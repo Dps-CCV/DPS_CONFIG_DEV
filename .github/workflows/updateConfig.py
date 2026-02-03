@@ -5,8 +5,7 @@ def main():
                           script_name="GithubUpdateConfig",
                           api_key=os.environ['UPDATECONFIGKEY'])
   data = {'descriptor': "sgtk:descriptor:git_branch?branch="+os.environ['BRANCH']+"&path=https://github.com/Dps-CCV/DPS_SHOTGRID_CONFIG_DEV.git&version="+os.environ['NEWCODE']}
-  if os.environ['BRANCH'] == "master":
-    id = 2542
+  id = 2542
   sg.update('PipelineConfiguration', id, data)
 
 
