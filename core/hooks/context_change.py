@@ -188,26 +188,6 @@ class ContextChange(get_hook_baseclass()):
                     # now register the command with the engine
                     engine.register_command("Set Shot Resolution", menu_callback)
 
-                    def mergeAnimatedFiles(self):
-                        import maya.cmds as cmds
-                        import sgtk
-                        engine = sgtk.platform.current_engine()
-                        sg = engine.shotgun
-                        context = engine.context.entity
-                        publishAlembics = sg.find_one('PublishedFile', [['entity.Shot.id', 'is', context['id']]],
-                                           ['sg_width', 'sg_height'])
-
-
-                    # first, set up our callback, calling out to a method inside the app module contained
-                    # in the python folder of the app
-                    try:
-                        menu_callback = lambda: mergeAnimatedFiles(self)
-                    except Exception as e:
-                        self.logger.info("Reload Config %s", str(current_engine._Engine__engine_instance_name))
-
-                    # now register the command with the engine
-                    engine.register_command("Load Animated files", menu_callback)
-
 
         except:
             pass

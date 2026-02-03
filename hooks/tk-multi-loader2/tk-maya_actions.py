@@ -420,7 +420,7 @@ class MayaActions(HookBaseClass):
                     path,
                     reference=True,
                     loadReferenceDepth="all",
-                    mergeNamespacesOnClash=True,
+                    mergeNamespacesOnClash=False,
                     namespace=namespace,
                 )
 
