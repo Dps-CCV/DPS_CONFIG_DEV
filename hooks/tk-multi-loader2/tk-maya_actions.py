@@ -87,6 +87,16 @@ class MayaActions(HookBaseClass):
                 }
             )
 
+        if "multi_reference" in actions:
+            action_instances.append(
+                {
+                    "name": "multi_reference",
+                    "params": None,
+                    "caption": "Create Multiple References",
+                    "description": "This will add the item to the scene as a standard reference a number of times.",
+                }
+            )
+
         if "reference_alembic" in actions:
             action_instances.append(
                 {
