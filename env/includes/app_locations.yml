@@ -31,11 +31,11 @@ apps.tk-multi-breakdown.location:
 apps.tk-multi-breakdown2.location:
   type: app_store
   name: tk-multi-breakdown2
-  version: v0.4.3
+  version: v0.4.4
 apps.tk-multi-breakdown2.mayalocation:
   type: app_store
   name: tk-multi-breakdown2
-  version: v0.4.3
+  version: v0.4.4
 apps.tk-multi-data-validation.location:
   type: app_store
   name: tk-multi-data-validation
@@ -47,15 +47,15 @@ apps.tk-multi-demo.location:
 apps.tk-multi-launchapp.location:
   type: app_store
   name: tk-multi-launchapp
-  version: v0.13.3
+  version: v0.14.1
 apps.tk-multi-loader2.location:
   type: app_store
   name: tk-multi-loader2
-  version: v1.25.2
+  version: v1.25.5
 apps.tk-multi-publish2.location:
   type: app_store
   name: tk-multi-publish2
-  version: v2.10.4
+  version: v2.10.7
 apps.tk-multi-pythonconsole.location:
   type: app_store
   name: tk-multi-pythonconsole
@@ -67,7 +67,7 @@ apps.tk-multi-reviewsubmission.location:
 apps.tk-multi-screeningroom.location:
   type: app_store
   name: tk-multi-screeningroom
-  version: v0.6.2
+  version: v0.6.3
 apps.tk-multi-setframerange.location:
   type: app_store
   name: tk-multi-setframerange
@@ -79,15 +79,15 @@ apps.tk-multi-shotgunpanel.location:
 apps.tk-multi-snapshot.location:
   type: app_store
   name: tk-multi-snapshot
-  version: v0.10.1
+  version: v0.10.2
 apps.tk-multi-workfiles2.location:
   type: app_store
   name: tk-multi-workfiles2
-  version: v0.15.5
+  version: v0.16.0
 apps.tk-multi-devutils.location:
   type: app_store
   name: tk-multi-devutils
-  version: v1.3.1
+  version: v1.3.2
 apps.tk-multi-bg-publish.location:
   type: app_store
   name: tk-multi-bg-publish
@@ -209,11 +209,11 @@ apps.tk-nuke-writenode.location:
 apps.tk-flame-export.location:
   name: tk-flame-export
   type: app_store
-  version: v1.11.3
+  version: v1.11.4
 apps.tk-flame-review.location:
   name: tk-flame-review
   type: app_store
-  version: v1.5.4
+  version: v1.5.5
 apps.tk-mari-projectmanager.location:
   name: tk-mari-projectmanager
   type: app_store
