@@ -77,6 +77,7 @@ class MayaSessionCollector(HookBaseClass):
         # create an item representing the current maya session
         item = self.collect_current_maya_session(settings, parent_item)
         project_root = item.properties["project_root"]
+        item_types = {}
 
         # look at the render layers to find rendered images on disk
         self.collect_rendered_images(item)
@@ -466,9 +467,6 @@ class MayaSessionCollector(HookBaseClass):
         """
 
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
-        if "Object Geometry" not in parent_item.items():
-            geoItem = parent_item.create_item("maya.session.object_geo_group", "Object Geometry Group",
-                                              "Object Geometry")
         search = "geo"
         namespaceSearch = ":geo"
 
@@ -482,8 +480,10 @@ class MayaSessionCollector(HookBaseClass):
                         except:
                             nodeName = str(cmds.listRelatives(node, p=True)[0])
 
-
-                        geo_object_item = geoItem.create_item(
+                        if "Object Geometry" not in item_types:
+                            parent_item.create_item("maya.session.object_geo_group", "Object Geometry Group",
+                                                              "Object Geometry")
+                        geo_object_item = item_types["Object Geometry"].create_item(
                             "maya.session.object_geo", "Object Geometry", nodeName
                         )
 
