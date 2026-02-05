@@ -466,9 +466,9 @@ class MayaSessionCollector(HookBaseClass):
         """
 
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
-        nodeName = ''
-        nodeExport = ''
-
+        if "Object Geometry" not in parent_item.items():
+            geoItem = parent_item.create_item("maya.session.object_geo_group", "Object Geometry Group",
+                                              "Object Geometry")
         search = "geo"
         namespaceSearch = ":geo"
 
@@ -483,7 +483,7 @@ class MayaSessionCollector(HookBaseClass):
                             nodeName = str(cmds.listRelatives(node, p=True)[0])
 
 
-                        geo_object_item = parent_item.create_item(
+                        geo_object_item = geoItem.create_item(
                             "maya.session.object_geo", "Object Geometry", nodeName
                         )
 
@@ -513,6 +513,7 @@ class MayaSessionCollector(HookBaseClass):
                 for node in cmds.listRelatives(object_geo, ad=True, fullPath=True):
                     nombre = str(cmds.ls(node, long = False)[0]).split("|")[-1]
                     if search in nombre:
+
 
                         geo_group_object_item = parent_item.create_item(
                             "maya.session.object_geo_group", "Object Geometry Group", nombre
