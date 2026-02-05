@@ -515,14 +515,13 @@ class MayaSessionCollector(HookBaseClass):
                     nombre = node.split("|")[-1]
                     if search in nombre:
 
-                        geo_object_item = parent_item.create_item(
+                        geo_group_object_item = parent_item.create_item(
                             "maya.session.object_geo_group", "Object Geometry Group", node
                         )
 
                         # set the icon for the item
                         geo_group_object_item.set_icon_from_path(icon_path)
 
-                        work_template_setting = settings.get("Work Template")
 
                         # store the selection set name so that any attached plugin knows which
                         # selection set this item represents!
