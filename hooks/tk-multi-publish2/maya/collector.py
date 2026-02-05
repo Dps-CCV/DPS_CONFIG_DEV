@@ -477,7 +477,6 @@ class MayaSessionCollector(HookBaseClass):
                 for node in cmds.listRelatives(object_geo, ad=True, fullPath=True):
                     nombre = node.split("|")[-1]
                     if search == nombre or namespaceSearch in nombre:
-                        nodeExport = node
                         try:
                             nodeName = str(cmds.listRelatives(node, p=True)[0]).replace(":", "_")
                         except:
@@ -496,7 +495,7 @@ class MayaSessionCollector(HookBaseClass):
                         # store the selection set name so that any attached plugin knows which
                         # selection set this item represents!
                         geo_object_item.properties["object_name"] = nodeName
-                        geo_object_item.properties["object"] = nodeExport
+                        geo_object_item.properties["object"] = node
 
     def _collect_object_geo_group(self, settings, parent_item):
         """
@@ -512,11 +511,11 @@ class MayaSessionCollector(HookBaseClass):
         for object_geo in cmds.ls(assemblies=True):
             if cmds.listRelatives(object_geo, ad=True, fullPath=True):
                 for node in cmds.listRelatives(object_geo, ad=True, fullPath=True):
-                    nombre = node.split("|")[-1]
+                    nombre = str(cmds.ls(node, long = False)[0]).split("|")[-1]
                     if search in nombre:
 
                         geo_group_object_item = parent_item.create_item(
-                            "maya.session.object_geo_group", "Object Geometry Group", node
+                            "maya.session.object_geo_group", "Object Geometry Group", nombre
                         )
 
                         # set the icon for the item
@@ -525,7 +524,7 @@ class MayaSessionCollector(HookBaseClass):
 
                         # store the selection set name so that any attached plugin knows which
                         # selection set this item represents!
-                        geo_group_object_item.properties["object_name"] = node
+                        geo_group_object_item.properties["object_name"] = nombre
                         geo_group_object_item.properties["object"] = node
 
     def _collect_particles_geo(self, settings, parent_item):
