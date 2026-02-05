@@ -465,6 +465,9 @@ class MayaSessionCollector(HookBaseClass):
 
         :param parent_item: The maya session parent item
         """
+        self.logger.info("=== STARTING _collect_object_geo ===")
+        self.logger.info("parent_item type: %s" % parent_item.type)
+        self.logger.info("parent_item name: %s" % parent_item.name)
 
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
         search = "geo"
@@ -482,10 +485,11 @@ class MayaSessionCollector(HookBaseClass):
 
                         if "geometries" not in item_types:
                             geodivider = parent_item.create_item("maya.session.object_geometry_divider", "Geometries",
-                                                              "")
+                                                              "Geometries")
                             geodivider.set_icon_from_path(icon_path)
                             item_types["geometries"] = geodivider
-                        self.logger.info("Created Geometry type group" + str(item_types))
+
+                        self.logger.info("Created Geometry type group" + str(item_types["geometries"]))
                         geo_object_item = item_types["geometries"].create_item(
                             "maya.session.object_geo", "Object Geometry", nodeName
                         )
