@@ -117,7 +117,7 @@ class MayaSessionCollector(HookBaseClass):
 
         self._collect_meshes(item)
         self._collect_cameras(item)
-        self._collect_object_geo(settings, item)
+        self._collect_object_geo(settings, item, item_types)
         self._collect_object_geo_group(settings, item)
         self._collect_particles_geo(settings, item)
         self._collect_ass(settings, item)
@@ -459,7 +459,7 @@ class MayaSessionCollector(HookBaseClass):
     #             # selection set this item represents!
     #             abc_set_item.properties["set_name"] = selection_set
 
-    def _collect_object_geo(self, settings, parent_item):
+    def _collect_object_geo(self, settings, parent_item, item_types):
         """
         Creates items for each abc set in the scene.
 
@@ -480,10 +480,11 @@ class MayaSessionCollector(HookBaseClass):
                         except:
                             nodeName = str(cmds.listRelatives(node, p=True)[0])
 
-                        if "Object Geometry" not in item_types:
-                            parent_item.create_item("maya.session.object_geo_group", "Object Geometry Group",
-                                                              "Object Geometry")
-                        geo_object_item = item_types["Object Geometry"].create_item(
+                        if "geometries" not in item_types:
+                            geodivider = parent_item.create_item("maya.session.object_geometry_divider", "Objects Geometry",
+                                                              "Objects Geometry")
+                            item_types["geometries"] = geodivider
+                        geo_object_item = item_types["geometries"].create_item(
                             "maya.session.object_geo", "Object Geometry", nodeName
                         )
 
