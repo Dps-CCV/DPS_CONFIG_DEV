@@ -481,9 +481,11 @@ class MayaSessionCollector(HookBaseClass):
                             nodeName = str(cmds.listRelatives(node, p=True)[0])
 
                         if "geometries" not in item_types:
-                            geodivider = parent_item.create_item("maya.session.object_geometry_divider", "Objects Geometry",
-                                                              "Objects Geometry")
+                            geodivider = parent_item.create_item("maya.session.object_geometry_divider", "Geometries",
+                                                              "")
+                            geodivider.set_icon_from_path(icon_path)
                             item_types["geometries"] = geodivider
+                        self.logger.info("Created Geometry type group" + str(item_types))
                         geo_object_item = item_types["geometries"].create_item(
                             "maya.session.object_geo", "Object Geometry", nodeName
                         )
