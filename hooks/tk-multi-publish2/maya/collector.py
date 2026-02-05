@@ -117,6 +117,7 @@ class MayaSessionCollector(HookBaseClass):
         self._collect_meshes(item)
         self._collect_cameras(item)
         self._collect_object_geo(settings, item)
+        self._collect_object_geo_group(settings, item)
         self._collect_particles_geo(settings, item)
         self._collect_ass(settings, item)
         self._collect_vdb(settings, item)
@@ -467,10 +468,8 @@ class MayaSessionCollector(HookBaseClass):
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
         nodeName = ''
         nodeExport = ''
-        if self.parent.context.step["name"] == "MODEL":
-            search = "geo"
-        else:
-            search = "geo"
+
+        search = "geo"
         namespaceSearch = ":geo"
 
         for object_geo in cmds.ls(assemblies=True):
@@ -478,24 +477,15 @@ class MayaSessionCollector(HookBaseClass):
                 for node in cmds.listRelatives(object_geo, ad=True, fullPath=True):
                     nombre = node.split("|")[-1]
                     if search == nombre or namespaceSearch in nombre:
-                        if self.parent.context.step["name"] == "MODEL":
-                            nodeExport = node
-                            nodeName = cmds.listRelatives(node, p=True)[0]
-                        else:
-                            nodeExport = cmds.listRelatives(node, p=True)[0]
-                            try:
-                                ###nodeName = str(cmds.listRelatives(node, p=True)[0]).split(":")[1]
-                                nodeName = str(cmds.listRelatives(node, p=True)[0]).replace(":", "_")
-                            except:
-                                nodeName = str(cmds.listRelatives(node, p=True)[0])
-                            displaynodeName = str(cmds.listRelatives(node, p=True)[0]).replace(":", "_")
+                        nodeExport = node
+                        try:
+                            nodeName = str(cmds.listRelatives(node, p=True)[0]).replace(":", "_")
+                        except:
+                            nodeName = str(cmds.listRelatives(node, p=True)[0])
 
-                        # if not cmds.ls(object_geo, dag=True, type="mesh"):
-                        #     # ignore non-meshes
-                        #     continue
 
                         geo_object_item = parent_item.create_item(
-                            "maya.session.object_geo", "Object Geometry", displaynodeName
+                            "maya.session.object_geo", "Object Geometry", nodeName
                         )
 
                         # set the icon for the item
@@ -507,6 +497,37 @@ class MayaSessionCollector(HookBaseClass):
                         # selection set this item represents!
                         geo_object_item.properties["object_name"] = nodeName
                         geo_object_item.properties["object"] = nodeExport
+
+    def _collect_object_geo_group(self, settings, parent_item):
+        """
+        Creates items for each abc set in the scene.
+
+        :param parent_item: The maya session parent item
+        """
+
+        icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
+
+        search = "_geoGroup"
+
+        for object_geo in cmds.ls(assemblies=True):
+            if cmds.listRelatives(object_geo, ad=True, fullPath=True):
+                for node in cmds.listRelatives(object_geo, ad=True, fullPath=True):
+                    nombre = node.split("|")[-1]
+                    if search in nombre:
+
+                        geo_object_item = parent_item.create_item(
+                            "maya.session.object_geo_group", "Object Geometry Group", node
+                        )
+
+                        # set the icon for the item
+                        geo_group_object_item.set_icon_from_path(icon_path)
+
+                        work_template_setting = settings.get("Work Template")
+
+                        # store the selection set name so that any attached plugin knows which
+                        # selection set this item represents!
+                        geo_group_object_item.properties["object_name"] = node
+                        geo_group_object_item.properties["object"] = node
 
     def _collect_particles_geo(self, settings, parent_item):
         """
