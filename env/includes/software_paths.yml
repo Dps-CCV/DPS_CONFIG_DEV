@@ -30,7 +30,7 @@ path.windows.motionbuilder: C:\Program Files\Autodesk\MotionBuilder 2020\bin\x64
 # RV
 path.linux.rv: "rv"
 path.mac.rv: "/Applications/RV.app"
-path.windows.rv: C:\Program Files\Shotgrid\RV-2022.3.1\bin\rv.exe
+path.windows.rv: C:\Program Files\Autodesk\RV-2025.0.0\bin\rv.exe
 
 # Resolve
 path.linux.resolve: "davinci"
