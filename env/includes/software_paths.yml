@@ -27,10 +27,10 @@ path.windows.motionbuilder: C:\Program Files\Autodesk\MotionBuilder 2020\bin\x64
 #path.mac.hiero: "/Applications/Nuke14.0v2/Hiero14.0v2.app"
 #path.windows.hiero: C:\Program Files\Nuke14.0v2\Nuke14.0.exe
 
-# RV
-path.linux.rv: "rv"
-path.mac.rv: "/Applications/RV.app"
-path.windows.rv: C:\Program Files\Autodesk\RV-2025.0.0\bin\rv.exe
+## RV
+#path.linux.rv: "rv"
+#path.mac.rv: "/Applications/RV.app"
+#path.windows.rv: C:\Program Files\Autodesk\RV-2025.0.0\bin\rv.exe
 
 # Resolve
 path.linux.resolve: "davinci"
