@@ -77,6 +77,7 @@ class MayaSessionCollector(HookBaseClass):
         # create an item representing the current maya session
         item = self.collect_current_maya_session(settings, parent_item)
         project_root = item.properties["project_root"]
+        item_types = {}
 
         # look at the render layers to find rendered images on disk
         self.collect_rendered_images(item)
@@ -116,12 +117,7 @@ class MayaSessionCollector(HookBaseClass):
 
         self._collect_meshes(item)
         self._collect_cameras(item)
-        icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
-        geodivider = item.create_item("maya.session.geometries", "Geometry",
-                                             "All Session Geometry")
-        geodivider.set_icon_from_path(icon_path)
-        geodivider.properties["object_name"] = "SessionGeo"
-        self._collect_object_geo(settings, item, geodivider)
+        self._collect_object_geo(settings, item, item_types)
         #self._collect_object_geo_group(settings, item)
         self._collect_particles_geo(settings, item)
         self._collect_ass(settings, item)
@@ -463,16 +459,12 @@ class MayaSessionCollector(HookBaseClass):
     #             # selection set this item represents!
     #             abc_set_item.properties["set_name"] = selection_set
 
-    def _collect_object_geo(self, settings, parent_item, geodivider):
+    def _collect_object_geo(self, settings, parent_item, item_types):
         """
         Creates items for each abc set in the scene.
 
         :param parent_item: The maya session parent item
         """
-        # self.logger.info("=== STARTING _collect_object_geo ===")
-        # self.logger.info("parent_item type: %s" % parent_item.type)
-        # self.logger.info("parent_item name: %s" % parent_item.name)
-        # self.logger.info("geodivider name: %s" % geodivider)
 
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
         search = "geo"
@@ -488,14 +480,14 @@ class MayaSessionCollector(HookBaseClass):
                         except:
                             nodeName = str(cmds.listRelatives(node, p=True)[0])
 
-                        # if "geometries" not in item_types:
-                        #     geodivider = parent_item.create_item("maya.session.object_geometry_divider", "Geometries",
-                        #                                       "Geometries")
-                        #     geodivider.set_icon_from_path(icon_path)
-                        #     item_types["geometries"] = geodivider
+                        if "geometries" not in item_types:
+                            geodivider = parent_item.create_item("maya.session.geometries", "Geometries",
+                                                              "All Session Geometries")
+                            geodivider.set_icon_from_path(icon_path)
+                            item_types["geometries"] = geodivider
 
-                        self.logger.info("Created Geometry type group" + nodeName]))
-                        geo_object_item = geodivider.create_item(
+
+                        geo_object_item = item_types["geometries"].create_item(
                             "maya.session.object_geo", "Object Geometry", nodeName
                         )
 

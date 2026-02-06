@@ -126,7 +126,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         template_name = settings["Publish Template"].value
 
         # ensure a work file template is available on the parent item
-        if item.type != "maya.session.object_geometry.group":
+        if item.type != "maya.session.geometries":
             work_template = item.parent.parent.properties.get("work_template")
         else:
             work_template = item.parent.properties.get("work_template")
@@ -162,7 +162,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         # is a temporary measure until the publisher handles context switching
         # natively.
         item.context_change_allowed = False
-        if item.type != "maya.session.object_geometry.group":
+        if item.type != "maya.session.geometries":
             cur_selection = cmds.ls(selection=True)
             cmds.select(item.properties["object"])
             parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath = True )
@@ -177,7 +177,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
             if _geo_has_animation(parentNode) == False and publisher.context.step['name'] in ['ANIMATION', 'ANIMATION_A']:
                 return {"accepted": accepted, "checked": False}
             else:
-                if item.type != "maya.session.object_geometry.group":
+                if item.type != "maya.session.geometries":
                     return {"accepted": accepted, "checked": True}
                 else:
                     return {"accepted": accepted, "checked": False}
@@ -307,7 +307,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
             "ogawa",
         ]
 
-        if item.type != "maya.session.object_geometry.group":
+        if item.type != "maya.session.geometries":
             item.properties["publish_type"] = "Alembic Cache"
             cmds.select(item.properties["object"])
             parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath = True )
