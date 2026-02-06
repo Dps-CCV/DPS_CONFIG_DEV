@@ -117,7 +117,12 @@ class MayaSessionCollector(HookBaseClass):
 
         self._collect_meshes(item)
         self._collect_cameras(item)
-        self._collect_object_geo(settings, item, item_types)
+        if "geometries" not in item_types:
+            geodivider = item.create_item("maya.session.object_geometry_divider", "Geometries",
+                                                 "Geometries")
+            geodivider.set_icon_from_path(icon_path)
+            item_types["geometries"] = geodivider
+        self._collect_object_geo(settings, item, geodivider, item_types)
         self._collect_object_geo_group(settings, item)
         self._collect_particles_geo(settings, item)
         self._collect_ass(settings, item)
@@ -459,7 +464,7 @@ class MayaSessionCollector(HookBaseClass):
     #             # selection set this item represents!
     #             abc_set_item.properties["set_name"] = selection_set
 
-    def _collect_object_geo(self, settings, parent_item, item_types):
+    def _collect_object_geo(self, settings, parent_item, geodivider, item_types):
         """
         Creates items for each abc set in the scene.
 
@@ -483,14 +488,14 @@ class MayaSessionCollector(HookBaseClass):
                         except:
                             nodeName = str(cmds.listRelatives(node, p=True)[0])
 
-                        if "geometries" not in item_types:
-                            geodivider = parent_item.create_item("maya.session.object_geometry_divider", "Geometries",
-                                                              "Geometries")
-                            geodivider.set_icon_from_path(icon_path)
-                            item_types["geometries"] = geodivider
+                        # if "geometries" not in item_types:
+                        #     geodivider = parent_item.create_item("maya.session.object_geometry_divider", "Geometries",
+                        #                                       "Geometries")
+                        #     geodivider.set_icon_from_path(icon_path)
+                        #     item_types["geometries"] = geodivider
 
-                        self.logger.info("Created Geometry type group" + str(item_types["geometries"]))
-                        geo_object_item = item_types["geometries"].create_item(
+                        # self.logger.info("Created Geometry type group" + str(item_types["geometries"]))
+                        geo_object_item = geodivider.create_item(
                             "maya.session.object_geo", "Object Geometry", nodeName
                         )
 
