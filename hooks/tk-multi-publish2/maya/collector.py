@@ -119,8 +119,8 @@ class MayaSessionCollector(HookBaseClass):
         self._collect_cameras(item)
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
         if "geometries" not in item_types:
-            geodivider = item.create_item("maya.session.object_geometry_divider", "Geometries",
-                                                 "Geometries")
+            geodivider = item.create_item("maya.session.object_geometry_divider", "Geometry",
+                                                 "All Session Geometry")
             geodivider.set_icon_from_path(icon_path)
             item_types["geometries"] = geodivider
         self._collect_object_geo(settings, item, geodivider, item_types)
@@ -474,6 +474,8 @@ class MayaSessionCollector(HookBaseClass):
         self.logger.info("=== STARTING _collect_object_geo ===")
         self.logger.info("parent_item type: %s" % parent_item.type)
         self.logger.info("parent_item name: %s" % parent_item.name)
+        self.logger.info("geodivider name: %s" % geodivider.name)
+        self.logger.info("item_types name: %s" % item_types)
 
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
         search = "geo"
