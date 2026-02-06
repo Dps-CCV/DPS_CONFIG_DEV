@@ -466,6 +466,7 @@ class MayaSessionCollector(HookBaseClass):
         :param parent_item: The maya session parent item
         """
 
+        work_template_setting = settings.get("Work Template")
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
         search = "geo"
         namespaceSearch = ":geo"
@@ -504,11 +505,9 @@ class MayaSessionCollector(HookBaseClass):
                         # set the icon for the item
                         geo_object_item.set_icon_from_path(icon_path)
 
-                        work_template_setting = settings.get("Work Template")
 
                         # store the selection set name so that any attached plugin knows which
                         # selection set this item represents!
-                        work_template_setting = settings.get("Work Template")
                         geo_object_item.properties["work_template"] = work_template_setting
                         geo_object_item.properties["object_name"] = nodeName
                         geo_object_item.properties["object"] = node
@@ -520,6 +519,7 @@ class MayaSessionCollector(HookBaseClass):
         :param parent_item: The maya session parent item
         """
 
+        work_template_setting = settings.get("Work Template")
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
 
         search = "_geoGroup"
@@ -557,7 +557,6 @@ class MayaSessionCollector(HookBaseClass):
 
                         # store the selection set name so that any attached plugin knows which
                         # selection set this item represents!
-                        work_template_setting = settings.get("Work Template")
                         geo_group_object_item.properties["work_template"] = work_template_setting
                         geo_group_object_item.properties["object_name"] = nombre
                         geo_group_object_item.properties["object"] = node
