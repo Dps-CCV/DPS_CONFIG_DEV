@@ -117,10 +117,10 @@ class MayaSessionCollector(HookBaseClass):
         self._collect_meshes(item)
         self._collect_cameras(item)
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
-        geodivider = item.create_item("maya.session.object_geometry.groupr", "Geometry",
+        geodivider = item.create_item("maya.session.object_geometry.group", "Geometry",
                                              "All Session Geometry")
         geodivider.set_icon_from_path(icon_path)
-        self._collect_object_geo(settings, item)
+        self._collect_object_geo(settings, item, geodivider)
         #self._collect_object_geo_group(settings, item)
         self._collect_particles_geo(settings, item)
         self._collect_ass(settings, item)
@@ -462,7 +462,7 @@ class MayaSessionCollector(HookBaseClass):
     #             # selection set this item represents!
     #             abc_set_item.properties["set_name"] = selection_set
 
-    def _collect_object_geo(self, settings, parent_item):
+    def _collect_object_geo(self, settings, parent_item, geodivider):
         """
         Creates items for each abc set in the scene.
 
@@ -494,7 +494,7 @@ class MayaSessionCollector(HookBaseClass):
                         #     item_types["geometries"] = geodivider
 
                         # self.logger.info("Created Geometry type group" + str(item_types["geometries"]))
-                        geo_object_item = parent_item.create_item(
+                        geo_object_item = geodivider.create_item(
                             "maya.session.object_geo", "Object Geometry", nodeName
                         )
 
