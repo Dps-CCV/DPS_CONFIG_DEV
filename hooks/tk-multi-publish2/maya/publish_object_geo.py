@@ -168,6 +168,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
             parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath = True )
             cmds.select(cur_selection)
         else:
+            item.expanded = False
             parentNode = _get_root_from_first_mesh()
 
 

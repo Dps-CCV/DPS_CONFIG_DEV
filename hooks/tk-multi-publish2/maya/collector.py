@@ -117,8 +117,8 @@ class MayaSessionCollector(HookBaseClass):
 
         self._collect_meshes(item)
         self._collect_cameras(item)
-        self._collect_object_geo(settings, item, item_types)
         self._collect_object_geo_group(settings, item, item_types)
+        self._collect_object_geo(settings, item, item_types)
         self._collect_particles_geo(settings, item)
         self._collect_ass(settings, item)
         self._collect_vdb(settings, item)
