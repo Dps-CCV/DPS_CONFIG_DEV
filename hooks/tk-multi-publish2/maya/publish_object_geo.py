@@ -176,6 +176,8 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
             else:
                 if item.type != "maya.session.geometries":
                     return {"accepted": accepted, "checked": True}
+                elif publisher.context.entity['type'] == 'Asset':
+                    return {"accepted": False, "checked": False}
                 else:
                     return {"accepted": accepted, "checked": False}
         else:
