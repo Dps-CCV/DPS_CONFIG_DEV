@@ -75,7 +75,7 @@ class MayaSessionCollector(HookBaseClass):
         """
 
         # create an item representing the current maya session
-        item = self.collect_current_maya_session(settings, parent_item)
+        item, work_template = self.collect_current_maya_session(settings, parent_item)
         project_root = item.properties["project_root"]
         item_types = {}
 
@@ -117,8 +117,8 @@ class MayaSessionCollector(HookBaseClass):
 
         self._collect_meshes(item)
         self._collect_cameras(item)
-        self._collect_object_geo_group(settings, item, item_types)
-        self._collect_object_geo(settings, item, item_types)
+        self._collect_object_geo_group(settings, item, item_types, work_template)
+        self._collect_object_geo(settings, item, item_types, work_template)
         self._collect_particles_geo(settings, item)
         self._collect_ass(settings, item)
         self._collect_vdb(settings, item)
@@ -181,7 +181,7 @@ class MayaSessionCollector(HookBaseClass):
 
         self.logger.info("Collected current Maya scene")
 
-        return session_item
+        return session_item, work_template
 
     # def collect_alembic_caches(self, parent_item, project_root):
     #     """
@@ -459,14 +459,13 @@ class MayaSessionCollector(HookBaseClass):
     #             # selection set this item represents!
     #             abc_set_item.properties["set_name"] = selection_set
 
-    def _collect_object_geo(self, settings, parent_item, item_types):
+    def _collect_object_geo(self, settings, parent_item, item_types, work_template):
         """
         Creates items for each abc set in the scene.
 
         :param parent_item: The maya session parent item
         """
 
-        work_template_setting = settings.get("Work Template")
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
         search = "geo"
         namespaceSearch = ":geo"
@@ -487,7 +486,7 @@ class MayaSessionCollector(HookBaseClass):
                             geodivider.set_icon_from_path(icon_path)
                             geodivider.expanded = False
                             item_types["geometries"] = geodivider
-                            geodivider.properties["work_template"] = work_template_setting
+                            geodivider.properties["work_template"] = work_template
                             geodivider.properties["object_name"] = "Session"
 
                         if "geometries_object" not in item_types:
@@ -508,18 +507,17 @@ class MayaSessionCollector(HookBaseClass):
 
                         # store the selection set name so that any attached plugin knows which
                         # selection set this item represents!
-                        geo_object_item.properties["work_template"] = work_template_setting
+                        geo_object_item.properties["work_template"] = work_template
                         geo_object_item.properties["object_name"] = nodeName
                         geo_object_item.properties["object"] = node
 
-    def _collect_object_geo_group(self, settings, parent_item, item_types):
+    def _collect_object_geo_group(self, settings, parent_item, item_types, work_template):
         """
         Creates items for each abc set in the scene.
 
         :param parent_item: The maya session parent item
         """
 
-        work_template_setting = settings.get("Work Template")
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
 
         search = "_geoGroup"
@@ -536,7 +534,7 @@ class MayaSessionCollector(HookBaseClass):
                             geodivider.set_icon_from_path(icon_path)
                             geodivider.expanded = False
                             item_types["geometries"] = geodivider
-                            geodivider.properties["work_template"] = work_template_setting
+                            geodivider.properties["work_template"] = work_template
                             geodivider.properties["object_name"] = "Session"
 
 
@@ -557,7 +555,7 @@ class MayaSessionCollector(HookBaseClass):
 
                         # store the selection set name so that any attached plugin knows which
                         # selection set this item represents!
-                        geo_group_object_item.properties["work_template"] = work_template_setting
+                        geo_group_object_item.properties["work_template"] = work_template
                         geo_group_object_item.properties["object_name"] = nombre
                         geo_group_object_item.properties["object"] = node
 
