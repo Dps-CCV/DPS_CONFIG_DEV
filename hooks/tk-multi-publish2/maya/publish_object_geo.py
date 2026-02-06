@@ -297,7 +297,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
             "ogawa",
         ]
 
-        if item.type != "maya.session.object_geometry.group"
+        if item.type != "maya.session.object_geometry.group":
             item.properties["publish_type"] = "Alembic Cache"
             cmds.select(item.properties["object"])
             parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath = True )
