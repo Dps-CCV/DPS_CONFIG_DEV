@@ -445,7 +445,7 @@ def _get_shading_groups_from_object(obj):
     shading_groups = set()
 
     # Get all shapes under this object (including children)
-    shapes = cmds.listRelatives(obj, allDescendents=True, shapes=True, fullPath=True) or []
+    shapes = cmds.listRelatives(obj, allDescendents=True, fullPath=True) or []
 
     # Also check if the object itself is a shape
     if cmds.nodeType(obj) in ['mesh', 'nurbsSurface', 'nurbsCurve']:
