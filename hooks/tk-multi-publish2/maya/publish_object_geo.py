@@ -465,7 +465,7 @@ def _get_root_from_first_mesh():
     print("Transform node: %s" % first_transform)
 
     # 4. Obtener el nodo raíz
-    root_node = get_root_node(first_transform)
+    root_node = _get_root_node(first_transform)
     print("Root node: %s" % root_node)
 
     return root_node
