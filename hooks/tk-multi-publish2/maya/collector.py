@@ -77,7 +77,6 @@ class MayaSessionCollector(HookBaseClass):
         # create an item representing the current maya session
         item = self.collect_current_maya_session(settings, parent_item)
         project_root = item.properties["project_root"]
-        item_types = {}
 
         # look at the render layers to find rendered images on disk
         self.collect_rendered_images(item)
@@ -118,13 +117,11 @@ class MayaSessionCollector(HookBaseClass):
         self._collect_meshes(item)
         self._collect_cameras(item)
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
-        if "geometries" not in item_types:
-            geodivider = item.create_item("maya.session.object_geometry_divider", "Geometry",
-                                                 "All Session Geometry")
-            geodivider.set_icon_from_path(icon_path)
-            item_types["geometries"] = geodivider
-        self._collect_object_geo(settings, item, geodivider, item_types)
-        self._collect_object_geo_group(settings, item)
+        geodivider = item.create_item("maya.session.object_geometry.groupr", "Geometry",
+                                             "All Session Geometry")
+        geodivider.set_icon_from_path(icon_path)
+        self._collect_object_geo(settings, item, geodivider)
+        #self._collect_object_geo_group(settings, item)
         self._collect_particles_geo(settings, item)
         self._collect_ass(settings, item)
         self._collect_vdb(settings, item)
@@ -474,8 +471,7 @@ class MayaSessionCollector(HookBaseClass):
         self.logger.info("=== STARTING _collect_object_geo ===")
         self.logger.info("parent_item type: %s" % parent_item.type)
         self.logger.info("parent_item name: %s" % parent_item.name)
-        self.logger.info("geodivider name: %s" % geodivider.name)
-        self.logger.info("item_types name: %s" % item_types)
+        self.logger.info("geodivider name: %s" % geodivider)
 
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
         search = "geo"
