@@ -132,7 +132,7 @@ class MayaObjectGeometryUSDPublishPlugin(HookBaseClass):
         self.logger.info(template_name)
 
         # ensure a work file template is available on the parent item
-        work_template = item.parent.properties.get("work_template")
+        work_template = item.parent.parent.properties.get("work_template")
         if not work_template:
             self.logger.debug(
                 "A work template is required for the session item in order to "

@@ -118,7 +118,7 @@ class MayaSessionCollector(HookBaseClass):
         self._collect_meshes(item)
         self._collect_cameras(item)
         self._collect_object_geo(settings, item, item_types)
-        #self._collect_object_geo_group(settings, item)
+        self._collect_object_geo_group(settings, item, item_types)
         self._collect_particles_geo(settings, item)
         self._collect_ass(settings, item)
         self._collect_vdb(settings, item)
@@ -501,7 +501,7 @@ class MayaSessionCollector(HookBaseClass):
                         geo_object_item.properties["object_name"] = nodeName
                         geo_object_item.properties["object"] = node
 
-    def _collect_object_geo_group(self, settings, parent_item):
+    def _collect_object_geo_group(self, settings, parent_item, item_types):
         """
         Creates items for each abc set in the scene.
 
@@ -518,8 +518,13 @@ class MayaSessionCollector(HookBaseClass):
                     nombre = str(cmds.ls(node, long = False)[0]).split("|")[-1]
                     if search in nombre:
 
+                        if "geometries" not in item_types:
+                            geodivider = parent_item.create_item("maya.session.geometries", "Geometries",
+                                                              "All Session Geometries")
+                            geodivider.set_icon_from_path(icon_path)
+                            item_types["geometries"] = geodivider
 
-                        geo_group_object_item = parent_item.create_item(
+                        geo_group_object_item = item_types["geometries"].create_item(
                             "maya.session.object_geo_group", "Object Geometry Group", nombre
                         )
 
