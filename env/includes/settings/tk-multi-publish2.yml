@@ -215,6 +215,11 @@ settings.tk-multi-publish2.maya.asset_step:
     settings:
       Publish Template: maya_asset_object_publish
 
+  - name: Publish SHADING to Shotgun
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_shader.py"
+    settings:
+      Publish Template: maya_asset_shader_publish
+
   - name: Publish PARTICLES GEO to Shotgun
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_particles.py"
     settings:

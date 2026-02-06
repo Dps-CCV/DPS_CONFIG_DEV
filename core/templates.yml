@@ -706,7 +706,7 @@ paths:
         definition: '@asset_root/PUBLISH/SCENES/{Step}/MAYA/{Asset}_{Step}_{name}_v{version}.{maya_extension}'
     # The location where maya shader networks are written/published
     maya_asset_shader_publish:
-        definition: '@asset_root/PUBLISH/SHADING/{Step}/{Asset}_{Step}_{name}_v{version}.ma'
+        definition: '@asset_root/PUBLISH/SHADING/{Step}/{Asset}_{Step}_{name}_{maya.object_name}_v{version}.mb'
         root_name: 'primary'
     # The location of published maya cameras
     maya_asset_camera_publish:
