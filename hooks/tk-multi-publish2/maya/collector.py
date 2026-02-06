@@ -117,6 +117,7 @@ class MayaSessionCollector(HookBaseClass):
 
         self._collect_meshes(item)
         self._collect_cameras(item)
+        icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
         if "geometries" not in item_types:
             geodivider = item.create_item("maya.session.object_geometry_divider", "Geometries",
                                                  "Geometries")
