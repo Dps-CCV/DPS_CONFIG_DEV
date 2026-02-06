@@ -484,10 +484,18 @@ class MayaSessionCollector(HookBaseClass):
                             geodivider = parent_item.create_item("maya.session.geometries", "Geometries",
                                                               "All Session Geometries")
                             geodivider.set_icon_from_path(icon_path)
+                            geodivider.expanded = False
                             item_types["geometries"] = geodivider
 
+                        if "geometries_object" not in item_types:
+                            geometries_object = item_types["geometries"].create_item("maya.session.geometries.objects", "Geometries",
+                                                                 "Objects")
+                            geometries_object.set_icon_from_path(icon_path)
+                            item_types["geometries_object"] = geometries_object
+                            geometries_object.expanded = False
 
-                        geo_object_item = item_types["geometries"].create_item(
+
+                        geo_object_item = item_types["geometries_object"].create_item(
                             "maya.session.object_geo", "Object Geometry", nodeName
                         )
 
@@ -498,6 +506,8 @@ class MayaSessionCollector(HookBaseClass):
 
                         # store the selection set name so that any attached plugin knows which
                         # selection set this item represents!
+                        work_template_setting = settings.get("Work Template")
+                        geo_object_item.properties["work_template"] = work_template_setting
                         geo_object_item.properties["object_name"] = nodeName
                         geo_object_item.properties["object"] = node
 
@@ -522,9 +532,18 @@ class MayaSessionCollector(HookBaseClass):
                             geodivider = parent_item.create_item("maya.session.geometries", "Geometries",
                                                               "All Session Geometries")
                             geodivider.set_icon_from_path(icon_path)
+                            geodivider.expanded = False
                             item_types["geometries"] = geodivider
 
-                        geo_group_object_item = item_types["geometries"].create_item(
+
+                        if "geometries_group" not in item_types:
+                            geometries_group = item_types["geometries"].create_item("maya.session.geometries.groups", "Geometry Groups",
+                                                                 "Geo Groups")
+                            geometries_group.set_icon_from_path(icon_path)
+                            item_types["geometries_group"] = geometries_group
+                            geometries_group.expanded = False
+
+                        geo_group_object_item = item_types["geometries_group"].create_item(
                             "maya.session.object_geo_group", "Object Geometry Group", nombre
                         )
 
@@ -534,6 +553,8 @@ class MayaSessionCollector(HookBaseClass):
 
                         # store the selection set name so that any attached plugin knows which
                         # selection set this item represents!
+                        work_template_setting = settings.get("Work Template")
+                        geo_group_object_item.properties["work_template"] = work_template_setting
                         geo_group_object_item.properties["object_name"] = nombre
                         geo_group_object_item.properties["object"] = node
 
