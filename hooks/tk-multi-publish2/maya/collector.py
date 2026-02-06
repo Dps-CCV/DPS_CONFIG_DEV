@@ -462,7 +462,7 @@ class MayaSessionCollector(HookBaseClass):
     #             # selection set this item represents!
     #             abc_set_item.properties["set_name"] = selection_set
 
-    def _collect_object_geo(self, settings, parent_item, geodivider, item_types):
+    def _collect_object_geo(self, settings, parent_item, geodivider):
         """
         Creates items for each abc set in the scene.
 
