@@ -486,6 +486,8 @@ class MayaSessionCollector(HookBaseClass):
                             geodivider.set_icon_from_path(icon_path)
                             geodivider.expanded = False
                             item_types["geometries"] = geodivider
+                            geodivider.properties["work_template"] = work_template_setting
+                            geodivider.properties["object_name"] = "Session"
 
                         if "geometries_object" not in item_types:
                             geometries_object = item_types["geometries"].create_item("maya.session.geometries.objects", "Geometries",
@@ -534,6 +536,8 @@ class MayaSessionCollector(HookBaseClass):
                             geodivider.set_icon_from_path(icon_path)
                             geodivider.expanded = False
                             item_types["geometries"] = geodivider
+                            geodivider.properties["work_template"] = work_template_setting
+                            geodivider.properties["object_name"] = "Session"
 
 
                         if "geometries_group" not in item_types:
