@@ -168,20 +168,26 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
             parentNode = _get_root_from_first_mesh()
 
         if publisher.context.step['name'] in ['MODEL', 'TEXTURE_A', 'CLAY_A', 'FOTOGRAMETRY_A', 'GROOM_A', 'MODEL_A', 'SCAN_A']:
-            return {"accepted": accepted, "checked": True}
+            accepted = accepted
+            checked = True
         elif publisher.context.step['name'] in ['TRACK_3D', 'LAYOUT', 'ANIMATION', 'CLOTH', 'CROWD', 'ANIMATION_A', 'CHARACTER_FX_A', 'CLOTH_A', 'LAYOUT_A', 'MODEL_A', 'SCAN_A']:
             if _geo_has_animation(parentNode) == False and publisher.context.step['name'] in ['ANIMATION', 'ANIMATION_A']:
-                return {"accepted": accepted, "checked": False}
+                accepted = accepted
+                checked = False
             else:
                 if item.type != "maya.session.geometries":
-                    return {"accepted": accepted, "checked": True}
+                    accepted = accepted
+                    checked = True
                 else:
-                    return {"accepted": accepted, "checked": False}
+                    accepted = accepted
+                    checked = False
         else:
-            return {"accepted": accepted, "checked": False}
+            accepted = accepted
+            checked = False
         if item.type == "maya.session.geometries" and publisher.context.entity['type'] == 'Asset':
-            return {"accepted": False, "checked": False}
-
+            accepted = False
+            checked = False
+        return {"accepted": accepted, "checked": checked}
     def validate(self, settings, item):
         """
         Validates the given item to check that it is ok to publish. Returns a
