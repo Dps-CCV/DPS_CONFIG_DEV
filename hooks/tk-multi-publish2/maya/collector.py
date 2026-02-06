@@ -654,6 +654,5 @@ class MayaSessionCollector(HookBaseClass):
                 # selection set this item represents!
                 particles_object_item.properties["object_name"] = nodeName
                 particles_object_item.properties["object"] = nodeExport
-¡
 
 
