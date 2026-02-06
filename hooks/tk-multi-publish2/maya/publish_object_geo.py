@@ -93,7 +93,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         accept() method. Strings can contain glob patters such as *, for example
         ["maya.*", "file.maya"]
         """
-        return ["maya.session.object_geo", "maya.session.object_geo_group", "maya.session.object_geometry.group"]
+        return ["maya.session.object_geo", "maya.session.object_geo_group", "maya.session.geometries"]
 
     def accept(self, settings, item):
         """
@@ -126,7 +126,10 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         template_name = settings["Publish Template"].value
 
         # ensure a work file template is available on the parent item
-        work_template = item.parent.properties.get("work_template")
+        if item.type != "maya.session.object_geometry.group":
+            work_template = item.parent.parent.properties.get("work_template")
+        else:
+            work_template = item.parent.properties.get("work_template")
         if not work_template:
             self.logger.debug(
                 "A work template is required for the session item in order to "
