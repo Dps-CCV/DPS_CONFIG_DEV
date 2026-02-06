@@ -264,13 +264,13 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         """
 
         publisher = self.parent
-        item.properties["publish_type"] = "Alembic Cache"
+
 
         # keep track of everything currently selected. we will restore at the
         # end of the publish method
         cur_selection = cmds.ls(selection=True)
 
-        cmds.select(item.properties["object"])
+
 
         # get the path to create and publish
         publish_path = item.properties["path"]
@@ -285,7 +285,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         # face sets for use in Mari.
         alembic_args = [
             # # only renderable objects (visible and not templated)
-            # "-renderableOnly",
+            "-renderableOnly",
             # write shading group set assignments (Maya 2015+)
             "-writeFaceSets",
             # write uv's (only the current uv set gets written)
@@ -295,17 +295,24 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
             "-worldSpace",
             "-dataformat",
             "ogawa",
-            "-root",
         ]
 
-        # find the animated frame range to use:
-        parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath = True )
+        if item.type != "maya.session.object_geometry.group"
+            item.properties["publish_type"] = "Alembic Cache"
+            cmds.select(item.properties["object"])
+            parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath = True )
+            alembic_args.append("-root")
+            alembic_args.append(cmds.ls(selection=True)[0])
+        else:
+            item.properties["publish_type"] = "Session Alembic Cache"
+            parentNode = _get_root_from_first_mesh()
+
         if _geo_has_animation(parentNode) == True:
             start_frame, end_frame = _find_scene_animation_range()
             alembic_args.insert(0, "-frameRange %d %d" % (start_frame-50, end_frame))
 
 
-        alembic_args.append(cmds.ls(selection=True)[0])
+
 
         # Set the output path:
         # Note: The AbcExport command expects forward slashes!
@@ -423,3 +430,54 @@ def _get_save_as_action():
             "callback": callback,
         }
     }
+
+
+def _get_root_from_first_mesh():
+    """
+    Obtiene todas las mallas, selecciona la primera, y obtiene su nodo raíz.
+    """
+    # 1. Obtener todas las geometrías/meshes (shapes)
+    all_meshes = cmds.ls(type='mesh', long=True)
+
+    if not all_meshes:
+        print("No meshes found in scene")
+        return None
+
+    # 2. Obtener el primer mesh
+    first_mesh = all_meshes[0]
+    print("First mesh shape: %s" % first_mesh)
+
+    # 3. Obtener el transform del mesh (el padre del shape)
+    transform = cmds.listRelatives(first_mesh, parent=True, fullPath=True)
+
+    if not transform:
+        print("No transform found for mesh")
+        return None
+
+    first_transform = transform[0]
+    print("Transform node: %s" % first_transform)
+
+    # 4. Obtener el nodo raíz
+    root_node = get_root_node(first_transform)
+    print("Root node: %s" % root_node)
+
+    return root_node
+
+
+def _get_root_node(node):
+    """
+    Obtiene el nodo raíz de cualquier nodo dado.
+    """
+    current = node
+
+    while True:
+        parents = cmds.listRelatives(current, parent=True, fullPath=True)
+
+        if not parents:
+            # No hay más padres, este es el root
+            break
+
+        current = parents[0]
+
+    # Devolver solo el nombre corto (sin path completo)
+    return current.split('|')[-1]

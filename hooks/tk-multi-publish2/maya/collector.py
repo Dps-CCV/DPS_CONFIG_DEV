@@ -120,6 +120,7 @@ class MayaSessionCollector(HookBaseClass):
         geodivider = item.create_item("maya.session.object_geometry.group", "Geometry",
                                              "All Session Geometry")
         geodivider.set_icon_from_path(icon_path)
+        geodivider.properties["object_name"] = "SessionGeo"
         self._collect_object_geo(settings, item, geodivider)
         #self._collect_object_geo_group(settings, item)
         self._collect_particles_geo(settings, item)
