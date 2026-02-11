@@ -116,7 +116,7 @@ class MayaSessionCollector(HookBaseClass):
         #     self._collect_session_geometry(item)
 
         self._collect_meshes(item)
-        self._collect_cameras(item)
+        self._collect_cameras(settings, item, item_types, work_template)
         self._collect_object_geo_group(settings, item, item_types, work_template)
         self._collect_object_geo(settings, item, item_types, work_template)
         self._collect_particles_geo(settings, item)
@@ -391,7 +391,7 @@ class MayaSessionCollector(HookBaseClass):
             # by the publish plugin to identify and export it properly
             mesh_item.properties["object"] = object
 
-    def _collect_cameras(self, parent_item):
+    def _collect_cameras(self, settings, parent_item, item_types, work_template):
         """
         Creates items for each camera in the session.
 
@@ -420,13 +420,21 @@ class MayaSessionCollector(HookBaseClass):
 
                 print (camera_name)
 
+            if "cameras" not in item_types:
+                camdivider = parent_item.create_item("maya.session.cameras", "Cameras",
+                                                     "All Session Cameras")
+                camdivider.set_icon_from_path(icon_path)
+                camdivider.expanded = False
+                item_types["cameras"] = camdivider
+                camdivider.properties["work_template"] = work_template
+
             # create a new item parented to the supplied session item. We
             # define an item type (maya.session.camera) that will be
             # used by an associated camera publish plugin as it searches for
             # items to act upon. We also give the item a display type and
             # display name. In the future, other publish plugins might attach to
             # these camera items to perform other actions
-            cam_item = parent_item.create_item(
+            cam_item = item_types["cameras"].create_item(
                 "maya.session.camera", "Camera", camera_name
             )
 
