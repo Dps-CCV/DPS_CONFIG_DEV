@@ -79,8 +79,7 @@ class MayaSessionCollector(HookBaseClass):
         project_root = item.properties["project_root"]
         item_types = {}
 
-        # look at the render layers to find rendered images on disk
-        self.collect_rendered_images(item)
+
 
         # if we can determine a project root, collect other files to publish
         if project_root:
@@ -116,9 +115,11 @@ class MayaSessionCollector(HookBaseClass):
         #     self._collect_session_geometry(item)
 
         self._collect_meshes(item)
-        self._collect_cameras(settings, item, item_types, work_template)
-        self._collect_object_geo_group(settings, item, item_types, work_template)
-        self._collect_object_geo(settings, item, item_types, work_template)
+        # look at the render layers to find rendered images on disk
+        self.collect_rendered_images(item, item_types, work_template)
+        self._collect_cameras(item, item_types, work_template)
+        self._collect_object_geo_group(item, item_types, work_template)
+        self._collect_object_geo(item, item_types, work_template)
         self._collect_particles_geo(settings, item)
         self._collect_ass(settings, item)
         self._collect_vdb(settings, item)
@@ -302,7 +303,7 @@ class MayaSessionCollector(HookBaseClass):
 
 
 
-    def collect_rendered_images(self, parent_item):
+    def collect_rendered_images(self, parent_item, item_types, work_template):
         """
         Creates items for any rendered images that can be identified by
         render layers in the file.
@@ -315,7 +316,7 @@ class MayaSessionCollector(HookBaseClass):
         # information about a potential render
         layerList = []
 
-
+        icon_path = os.path.join(self.disk_location, os.pardir, "icons", "image_sequence.png")
         for layer in cmds.ls(type="renderLayer"):
             # layerFixed = cmds.renderSetup(q=True, renderLayers=True)
 
@@ -333,10 +334,19 @@ class MayaSessionCollector(HookBaseClass):
                 rendered_paths = glob.glob(frame_glob)
 
                 if rendered_paths:
+
+                    if "renders" not in item_types:
+                        renderdivider = parent_item.create_item("maya.session.renders", "Renders",
+                                                             "All Session Renders")
+                        renderdivider.set_icon_from_path(icon_path)
+                        renderdivider.expanded = False
+                        item_types["renders"] = renderdivider
+                        renderdivider.properties["work_template"] = work_template
+
                     # we only need one path to publish, so take the first one and
                     # let the base class collector handle it
                     item = super(MayaSessionCollector, self)._collect_file(
-                        parent_item, rendered_paths[0], frame_sequence=True
+                        item_types["renders"], rendered_paths[0], frame_sequence=True
                     )
 
                     # the item has been created. update the display name to include
@@ -391,7 +401,7 @@ class MayaSessionCollector(HookBaseClass):
             # by the publish plugin to identify and export it properly
             mesh_item.properties["object"] = object
 
-    def _collect_cameras(self, settings, parent_item, item_types, work_template):
+    def _collect_cameras(self, parent_item, item_types, work_template):
         """
         Creates items for each camera in the session.
 
@@ -418,7 +428,6 @@ class MayaSessionCollector(HookBaseClass):
                 except:
                     camera_name = camera_shape
 
-                print (camera_name)
 
             if "cameras" not in item_types:
                 camdivider = parent_item.create_item("maya.session.cameras", "Cameras",
@@ -467,7 +476,7 @@ class MayaSessionCollector(HookBaseClass):
     #             # selection set this item represents!
     #             abc_set_item.properties["set_name"] = selection_set
 
-    def _collect_object_geo(self, settings, parent_item, item_types, work_template):
+    def _collect_object_geo(self, parent_item, item_types, work_template):
         """
         Creates items for each abc set in the scene.
 
@@ -519,7 +528,7 @@ class MayaSessionCollector(HookBaseClass):
                         geo_object_item.properties["object_name"] = nodeName
                         geo_object_item.properties["object"] = node
 
-    def _collect_object_geo_group(self, settings, parent_item, item_types, work_template):
+    def _collect_object_geo_group(self, parent_item, item_types, work_template):
         """
         Creates items for each abc set in the scene.
 
