@@ -642,7 +642,7 @@ class MayaSessionCollector(HookBaseClass):
                 fxdivider.properties["work_template"] = work_template
 
 
-           ass_object_item = item_types["fx"].create_item(
+            ass_object_item = item_types["fx"].create_item(
                 "maya.session.ass", "Ass Cache", nodeName
             )
 
