@@ -187,6 +187,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
             accepted = False
             checked = False
         return {"accepted": accepted, "checked": checked}
+
     def validate(self, settings, item):
         """
         Validates the given item to check that it is ok to publish. Returns a

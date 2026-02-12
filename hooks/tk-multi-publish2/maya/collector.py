@@ -114,12 +114,13 @@ class MayaSessionCollector(HookBaseClass):
         # if cmds.ls(geometry=True, noIntermediate=True):
         #     self._collect_session_geometry(item)
 
-        self._collect_meshes(item)
+        # self._collect_meshes(item)
         # look at the render layers to find rendered images on disk
         self.collect_rendered_images(item, item_types, work_template)
         self._collect_cameras(item, item_types, work_template)
         self._collect_object_geo_group(item, item_types, work_template)
         self._collect_object_geo(item, item_types, work_template)
+        # self._collect_object_sets(parent_item, item_types, work_template)
         self._collect_particles_geo(item, item_types, work_template)
         self._collect_ass(item, item_types, work_template)
         self._collect_vdb(item, item_types, work_template)
@@ -348,41 +349,41 @@ class MayaSessionCollector(HookBaseClass):
                         item.properties["maya.layer_name"] = stringLayer
                     self.logger.info("collecting render layer %s", item.properties["maya.layer_name"])
 
-    def _collect_meshes(self, parent_item):
-        """
-        Collect mesh definitions and create publish items for them.
-
-        :param parent_item: The maya session parent item
-        """
-
-        # build a path for the icon to use for each item. the disk
-        # location refers to the path of this hook file. this means that
-        # the icon should live one level above the hook in an "icons"
-        # folder.
-        icon_path = os.path.join(self.disk_location, os.pardir, "icons", "shading.png")
-
-        # iterate over all top-level transforms and create mesh items
-        # for any mesh.
-        for object in cmds.ls(assemblies=True):
-
-            if not cmds.ls(object, dag=True, type="mesh"):
-                # ignore non-meshes
-                continue
-
-            # create a new item parented to the supplied session item. We
-            # define an item type (maya.session.mesh) that will be
-            # used by an associated shader publish plugin as it searches for
-            # items to act upon. We also give the item a display type and
-            # display name (the group name). In the future, other publish
-            # plugins might attach to these mesh items to publish other things
-            mesh_item = parent_item.create_item("maya.session.mesh", "Mesh", object)
-
-            # set the icon for the item
-            mesh_item.set_icon_from_path(icon_path)
-
-            # finally, add information to the mesh item that can be used
-            # by the publish plugin to identify and export it properly
-            mesh_item.properties["object"] = object
+    # def _collect_meshes(self, parent_item):
+    #     """
+    #     Collect mesh definitions and create publish items for them.
+    #
+    #     :param parent_item: The maya session parent item
+    #     """
+    #
+    #     # build a path for the icon to use for each item. the disk
+    #     # location refers to the path of this hook file. this means that
+    #     # the icon should live one level above the hook in an "icons"
+    #     # folder.
+    #     icon_path = os.path.join(self.disk_location, os.pardir, "icons", "shading.png")
+    #
+    #     # iterate over all top-level transforms and create mesh items
+    #     # for any mesh.
+    #     for object in cmds.ls(assemblies=True):
+    #
+    #         if not cmds.ls(object, dag=True, type="mesh"):
+    #             # ignore non-meshes
+    #             continue
+    #
+    #         # create a new item parented to the supplied session item. We
+    #         # define an item type (maya.session.mesh) that will be
+    #         # used by an associated shader publish plugin as it searches for
+    #         # items to act upon. We also give the item a display type and
+    #         # display name (the group name). In the future, other publish
+    #         # plugins might attach to these mesh items to publish other things
+    #         mesh_item = parent_item.create_item("maya.session.mesh", "Mesh", object)
+    #
+    #         # set the icon for the item
+    #         mesh_item.set_icon_from_path(icon_path)
+    #
+    #         # finally, add information to the mesh item that can be used
+    #         # by the publish plugin to identify and export it properly
+    #         mesh_item.properties["object"] = object
 
     def _collect_cameras(self, parent_item, item_types, work_template):
         """
@@ -539,6 +540,50 @@ class MayaSessionCollector(HookBaseClass):
                         geo_group_object_item.properties["work_template"] = work_template
                         geo_group_object_item.properties["object_name"] = nombre
                         geo_group_object_item.properties["object"] = node
+
+
+    # def _collect_object_sets(self, parent_item, item_types, work_template):
+    #     """
+    #     Creates items for each set in the scene.
+    #
+    #     :param parent_item: The maya session parent item
+    #     """
+    #
+    #     icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
+    #
+    #
+    #     for set in cmds.ls(type='quickSelectSet'):
+    #         if "geometries" not in item_types:
+    #             geodivider = parent_item.create_item("maya.session.geometries", "Geometries",
+    #                                               "All Session Geometries")
+    #             geodivider.set_icon_from_path(icon_path)
+    #             geodivider.expanded = False
+    #             item_types["geometries"] = geodivider
+    #             geodivider.properties["work_template"] = work_template
+    #             geodivider.properties["object_name"] = "Session"
+    #
+    #
+    #         if "sets" not in item_types:
+    #             geometries_set = item_types["geometries"].create_item("maya.session.geometries.set", "Geometry SETS",
+    #                                                  "SETS")
+    #             geometries_set.set_icon_from_path(icon_path)
+    #             item_types["sets"] = geometries_set
+    #             geometries_set.expanded = False
+    #
+    #         geo_set_object_item = item_types["sets"].create_item(
+    #             "maya.session.object_geo_set", "Object Geometry Set", nombre
+    #         )
+    #
+    #         # set the icon for the item
+    #         geo_set_object_item.set_icon_from_path(icon_path)
+    #
+    #
+    #         # store the selection set name so that any attached plugin knows which
+    #         # selection set this item represents!
+    #         geo_set_object_item.properties["work_template"] = work_template
+    #         geo_set_object_item.properties["object_name"] = set
+    #         geo_set_object_item.properties["object"] = set
+
 
     def _collect_particles_geo(self, parent_item, item_types, work_template):
         """
