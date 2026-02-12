@@ -345,7 +345,7 @@ class RenderPublishPlugin(HookBaseClass):
 
             path = publish_path
 
-            uploadPath = self.get_dailies_path(settings, item)
+            uploadPath = self.get_dailies_path(settings, item).replace(".avi", ".mov")
 
             first = item.properties['sequence_paths'][0][-8:-4]
             last =item.properties['sequence_paths'][-1][-8:-4]

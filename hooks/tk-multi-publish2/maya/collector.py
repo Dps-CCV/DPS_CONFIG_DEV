@@ -421,7 +421,7 @@ class MayaSessionCollector(HookBaseClass):
 
             if camera_name and camera_shape:
                 if not self._cam_name_matches_settings(camera_name, settings):
-                    self.logger.debug(
+                    self.logger.info(
                         "Camera name %s does not match any of the configured "
                         "patterns for camera names to publish. Not accepting "
                         "session camera item." % (camera_name,)
