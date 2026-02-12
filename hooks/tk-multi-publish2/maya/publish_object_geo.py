@@ -182,7 +182,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
                 return default
 
         # Set default values
-        self.write_facesets_cb.setChecked(get_setting_value(settings, "Write Face Sets", True))
+        self.write_facesets_cb.setChecked(get_setting_value(settings, "Write Face Sets", False))
         self.write_uvs_cb.setChecked(get_setting_value(settings, "Write Uvs", False))
         self.write_uvSets_cb.setChecked(get_setting_value(settings, "Write Uv Sets", False))
         self.write_colorSets_cb.setChecked(get_setting_value(settings, "Write Color Sets", False))
