@@ -189,9 +189,9 @@ class MayaCameraPublishPlugin(HookBaseClass):
         publisher = self.parent
         template_name = settings["Publish Template"].value
 
-        # validate the camera name first
-        cam_name = item.properties.get("camera_name")
-        cam_shape = item.properties.get("camera_shape")
+        # # validate the camera name first
+        # cam_name = item.properties.get("camera_name")
+        # cam_shape = item.properties.get("camera_shape")
 
         # if cam_name and cam_shape:
         #     if not self._cam_name_matches_settings(cam_name, settings):

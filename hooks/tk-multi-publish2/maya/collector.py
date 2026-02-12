@@ -419,7 +419,7 @@ class MayaSessionCollector(HookBaseClass):
                 except:
                     camera_name = camera_shape
 
-            if cam_name and cam_shape:
+            if camera_name and camera_shape:
                 if not self._cam_name_matches_settings(cam_name, settings):
                     self.logger.debug(
                         "Camera name %s does not match any of the configured "
