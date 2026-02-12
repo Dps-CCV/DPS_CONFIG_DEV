@@ -709,24 +709,24 @@ class MayaSessionCollector(HookBaseClass):
                 vdb_object_item.properties["object_name"] = nodeName
                 vdb_object_item.properties["object"] = nodeExport
 
-        def _cam_name_matches_settings(self, cam_name, settings):
-            """
-            Returns True if the supplied camera name matches any of the configured
-            camera name patterns.
-            """
+    def _cam_name_matches_settings(self, cam_name, settings):
+        """
+        Returns True if the supplied camera name matches any of the configured
+        camera name patterns.
+        """
 
-            # loop through each pattern specified and see if the supplied camera
-            # name matches the pattern
-            cam_patterns = settings["Cameras"].value
+        # loop through each pattern specified and see if the supplied camera
+        # name matches the pattern
+        cam_patterns = settings["Cameras"].value
 
-            # if no patterns specified, then no constraints on camera name
-            if not cam_patterns:
+        # if no patterns specified, then no constraints on camera name
+        if not cam_patterns:
+            return True
+
+        for camera_pattern in cam_patterns:
+            if fnmatch.fnmatch(cam_name, camera_pattern):
                 return True
 
-            for camera_pattern in cam_patterns:
-                if fnmatch.fnmatch(cam_name, camera_pattern):
-                    return True
-
-            return False
+        return False
 
 
