@@ -76,13 +76,61 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
                 "description": "Template path for published work files. Should"
                 "correspond to a template defined in "
                 "templates.yml.",
+            },
+            "Write Face Sets": {
+                "type": "bool",
+                "default": False,
+                "description": "Writes face sets information to the resulting alembic file",
+            },
+            "Write Uvs": {
+                "type": "bool",
+                "default": False,
+                "description": "Writes uvs information to the resulting alembic file",
+            },
+            "Write Uv Sets": {
+                "type": "bool",
+                "default": False,
+                "description": "Writes uv sets information to the resulting alembic file",
+            },
+            "Write Color Sets": {
+                "type": "bool",
+                "default": False,
+                "description": "Writes color sets information to the resulting alembic file",
             }
+
         }
 
         # update the base settings
         base_settings.update(maya_object_publish_settings)
 
         return base_settings
+
+    def get_ui_settings(self, widget, items):
+        """
+        Dynamically set checkbox states based on context
+        """
+        publisher = self.parent
+        context = publisher.context
+
+        # Start with defaults
+        ui_settings = super(MayaObjectGeometryPublishPlugin, self).get_ui_settings(widget, items)
+
+        # Get step information
+        step_name = ""
+        if context.step:
+            step_name = context.step.get("name", "")
+
+        # Get entity type (Asset vs Shot)
+        entity_type = context.entity.get("type") if context.entity else None
+
+        # Customize based on step
+        if 'TEXTURE' or 'SHADING' in step_name:
+            ui_settings["Write Face Sets"] = True
+            ui_settings["Write Uvs"] = True
+            ui_settings["Write Uv Sets"] = True
+            ui_settings["Write Color Sets"] = True
+
+        return ui_settings
 
     @property
     def item_filters(self):
@@ -284,9 +332,6 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         # keep track of everything currently selected. we will restore at the
         # end of the publish method
         cur_selection = cmds.ls(selection=True)
-
-
-
         # get the path to create and publish
         publish_path = item.properties["path"]
 
@@ -301,20 +346,29 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         alembic_args = [
             # # only renderable objects (visible and not templated)
             "-renderableOnly",
-            # write shading group set assignments (Maya 2015+)
-            "-writeFaceSets",
-            # write uv's (only the current uv set gets written)
-            "-uvWrite",
-            "-writeUVSets",
-            "-writeColorSets",
             "-worldSpace",
             "-dataformat",
             "ogawa",
         ]
 
+        write_face_sets = settings.get("Write Face Sets").value
+        write_uvs = settings.get("Write Uvs").value
+        write_uv_sets = settings.get("Write Uv Sets").value
+        write_color_sets = settings.get("Write Color Sets").value
+        if write_face_sets:
+            alembic_args.append("-writeFaceSets")
+        if write_uvs:
+            alembic_args.append("-uvWrite")
+        if write_uv_sets:
+            alembic_args.append("-writeUVSets")
+        if write_color_sets:
+            alembic_args.append("-writeColorSets")
+
         if item.type != "maya.session.geometries":
             item.properties["publish_type"] = "Alembic Cache"
             cmds.select(item.properties["object"])
+            if 'TEXTURE' or 'SHADING' in publisher.context.step['name']:
+                bake_facesets_for_selection(remove_object_level_links=True, verbose=True)
             parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath = True )
             alembic_args.append("-root")
             alembic_args.append(cmds.ls(selection=True)[0])
@@ -496,3 +550,263 @@ def _get_root_node(node):
 
     # Devolver solo el nombre corto (sin path completo)
     return current.split('|')[-1]
+
+import maya.cmds as cmds
+import maya.mel as mel
+
+# -----------------------------
+# Helpers
+# -----------------------------
+
+def _get_selected_mesh_shapes():
+    """
+    From the current selection (transforms or shapes), return ALL descendant mesh shapes,
+    at ANY depth, using long DAG paths.
+    """
+    sel = cmds.ls(sl=True, long=True) or []
+    if not sel:
+        cmds.warning("Nothing selected. Select one or more root transforms to process.")
+        return []
+
+    shapes = []
+
+    # Expand selection to transforms (if shapes are selected, consider their parents as roots too)
+    roots = set()
+    for node in sel:
+        nt = cmds.nodeType(node)
+        if nt == "transform":
+            roots.add(node)
+        elif nt == "mesh":
+            parent = cmds.listRelatives(node, parent=True, fullPath=True) or []
+            if parent:
+                roots.add(parent[0])
+
+    # If user only selected meshes and not transforms, we still include those shapes explicitly
+    explicit_meshes = [n for n in sel if cmds.nodeType(n) == "mesh"]
+    shapes.extend(explicit_meshes)
+
+    # For each root transform, get all descendant mesh shapes
+    for root in roots:
+        desc_meshes = cmds.listRelatives(root, allDescendents=True, noIntermediate=True, type="mesh", fullPath=True) or []
+        shapes.extend(desc_meshes)
+
+    # Deduplicate, preserve order
+    seen = set()
+    out = []
+    for s in shapes:
+        if s not in seen:
+            seen.add(s)
+            out.append(s)
+
+    if not out:
+        cmds.warning("No mesh shapes found under the selected nodes.")
+    print(out)
+    return out
+
+def _get_shape_transform(shape_long):
+    return (cmds.listRelatives(shape_long, parent=True, fullPath=True) or [None])[0]
+
+def _expand_face_components(comps):
+    """
+    Expand component strings into explicit per-face strings using filterExpand.
+    Returns a list like ["|pCube1|pCubeShape1.f[0]", ...].
+    """
+    if not comps:
+        return []
+    if isinstance(comps, (str,)):
+        comps = [comps]
+    expanded = cmds.filterExpand(comps, sm=34) or []  # sm=34 => polygon faces
+    return expanded
+
+def _parse_face_indices(face_components):
+    """
+    Given explicit face component strings (e.g., "|mesh|shape.f[12]"),
+    return a set of face indices as integers.
+    """
+    indices = set()
+    for comp in face_components or []:
+        lb = comp.rfind("[")
+        rb = comp.rfind("]")
+        if lb != -1 and rb != -1:
+            try:
+                idx = int(comp[lb+1:rb])
+                indices.add(idx)
+            except ValueError:
+                pass
+    return indices
+
+def _connected_shading_groups(shape_long):
+    """
+    Return shadingEngine nodes connected to the given mesh shape.
+    """
+    sgs = cmds.listConnections(shape_long, type="shadingEngine") or []
+    # Deduplicate & keep order
+    seen = set()
+    out = []
+    for sg in sgs:
+        if sg not in seen:
+            seen.add(sg)
+            out.append(sg)
+    return out
+
+def _members_for_sg(sg):
+    """
+    Return members of shadingEngine set. Could include transforms, shapes, or components.
+    """
+    try:
+        members = cmds.sets(sg, query=True) or []
+    except Exception:
+        members = []
+    return members
+
+def _is_member_object_level_for_shape(member, shape_long):
+    """
+    Determine if this member (string) represents object-level assignment for 'shape_long'.
+    Accepts either the shape itself or its transform as an SG member.
+    """
+    member_long = (cmds.ls(member, long=True) or [member])[0]
+
+    # Direct match to shape
+    if member_long == shape_long or member == shape_long.split("|")[-1]:
+        return True
+
+    # Transform containing our shape?
+    if cmds.nodeType(member_long) == "transform":
+        child_shapes = cmds.listRelatives(member_long, shapes=True, ni=True, fullPath=True) or []
+        return shape_long in child_shapes
+
+    return False
+
+def _collect_face_assignments_for_shape(shape_long, sgs):
+    """
+    Returns:
+        assigned_faces_all: set of all face indices already assigned per-face across all SGs
+        per_sg_faces: dict[sg] -> set(face indices)
+        object_level_sgs: list of SGs that are assigned at object level for this shape
+    """
+    face_count = cmds.polyEvaluate(shape_long, face=True)
+    per_sg_faces = {sg: set() for sg in sgs}
+    assigned_faces_all = set()
+    object_level_sgs = []
+
+    for sg in sgs:
+        members = _members_for_sg(sg)
+        if not members:
+            continue
+
+        comp_members = []
+        object_level_here = False
+
+        for m in members:
+            if m.startswith(shape_long + ".f[") or (m.endswith(".f]") and (shape_long.split("|")[-1] + ".f[") in m):
+                comp_members.append(m)
+            else:
+                if _is_member_object_level_for_shape(m, shape_long):
+                    object_level_here = True
+
+        expanded = _expand_face_components(comp_members)
+        indices = _parse_face_indices(expanded)
+        per_sg_faces[sg] |= indices
+        assigned_faces_all |= indices
+
+        if object_level_here:
+            object_level_sgs.append(sg)
+
+    # Clamp indices just in case
+    assigned_faces_all = {i for i in assigned_faces_all if 0 <= i < face_count}
+    for sg in per_sg_faces:
+        per_sg_faces[sg] = {i for i in per_sg_faces[sg] if 0 <= i < face_count}
+
+    return assigned_faces_all, per_sg_faces, object_level_sgs, face_count
+
+def _assign_faces_to_sg(shape_long, face_indices, sg):
+    """
+    Assign the given faces to the shadingEngine (per-face).
+    """
+    if not face_indices:
+        return
+    face_components = ["{}{}.f[{}]".format("", shape_long, idx) for idx in sorted(face_indices)]
+    try:
+        cmds.sets(face_components, edit=True, forceElement=sg)  # crucial call
+    except Exception as ex:
+        cmds.warning("Failed assigning faces to {}: {}".format(sg, ex))
+
+def _remove_object_level_membership(shape_long, sg):
+    """
+    Remove object-level membership (shape or transform) from the SG for cleanliness.
+    """
+    xform = _get_shape_transform(shape_long)
+    for target in [shape_long, xform]:
+        if not target:
+            continue
+        try:
+            cmds.sets(target, remove=sg)
+        except Exception:
+            pass
+
+def _convert_object_level_materials_to_face_sets(shape_long, remove_object_level_links=True, verbose=True):
+    """
+    For a given mesh shape:
+    - Detect object-level shading group assignments.
+    - Compute unassigned faces (not already covered by per-face members of any SG).
+    - For each object-level SG, assign the remaining unassigned faces to that SG.
+    - Optionally remove object-level membership after conversion.
+
+    This preserves any existing per-face overrides.
+    """
+    if cmds.nodeType(shape_long) != "mesh":
+        return
+
+    sgs = _connected_shading_groups(shape_long)
+    if not sgs:
+        return
+
+    assigned_faces_all, per_sg_faces, object_level_sgs, face_count = _collect_face_assignments_for_shape(shape_long, sgs)
+
+    if verbose:
+        print("\n[FaceSets] Processing: {}".format(shape_long))
+        print("  Connected SGs: {}".format(", ".join(sgs)))
+        print("  Face count: {}".format(face_count))
+        if object_level_sgs:
+            print("  Object-level SGs detected: {}".format(", ".join(object_level_sgs)))
+        else:
+            print("  No object-level SGs on this shape.")
+
+    if not object_level_sgs:
+        return  # Nothing to convert
+
+    all_faces = set(range(face_count))
+    remaining = all_faces - assigned_faces_all
+
+    for i, sg in enumerate(object_level_sgs):
+        if not remaining:
+            break
+        to_assign = set(remaining)
+        _assign_faces_to_sg(shape_long, to_assign, sg)
+        remaining -= to_assign
+
+        if remove_object_level_links:
+            _remove_object_level_membership(shape_long, sg)
+
+    if verbose:
+        print("  Conversion done (remaining unassigned faces after pass: {}).".format(len(remaining)))
+
+def bake_facesets_for_selection(remove_object_level_links=True, verbose=True):
+    """
+    Convert object-level material assignments to per-face for ALL descendant meshes
+    under the currently selected root transform(s).
+    """
+    shapes = _get_selected_mesh_shapes()
+    if not shapes:
+        return []
+
+    for s in shapes:
+        convert_object_level_materials_to_face_sets(
+            s,
+            remove_object_level_links=remove_object_level_links,
+            verbose=verbose
+        )
+    if verbose:
+        print("\n[FaceSets] Finished. Processed {} mesh shape(s).".format(len(shapes)))
+    return shapes
+
