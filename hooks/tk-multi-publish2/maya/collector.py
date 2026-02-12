@@ -120,10 +120,9 @@ class MayaSessionCollector(HookBaseClass):
         self._collect_cameras(item, item_types, work_template)
         self._collect_object_geo_group(item, item_types, work_template)
         self._collect_object_geo(item, item_types, work_template)
-        self._collect_particles_geo(settings, item)
-        self._collect_ass(settings, item)
-        self._collect_vdb(settings, item)
-        # self._collect_abc_sets(item)
+        self._collect_particles_geo(item, item_types, work_template)
+        self._collect_ass(item, item_types, work_template)
+        self._collect_vdb(item, item_types, work_template)
 
     def collect_current_maya_session(self, settings, parent_item):
         """
@@ -222,22 +221,6 @@ class MayaSessionCollector(HookBaseClass):
     #         item.properties["type_spec"] = "file.alembic"
     #         item.properties["object_name"] = filename
 
-
-    # def _collect_session_geometry(self, parent_item):
-    #     """
-    #     Creates items for session geometry to be exported.
-    #
-    #     :param parent_item: Parent Item instance
-    #     """
-    #
-    #     geo_item = parent_item.create_item(
-    #         "maya.session.geometry", "Geometry", "All Session Geometry"
-    #     )
-    #
-    #     # get the icon path to display for this item
-    #     icon_path = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
-    #
-    #     geo_item.set_icon_from_path(icon_path)
 
     # def collect_playblasts(self, parent_item, project_root):
     #     """
@@ -456,25 +439,6 @@ class MayaSessionCollector(HookBaseClass):
             cam_item.properties["camera_shape"] = camera_shape
             cam_item.properties["publish_name"] = camera_name + '_' + self.parent.context.step["name"]
 
-    # def _collect_abc_sets(self, parent_item):
-    #     """
-    #     Creates items for each abc set in the scene.
-    #
-    #     :param parent_item: The maya session parent item
-    #     """
-    #
-    #     # iterate over each selection set
-    #     for selection_set in cmds.ls(type="objectSet"):
-    #
-    #         if selection_set.startswith("abc_"):
-    #
-    #             abc_set_item = parent_item.create_item(
-    #                 "maya.session.abc_set", "ABC Set", selection_set
-    #             )
-    #
-    #             # store the selection set name so that any attached plugin knows which
-    #             # selection set this item represents!
-    #             abc_set_item.properties["set_name"] = selection_set
 
     def _collect_object_geo(self, parent_item, item_types, work_template):
         """
@@ -576,7 +540,7 @@ class MayaSessionCollector(HookBaseClass):
                         geo_group_object_item.properties["object_name"] = nombre
                         geo_group_object_item.properties["object"] = node
 
-    def _collect_particles_geo(self, settings, parent_item):
+    def _collect_particles_geo(self, parent_item, item_types, work_template):
         """
         Creates items for each particles node in the scene.
 
@@ -584,30 +548,33 @@ class MayaSessionCollector(HookBaseClass):
         """
 
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "particles.png")
-        nodeName = ''
-        nodeExport = ''
-
 
         for particles_geo in cmds.ls(type="nParticle"):
 
             nodeExport = particles_geo
             nodeName = particles_geo
 
-
-            particles_object_item = parent_item.create_item(
+            if "fx" not in item_types:
+                fxdivider = parent_item.create_item("maya.session.fx", "FX",
+                                                        "All Session FX")
+                fxdivider.set_icon_from_path(icon_path)
+                fxdivider.expanded = False
+                item_types["fx"] = fxdivider
+                fxdivider.properties["work_template"] = work_template
+            particles_object_item = item_types["fx"].create_item(
                 "maya.session.particles_geo", "Particles Cache", nodeName
             )
 
             particles_object_item.set_icon_from_path(icon_path)
 
-            work_template_setting = settings.get("Work Template")
+
 
             # store the selection set name so that any attached plugin knows which
             # selection set this item represents!
             particles_object_item.properties["object_name"] = nodeName
             particles_object_item.properties["object"] = nodeExport
 
-    def _collect_ass(self, settings, parent_item):
+    def _collect_ass(self, parent_item, item_types, work_template):
         """
         Creates items for each standin node in the scene.
 
@@ -615,31 +582,35 @@ class MayaSessionCollector(HookBaseClass):
         """
 
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "particles.png")
-        nodeName = ''
-        nodeExport = ''
-
-        search = ["prt", "vdb"]
 
         for ass in cmds.ls(type="aiStandIn"):
 
             nodeExport = ass
             nodeName = ass
 
+            if "fx" not in item_types:
+                fxdivider = parent_item.create_item("maya.session.fx", "FX",
+                                                        "All Session FX")
+                fxdivider.set_icon_from_path(icon_path)
+                fxdivider.expanded = False
+                item_types["fx"] = fxdivider
+                fxdivider.properties["work_template"] = work_template
 
-            particles_object_item = parent_item.create_item(
+
+           ass_object_item = item_types["fx"].create_item(
                 "maya.session.ass", "Ass Cache", nodeName
             )
 
-            particles_object_item.set_icon_from_path(icon_path)
+            ass_object_item.set_icon_from_path(icon_path)
 
-            work_template_setting = settings.get("Work Template")
+
 
             # store the selection set name so that any attached plugin knows which
             # selection set this item represents!
-            particles_object_item.properties["object_name"] = nodeName
-            particles_object_item.properties["object"] = nodeExport
+            ass_object_item.properties["object_name"] = nodeName
+            ass_object_item.properties["object"] = nodeExport
 
-    def _collect_vdb(self, settings, parent_item):
+    def _collect_vdb(self, parent_item, item_types, work_template):
         """
         Creates items for each Volume node in the scene.
 
@@ -647,8 +618,6 @@ class MayaSessionCollector(HookBaseClass):
         """
 
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "particles.png")
-        nodeName = ''
-        nodeExport = ''
 
         search = "vdb"
 
@@ -658,18 +627,25 @@ class MayaSessionCollector(HookBaseClass):
                 nodeExport = volume
                 nodeName = volume
 
+                if "fx" not in item_types:
+                    fxdivider = parent_item.create_item("maya.session.fx", "FX",
+                                                        "All Session FX")
+                    fxdivider.set_icon_from_path(icon_path)
+                    fxdivider.expanded = False
+                    item_types["fx"] = fxdivider
+                    fxdivider.properties["work_template"] = work_template
 
-                particles_object_item = parent_item.create_item(
+                vdb_object_item = item_types["fx"].create_item(
                     "maya.session.vdb", "Volume VDB", nodeName
                 )
 
-                particles_object_item.set_icon_from_path(icon_path)
+                vdb_object_item.set_icon_from_path(icon_path)
 
-                work_template_setting = settings.get("Work Template")
+
 
                 # store the selection set name so that any attached plugin knows which
                 # selection set this item represents!
-                particles_object_item.properties["object_name"] = nodeName
-                particles_object_item.properties["object"] = nodeExport
+                vdb_object_item.properties["object_name"] = nodeName
+                vdb_object_item.properties["object"] = nodeExport
 
 
