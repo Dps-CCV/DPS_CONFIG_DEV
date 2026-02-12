@@ -88,10 +88,10 @@ apps.tk-multi-devutils.location:
   type: app_store
   name: tk-multi-devutils
   version: v1.3.2
-apps.tk-multi-bg-publish.location:
-  type: app_store
-  name: tk-multi-bg-publish
-  version: v0.2.1
+#apps.tk-multi-bg-publish.location:
+#  type: app_store
+#  name: tk-multi-bg-publish
+#  version: v0.2.1
 
 apps.tk-shotgun-folders.location:
   type: app_store
@@ -226,7 +226,7 @@ apps.tk-multi-bugreporter.location:
   path: '{CONFIG_FOLDER}/bundles/tk-multi-bugreporter'
 apps.tk-multi-scenebuilder.location:
   type: app_store
-  name: tk-multi-bg-publish
+  name: tk-multi-scenebuilder
   version: v0.2.1
 
 
