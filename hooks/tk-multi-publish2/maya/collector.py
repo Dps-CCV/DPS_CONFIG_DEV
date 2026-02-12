@@ -124,7 +124,7 @@ class MayaSessionCollector(HookBaseClass):
         # self._collect_meshes(item)
         # look at the render layers to find rendered images on disk
         self.collect_rendered_images(item, item_types, work_template)
-        self._collect_cameras(item, item_types, work_template)
+        self._collect_cameras(settings, item, item_types, work_template)
         self._collect_object_geo_group(item, item_types, work_template)
         self._collect_object_geo(item, item_types, work_template)
         # self._collect_object_sets(parent_item, item_types, work_template)
@@ -392,7 +392,7 @@ class MayaSessionCollector(HookBaseClass):
     #         # by the publish plugin to identify and export it properly
     #         mesh_item.properties["object"] = object
 
-    def _collect_cameras(self, parent_item, item_types, work_template):
+    def _collect_cameras(self, settings, parent_item, item_types, work_template):
         """
         Creates items for each camera in the session.
 
