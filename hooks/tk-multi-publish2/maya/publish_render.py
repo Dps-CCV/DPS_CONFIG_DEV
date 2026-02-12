@@ -9,6 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+import subprocess
 import pprint
 import traceback
 
@@ -395,8 +396,20 @@ class RenderPublishPlugin(HookBaseClass):
                 )
                 self.logger.info(cmd)
                 self.logger.info(os.environ['PATH'])
-                os.popen(cmd)
 
+                with subprocess.Popen(
+                        cmd,
+                        shell=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        text=True,
+                        bufsize=1  # line-buffered
+                ) as proc:
+                    for line in proc.stdout:
+                        sys.stdout.write(line)  # stream to your console (or handle it as you like)
+                    return_code = proc.wait()
+
+                print("Exit code:", return_code)
 
                 publish_name = item.properties.get("publish_name")
                 if not publish_name:
