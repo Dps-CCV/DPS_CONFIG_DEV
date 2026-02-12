@@ -140,32 +140,51 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
 
         return widget
 
-    def get_ui_settings(self, widget, items):
+
+    def get_ui_settings(self, widget):
         """
-        Dynamically set checkbox states based on context
+        Method called by the publisher to retrieve setting values from the UI.
+
+        :param widget: The widget returned by create_settings_widget()
+        :returns: Dictionary of setting names to values
         """
+        ui_settings = {}
+
+        ui_settings["Write Face Sets"] = self.write_fasets_cb.isChecked()
+        ui_settings["Write Uvs"] = self.write_uvs_cb.isChecked()
+        ui_settings["Write Uv Sets"] = self.write_uvSets_cb.isChecked()
+        ui_settings["Write Color Sets"] = self.write_colorSets_cb.isChecked()
+
+        return ui_settings
+
+    def set_ui_settings(self, widget, settings):
+        """
+        Method called by the publisher to populate the UI with setting values.
+
+        :param widget: The widget returned by create_settings_widget()
+        :param settings: Dictionary of setting names to values
+        """
+        # Get the current context to modify checkbox states
         publisher = self.parent
         context = publisher.context
 
-        # Start with defaults
-        ui_settings = super(MayaObjectGeometryPublishPlugin, self).get_ui_settings(widget, items)
-
-        # Get step information
-        step_name = ""
-        if context.step:
-            step_name = context.step.get("name", "")
-
-        # Get entity type (Asset vs Shot)
-        entity_type = context.entity.get("type") if context.entity else None
+        # Set default values
+        self.write_fasets_cb.setChecked(settings.get("Write Face Sets", True))
+        self.write_uvs_cb.setChecked(settings.get("Write Uvs", False))
+        self.write_uvSets_cb.setChecked(settings.get("Write Uv Sets", False))
+        self.write_colorSets_cb.setChecked(settings.get("Write Color Sets", False))
 
         # Customize based on step
-        if 'TEXTURE' or 'SHADING' in step_name:
-            ui_settings["Write Face Sets"] = True
-            ui_settings["Write Uvs"] = True
-            ui_settings["Write Uv Sets"] = True
-            ui_settings["Write Color Sets"] = True
+        if context.step:
+            step_name = context.step.get("name", "").lower()
 
-        return ui_settings
+            if 'texture' in step_name or 'shading' in step_name:
+                self.write_fasets_cb.setChecked(True)
+                self.write_uvs_cb.setChecked(True)
+                self.write_uvSets_cb.setChecked(True)
+                self.write_colorSets_cb.setChecked(True)
+
+
 
     @property
     def item_filters(self):
@@ -204,71 +223,98 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         :returns: dictionary with boolean keys accepted, required and enabled
         """
 
+        # Initialize return values
         accepted = True
+        checked = False
+
         publisher = self.parent
         template_name = settings["Publish Template"].value
 
-        # ensure a work file template is available on the parent item
+        # ============================================================================
+        # VALIDATION CHECKS - Early returns for failed validations
+        # ============================================================================
+
+        # Check work template
         work_template = item.properties.get("work_template")
         if not work_template:
             self.logger.debug(
                 "A work template is required for the session item in order to "
                 "publish session geometry. Not accepting session geom item."
             )
-            accepted = False
+            return {"accepted": False, "checked": False}
 
-        # ensure the publish template is defined and valid and that we also have
+        # Check publish template
         publish_template = publisher.get_template_by_name(template_name)
         if not publish_template:
             self.logger.debug(
                 "The valid publish template could not be determined for the "
                 "session geometry item. Not accepting the item."
             )
-            accepted = False
+            return {"accepted": False, "checked": False}
 
-        # we've validated the publish template. add it to the item properties
-        # for use in subsequent methods
+        # Store publish template for later use
         item.properties["publish_template"] = publish_template
 
-        # check that the AbcExport command is available!
+        # Check Alembic export command availability
         if not mel.eval('exists "AbcExport"'):
             self.logger.debug(
                 "Item not accepted because alembic export command 'AbcExport' "
                 "is not available. Perhaps the plugin is not enabled?"
             )
-            accepted = False
+            return {"accepted": False, "checked": False}
 
-        # because a publish template is configured, disable context change. This
-        # is a temporary measure until the publisher handles context switching
-        # natively.
+        # Disable context change (temporary measure)
         item.context_change_allowed = False
 
+        # Special case: session geometries on Assets are not accepted
+        if item.type == "maya.session.geometries" and publisher.context.entity['type'] == 'Asset':
+            return {"accepted": False, "checked": False}
+
+        # ============================================================================
+        # GET PARENT NODE
+        # ============================================================================
 
         if item.type != "maya.session.geometries":
             cur_selection = cmds.ls(selection=True)
             cmds.select(item.properties["object"])
-            parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath = True )
+            parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath=True)
             cmds.select(cur_selection)
         else:
             parentNode = _get_root_from_first_mesh()
 
-        checked = False
+        # ============================================================================
+        # DETERMINE CHECKED STATE BASED ON STEP
+        # ============================================================================
 
-        if publisher.context.step['name'] in ['MODEL', 'TEXTURE_A', 'CLAY_A', 'FOTOGRAMETRY_A', 'GROOM_A', 'MODEL_A', 'SCAN_A']:
+        step_name = publisher.context.step['name']
+
+        # Define step categories
+        MODELING_STEPS = ['MODEL', 'TEXTURE_A', 'CLAY_A', 'FOTOGRAMETRY_A', 'GROOM_A', 'MODEL_A', 'SCAN_A']
+        ANIMATION_STEPS = ['TRACK_3D', 'LAYOUT', 'ANIMATION', 'CLOTH', 'CROWD', 'ANIMATION_A', 'CHARACTER_FX_A',
+                           'CLOTH_A', 'LAYOUT_A', 'MODEL_A', 'SCAN_A']
+        ANIMATION_SPECIFIC = ['ANIMATION', 'ANIMATION_A']
+
+        if step_name in MODELING_STEPS:
+            # Modeling steps: always checked
             checked = True
-        elif publisher.context.step['name'] in ['TRACK_3D', 'LAYOUT', 'ANIMATION', 'CLOTH', 'CROWD', 'ANIMATION_A', 'CHARACTER_FX_A', 'CLOTH_A', 'LAYOUT_A', 'MODEL_A', 'SCAN_A']:
-            if _geo_has_animation(parentNode) == False and publisher.context.step['name'] in ['ANIMATION', 'ANIMATION_A']:
+
+        elif step_name in ANIMATION_STEPS:
+            # Animation-related steps: more complex logic
+
+            # For animation-specific steps without animation, don't check
+            if step_name in ANIMATION_SPECIFIC and not _geo_has_animation(parentNode):
                 checked = False
+            # For non-session geometries, check
+            elif item.type != "maya.session.geometries":
+                checked = True
+            # Session geometries in animation steps: don't check
             else:
-                if item.type != "maya.session.geometries":
-                    checked = True
-                else:
-                    checked = False
+                checked = False
+
         else:
+            # Unknown steps: don't check
             checked = False
-        if item.type == "maya.session.geometries" and publisher.context.entity['type'] == 'Asset':
-            accepted = False
-            checked = False
+
         return {"accepted": accepted, "checked": checked}
 
     def validate(self, settings, item):
