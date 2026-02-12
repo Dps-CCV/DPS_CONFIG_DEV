@@ -420,11 +420,11 @@ class MayaSessionCollector(HookBaseClass):
                     camera_name = camera_shape
 
             if camera_name and camera_shape:
-                if not self._cam_name_matches_settings(cam_name, settings):
+                if not self._cam_name_matches_settings(camera_name, settings):
                     self.logger.debug(
                         "Camera name %s does not match any of the configured "
                         "patterns for camera names to publish. Not accepting "
-                        "session camera item." % (cam_name,)
+                        "session camera item." % (camera_name,)
                     )
                     return
 
@@ -709,7 +709,7 @@ class MayaSessionCollector(HookBaseClass):
                 vdb_object_item.properties["object_name"] = nodeName
                 vdb_object_item.properties["object"] = nodeExport
 
-    def _cam_name_matches_settings(self, cam_name, settings):
+    def _cam_name_matches_settings(self, camera_name, settings):
         """
         Returns True if the supplied camera name matches any of the configured
         camera name patterns.
@@ -724,7 +724,7 @@ class MayaSessionCollector(HookBaseClass):
             return True
 
         for camera_pattern in cam_patterns:
-            if fnmatch.fnmatch(cam_name, camera_pattern):
+            if fnmatch.fnmatch(camera_name, camera_pattern):
                 return True
 
         return False
