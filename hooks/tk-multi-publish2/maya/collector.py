@@ -13,6 +13,7 @@ import os
 import maya.cmds as cmds
 import maya.mel as mel
 import sgtk
+import fnmatch
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -57,6 +58,12 @@ class MayaSessionCollector(HookBaseClass):
                 "to publish plugins via the collected item's "
                 "properties. ",
             },
+            "Cameras": {
+                "type": "list",
+                "default": ["camera*"],
+                "description": "Glob-style list of camera names to publish. "
+                               "Example: ['camMain', 'camAux*']."
+            }
         }
 
         # update the base settings with these settings
@@ -412,6 +419,15 @@ class MayaSessionCollector(HookBaseClass):
                 except:
                     camera_name = camera_shape
 
+            if cam_name and cam_shape:
+                if not self._cam_name_matches_settings(cam_name, settings):
+                    self.logger.debug(
+                        "Camera name %s does not match any of the configured "
+                        "patterns for camera names to publish. Not accepting "
+                        "session camera item." % (cam_name,)
+                    )
+                    return
+
 
             if "cameras" not in item_types:
                 camdivider = parent_item.create_item("maya.session.cameras", "Cameras",
@@ -692,5 +708,25 @@ class MayaSessionCollector(HookBaseClass):
                 # selection set this item represents!
                 vdb_object_item.properties["object_name"] = nodeName
                 vdb_object_item.properties["object"] = nodeExport
+
+        def _cam_name_matches_settings(self, cam_name, settings):
+            """
+            Returns True if the supplied camera name matches any of the configured
+            camera name patterns.
+            """
+
+            # loop through each pattern specified and see if the supplied camera
+            # name matches the pattern
+            cam_patterns = settings["Cameras"].value
+
+            # if no patterns specified, then no constraints on camera name
+            if not cam_patterns:
+                return True
+
+            for camera_pattern in cam_patterns:
+                if fnmatch.fnmatch(cam_name, camera_pattern):
+                    return True
+
+            return False
 
 
