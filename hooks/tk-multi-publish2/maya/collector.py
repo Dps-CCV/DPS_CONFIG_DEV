@@ -426,7 +426,7 @@ class MayaSessionCollector(HookBaseClass):
                         "patterns for camera names to publish. Not accepting "
                         "session camera item." % (camera_name,)
                     )
-                    return
+                    continue
 
 
             if "cameras" not in item_types:
