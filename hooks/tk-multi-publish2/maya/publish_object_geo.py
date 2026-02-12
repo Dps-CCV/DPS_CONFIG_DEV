@@ -119,9 +119,9 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         layout.setContentsMargins(0, 0, 0, 0)
 
         # Create checkboxes
-        self.write_fasets_cb = QtGui.QCheckBox("Write Face Sets")
-        self.write_fasets_cb.setToolTip("Writes face sets info to resulting alembic")
-        layout.addWidget(self.write_fasets_cb)
+        self.write_facesets_cb = QtGui.QCheckBox("Write Face Sets")
+        self.write_facesets_cb.setToolTip("Writes face sets info to resulting alembic")
+        layout.addWidget(self.write_facesets_cb)
 
         self.write_uvs_cb = QtGui.QCheckBox("Write Uvs")
         self.write_uvs_cb.setToolTip("Writes uvs info to resulting alembic")
@@ -150,7 +150,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         """
         ui_settings = {}
 
-        ui_settings["Write Face Sets"] = self.write_fasets_cb.isChecked()
+        ui_settings["Write Face Sets"] = self.write_facesets_cb.isChecked()
         ui_settings["Write Uvs"] = self.write_uvs_cb.isChecked()
         ui_settings["Write Uv Sets"] = self.write_uvSets_cb.isChecked()
         ui_settings["Write Color Sets"] = self.write_colorSets_cb.isChecked()
@@ -168,18 +168,31 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         publisher = self.parent
         context = publisher.context
 
+        # Helper function to get setting value
+        def get_setting_value(settings, name, default):
+            """Get setting value whether settings is a dict or list"""
+            if isinstance(settings, dict):
+                return settings.get(name, default)
+            elif isinstance(settings, list):
+                for setting in settings:
+                    if hasattr(setting, 'name') and setting.name == name:
+                        return setting.value
+                return default
+            else:
+                return default
+
         # Set default values
-        self.write_fasets_cb.setChecked(settings.get("Write Face Sets", True))
-        self.write_uvs_cb.setChecked(settings.get("Write Uvs", False))
-        self.write_uvSets_cb.setChecked(settings.get("Write Uv Sets", False))
-        self.write_colorSets_cb.setChecked(settings.get("Write Color Sets", False))
+        self.write_facesets_cb.setChecked(get_setting_value(settings, "Write Face Sets", True))
+        self.write_uvs_cb.setChecked(get_setting_value(settings, "Write Uvs", False))
+        self.write_uvSets_cb.setChecked(get_setting_value(settings, "Write Uv Sets", False))
+        self.write_colorSets_cb.setChecked(get_setting_value(settings, "Write Color Sets", False))
 
         # Customize based on step
         if context.step:
             step_name = context.step.get("name", "").lower()
 
             if 'texture' in step_name or 'shading' in step_name:
-                self.write_fasets_cb.setChecked(True)
+                self.write_facesets_cb.setChecked(True)
                 self.write_uvs_cb.setChecked(True)
                 self.write_uvSets_cb.setChecked(True)
                 self.write_colorSets_cb.setChecked(True)
