@@ -372,9 +372,10 @@ class RenderPublishPlugin(HookBaseClass):
 
                 framerate = "24"
                 start_number = first
-                in_sequence = path.replace("####", '%04d')
+                in_path = path.replace("####", '%04d')
+                in_sequence = in_path.replace('\\', '/')
                 lut_path = r"L\:/NUKE_CONFIG/ACESCg_to_Rec709.cube"  # keep the backslash before the colon
-                out_mov = uploadPath
+                out_mov = uploadPath.replace('\\', '/')
 
                 # Build the filter string (double-quoted on the command line; single quotes inside for lut3d path)
                 vf = (
@@ -393,6 +394,7 @@ class RenderPublishPlugin(HookBaseClass):
                     f'"{out_mov}"'
                 )
                 self.logger.info(cmd)
+                self.logger.info(os.environ['PATH'])
                 os.popen(cmd)
 
 
