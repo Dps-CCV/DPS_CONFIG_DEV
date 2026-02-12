@@ -201,12 +201,12 @@ class MayaCameraPublishPlugin(HookBaseClass):
         #             "session camera item." % (cam_name,)
         #         )
         #         accepted = False
-        else:
-            self.logger.debug(
-                "Camera name or shape was set on the item properties. Not "
-                "accepting session camera item."
-            )
-            accepted = False
+        # else:
+        #     self.logger.debug(
+        #         "Camera name or shape was set on the item properties. Not "
+        #         "accepting session camera item."
+        #     )
+        #     accepted = False
 
         # ensure a camera file template is available on the parent item
         work_template = item.parent.properties.get("work_template")
