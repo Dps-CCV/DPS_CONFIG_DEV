@@ -184,7 +184,8 @@ settings.tk-multi-publish2.maya.asset_step:
   collector: "{self}/collector.py:{config}/tk-multi-publish2/maya/collector.py"
   collector_settings:
       Work Template: maya_asset_work
-      Background Processing: True
+#      Background Processing: True
+      Cameras: ["*camMain*"]
   pre_publish: "{self}/pre_publish.py:{config}/tk-multi-publish2/maya/pre_publish.py"
   publish_plugins:
 #  - name: Publish File to Shotgun
@@ -246,7 +247,7 @@ settings.tk-multi-publish2.maya.asset_step:
     hook: "{config}/tk-multi-publish2/maya/publish_file.py:{config}/tk-multi-publish2/maya/publish_camera.py"
     settings:
         Publish Template: maya_asset_camera_publish
-        Cameras: ["*camMain*"]
+#        Cameras: ["*camMain*"]
   post_phase: "{self}/post_phase.py"
   help_url: *help_url
   location: "@apps.tk-multi-publish2.location"
@@ -256,7 +257,8 @@ settings.tk-multi-publish2.maya.shot_step:
   collector: "{self}/collector.py:{config}/tk-multi-publish2/maya/collector.py"
   collector_settings:
       Work Template: maya_shot_work
-      Background Processing: True
+#      Background Processing: True
+      Cameras: ["*camMain*"]
   pre_publish: "{self}/pre_publish.py:{config}/tk-multi-publish2/maya/pre_publish.py"
   publish_plugins:
 #  - name: Publish File to Shotgun
@@ -282,7 +284,7 @@ settings.tk-multi-publish2.maya.shot_step:
     hook: "{config}/tk-multi-publish2/maya/publish_file.py:{config}/tk-multi-publish2/maya/publish_camera.py"
     settings:
         Publish Template: maya_shot_camera_publish
-        Cameras: ["*camMain*"]
+#        Cameras: ["*camMain*"]
 #  - name: Publish Session Geometry
 #    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/publish_session_geometry.py"
 #    settings:
