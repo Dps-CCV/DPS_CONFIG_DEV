@@ -13,6 +13,7 @@ import pprint
 import traceback
 
 import maya.cmds as cmds
+from pkg_resources import find_on_path
 
 from tank_vendor import six
 import sys
@@ -349,26 +350,50 @@ class RenderPublishPlugin(HookBaseClass):
             first = item.properties['sequence_paths'][0][-8:-4]
             last =item.properties['sequence_paths'][-1][-8:-4]
             pathNum = path.replace("####", str(first))
-            # create an image plane for the supplied path, visible in all views
-            (dumyCam, dumyCam_shape) = cmds.camera()
-            (img_plane, img_plane_shape) = cmds.imagePlane(camera=dumyCam, fileName=pathNum, showInAllViews=True)
+            # # create an image plane for the supplied path, visible in all views
+            # (dumyCam, dumyCam_shape) = cmds.camera()
+            # (img_plane, img_plane_shape) = cmds.imagePlane(camera=dumyCam, fileName=pathNum, showInAllViews=True)
+            #
+            # cmds.setAttr("%s.useFrameExtension" % (img_plane_shape,), 1)
+            # cmds.setAttr("%s.depth" % (img_plane_shape,), 0.1)
+            # cmds.setAttr("%s.displayMode" % (img_plane_shape,), 2)
+            # if 'EXR' in path:
+            #     cmds.setAttr("%s.colorSpace" % (img_plane_shape,), 'ACEScg', type='string')
+            # elif 'JPG' in path:
+            #     cmds.setAttr("%s.colorSpace" % (img_plane_shape,), 'Output - Rec.709', type='string')
+            # cmds.lookThru(dumyCam)
+            # # viewport = cmds.getPanel(withFocus=True)
+            # # cmds.modelEditor(viewport, da="smoothShaded", wos=False, swf=False)
+            # cmds.playblast(format="movie", filename=uploadPath, forceOverwrite=True, percent=100,
+            #                widthHeight=[1920, 1080], showOrnaments=False, viewer=False, startTime=int(first), endTime=int(last))
+            # # cmds.playblast(fmt= "movie", completeFilename="C:\Users\USER\Desktop\test.avi", viewer=False, showOrnaments=False, percent=100, width=1920, height=1080, startTime=1001, endTime=1020)
+            # cmds.delete(img_plane)
+            # cmds.delete(dumyCam)
 
-            cmds.setAttr("%s.useFrameExtension" % (img_plane_shape,), 1)
-            cmds.setAttr("%s.depth" % (img_plane_shape,), 0.1)
-            cmds.setAttr("%s.displayMode" % (img_plane_shape,), 2)
-            if 'EXR' in path:
-                cmds.setAttr("%s.colorSpace" % (img_plane_shape,), 'ACEScg', type='string')
-            elif 'JPG' in path:
-                cmds.setAttr("%s.colorSpace" % (img_plane_shape,), 'Output - Rec.709', type='string')
-            cmds.lookThru(dumyCam)
-            # viewport = cmds.getPanel(withFocus=True)
-            # cmds.modelEditor(viewport, da="smoothShaded", wos=False, swf=False)
-            cmds.playblast(format="movie", filename=uploadPath, forceOverwrite=True, percent=100,
-                           widthHeight=[1920, 1080], showOrnaments=False, viewer=False, startTime=int(first), endTime=int(last))
-            # cmds.playblast(fmt= "movie", completeFilename="C:\Users\USER\Desktop\test.avi", viewer=False, showOrnaments=False, percent=100, width=1920, height=1080, startTime=1001, endTime=1020)
-            cmds.delete(img_plane)
-            cmds.delete(dumyCam)
+            framerate = "24"
+            start_number = first
+            in_sequence = path.replace("####", '%04d')
+            lut_path = r"L\:/NUKE_CONFIG/ACESCg_to_Rec709.cube"  # keep the backslash before the colon
+            out_mov = uploadPath
 
+            # Build the filter string (double-quoted on the command line; single quotes inside for lut3d path)
+            vf = (
+                "format=gbrpf32le,"
+                f"lut3d='{lut_path}',"
+                "scale=1920:1080,format=yuv422p10le"
+            )
+
+            # Assemble the final command with all quotes preserved
+            cmd = (
+                f'ffmpeg -framerate {framerate} -start_number {start_number} '
+                f'-i "{in_sequence}" '
+                f'-vf "{vf}" '
+                f'-c:v prores_ks -profile:v 3 -pix_fmt yuv422p10le '
+                f'-movflags +write_colr -color_primaries bt709 -color_trc bt709 -colorspace bt709 '
+                f'"{out_mov}"'
+            )
+
+            os.popen(cmd)
 
 
             publish_name = item.properties.get("publish_name")
