@@ -14,6 +14,7 @@ import maya.mel as mel
 import sgtk
 
 from tank_vendor import six
+from sgtk.platform.qt import QtCore, QtGui
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -104,6 +105,40 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         base_settings.update(maya_object_publish_settings)
 
         return base_settings
+
+    def create_settings_widget(self, parent):
+        """
+        Creates a Qt widget for editing the plugin settings.
+
+        :param parent: The parent QWidget
+        :returns: A QWidget with the settings UI
+        """
+        # Create main widget
+        widget = QtGui.QWidget(parent)
+        layout = QtGui.QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        # Create checkboxes
+        self.write_fasets_cb = QtGui.QCheckBox("Write Face Sets")
+        self.write_fasets_cb.setToolTip("Writes face sets info to resulting alembic")
+        layout.addWidget(self.write_fasets_cb)
+
+        self.write_uvs_cb = QtGui.QCheckBox("Write Uvs")
+        self.write_uvs_cb.setToolTip("Writes uvs info to resulting alembic")
+        layout.addWidget(self.write_uvs_cb)
+
+        self.write_uvSets_cb = QtGui.QCheckBox("Write Uv Sets")
+        self.write_uvSets_cb.setToolTip("Writes uv sets info to resulting alembic")
+        layout.addWidget(self.write_uvSets_cb)
+
+        self.write_colorSets_cb = QtGui.QCheckBox("Write Color Sets")
+        self.write_colorSets_cb.setToolTip("Writes color sets info to resulting alembic")
+        layout.addWidget(self.write_colorSets_cb)
+
+        # Add stretch to push checkboxes to the top
+        layout.addStretch()
+
+        return widget
 
     def get_ui_settings(self, widget, items):
         """
