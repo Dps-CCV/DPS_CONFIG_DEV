@@ -147,10 +147,10 @@ class UploadVersionPlugin(HookBaseClass):
         """
 
         publisher = self.parent
-        file_path = item.properties["path"]
+        item.properties["path"] = _session_path()
 
         # Accept any files with a valid extension defined in the setting "File Extensions"
-        file_info = publisher.util.get_file_path_components(file_path)
+        file_info = publisher.util.get_file_path_components(item.properties["path"])
         extension = file_info["extension"].lower()
 
         valid_extensions = []
@@ -164,8 +164,8 @@ class UploadVersionPlugin(HookBaseClass):
         if extension in valid_extensions or item.type == "maya.session":
             # log the accepted file and display a button to reveal it in the fs
             self.logger.info(
-                "Version upload plugin accepted: %s" % (file_path,),
-                extra={"action_show_folder": {"path": file_path}},
+                "Version upload plugin accepted: %s" % (item.properties["path"],),
+                extra={"action_show_folder": {"path": item.properties["path"]}},
             )
 
             # return the accepted info
@@ -190,6 +190,7 @@ class UploadVersionPlugin(HookBaseClass):
 
         :returns: True if item is valid, False otherwise.
         """
+        path = item.properties["path"]
         return True
 
     def publish(self, settings, item):
