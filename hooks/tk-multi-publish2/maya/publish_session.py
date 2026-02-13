@@ -270,6 +270,7 @@ class MayaSessionPublishPlugin(HookBaseClass):
             item.context_change_allowed = False
 
         path = _session_path()
+        item.properties["path"] = path
 
         if not path:
             # the session has not been saved before (no path determined).

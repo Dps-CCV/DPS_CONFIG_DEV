@@ -168,6 +168,7 @@ class RenderPublishPlugin(HookBaseClass):
         # self.logger.debug("PlayblastPublishPlugin.accept")
 
         # ensure a camera file template is available on the parent item
+        item.properties["path"] = _session_path()
         work_template = item.parent.properties.get("work_template")
         if not work_template:
             self.logger.debug(
@@ -201,7 +202,7 @@ class RenderPublishPlugin(HookBaseClass):
     def validate(self, settings, item):
         # self.logger.debug("PlayblastPublishPlugin.validate")
 
-        path = _session_path()
+        # path = _session_path()
 
         # get the configured work file template
         work_template = item.parent.properties.get("work_template")
@@ -223,7 +224,7 @@ class RenderPublishPlugin(HookBaseClass):
         if missing_keys:
             error_msg = (
                 "Work file '%s' missing keys required for the "
-                "publish template: %s" % (path, missing_keys)
+                "publish template: %s" % (item.properties["path"], missing_keys)
             )
             self.logger.error(error_msg)
             raise Exception(error_msg)
