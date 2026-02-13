@@ -225,7 +225,7 @@ class UploadVersionPlugin(HookBaseClass):
 
             path = item.properties['publish_data']['path']
 
-            uploadPath = self.get_dailies_path(settings, item).replace(".avi", ".mov")
+            uploadPath = self.get_dailies_path(settings, item)
 
             first = item.properties['sequence_paths'][0][-8:-4]
 
@@ -605,12 +605,12 @@ class UploadVersionPlugin(HookBaseClass):
 
             if work_template.validate(path):
                 work_fields = work_template.get_fields(path)
-                work_fields["maya.layer_name"] = item.properties["maya.layer_name"]
-
-                if platform.system() == 'Windows':
+                if item.type == "maya.session":
                     work_fields["extension"] = "avi"
-                else:
+                elif item.type == "maya.session.render":
+                    work_fields["maya.layer_name"] = item.properties["maya.layer_name"]
                     work_fields["extension"] = "mov"
+
 
             missing_keys = dailies_template.missing_keys(work_fields)
 
