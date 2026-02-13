@@ -161,7 +161,7 @@ class UploadVersionPlugin(HookBaseClass):
 
         self.logger.debug("Valid extensions: %s" % valid_extensions)
 
-        if extension in valid_extensions:
+        if extension in valid_extensions or item.type == "maya.session":
             # log the accepted file and display a button to reveal it in the fs
             self.logger.info(
                 "Version upload plugin accepted: %s" % (file_path,),

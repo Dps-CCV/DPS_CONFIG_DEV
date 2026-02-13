@@ -193,11 +193,7 @@ settings.tk-multi-publish2.maya.asset_step:
 #    settings: {
 #      Alembic Publish Template: maya_asset_object_publish
 #    }
-  - name: Upload for review
-    hook: "{self}/upload_version.py:{config}/tk-multi-publish2/maya/upload_version.py"
-    settings:
-        File Extensions: "jpeg, jpg, png, mov, mp4, pdf, avi, exr, ma, mb"
-        Link Local File: True
+
   - name: Begin file versioning
     hook: "{engine}/tk-multi-publish2/basic/start_version_control.py"
     settings: {}
@@ -248,6 +244,11 @@ settings.tk-multi-publish2.maya.asset_step:
     settings:
         Publish Template: maya_asset_camera_publish
 #        Cameras: ["*camMain*"]
+  - name: Upload for review
+    hook: "{self}/upload_version.py:{config}/tk-multi-publish2/maya/upload_version.py"
+    settings:
+      File Extensions: "jpeg, jpg, png, mov, mp4, pdf, avi, exr, ma, mb"
+      Link Local File: True
   post_phase: "{self}/post_phase.py"
   help_url: *help_url
   location: "@apps.tk-multi-publish2.location"
@@ -266,11 +267,7 @@ settings.tk-multi-publish2.maya.shot_step:
 #    settings: {
 #      Alembic Publish Template: maya_shot_object_publish
 #    }
-  - name: Upload for review
-    hook: "{self}/upload_version.py:{config}/tk-multi-publish2/maya/upload_version.py"
-    settings:
-      File Extensions: "jpeg, jpg, png, mov, mp4, pdf, avi, exr, ma, mb"
-      Link Local File: True
+
   - name: Begin file versioning
     hook: "{engine}/tk-multi-publish2/basic/start_version_control.py"
     settings: {}
@@ -317,6 +314,11 @@ settings.tk-multi-publish2.maya.shot_step:
         Publish Template: maya_shot_render_publish
         Dailies Template: maya_shot_dailies_publish
         Link Local File: True
+  - name: Upload for review
+    hook: "{self}/upload_version.py:{config}/tk-multi-publish2/maya/upload_version.py"
+    settings:
+      File Extensions: "jpeg, jpg, png, mov, mp4, pdf, avi, exr, ma, mb"
+      Link Local File: True
   post_phase: "{self}/post_phase.py"
   help_url: *help_url
   location: "@apps.tk-multi-publish2.location"
