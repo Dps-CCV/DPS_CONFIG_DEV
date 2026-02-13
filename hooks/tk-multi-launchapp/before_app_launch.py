@@ -85,7 +85,7 @@ class BeforeAppLaunch(tank.Hook):
 
         os.environ["PROJECTMASK"] = str(getColor["sg_formato___ratio"])
 
-        os.environ["RV_SUPPORT_PATH"] = os.path.join(project_path, "CONFIG", "COLOR", "RV")
+        # os.environ["RV_SUPPORT_PATH"] = os.path.join(project_path, "CONFIG", "COLOR", "RV")
 
 
         os.environ["PROJECT_CODE"] = str(getColor["code"])
