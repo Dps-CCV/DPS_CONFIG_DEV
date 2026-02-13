@@ -105,6 +105,20 @@ class UploadVersionPlugin(HookBaseClass):
                 "default": True,
                 "description": "Should the local file be referenced by Shotgun",
             },
+            "Dailies Template": {
+                "type": "template",
+                "default": None,
+                "description": "Template path for published dailies. Should"
+                               "correspond to a template defined in "
+                               "templates.yml.",
+            },
+            "Dailies Low Template": {
+                "type": "template",
+                "default": None,
+                "description": "Template path for published playblast. Should"
+                               "correspond to a template defined in "
+                               "templates.yml.",
+            },
         }
 
     @property
@@ -543,7 +557,10 @@ class UploadVersionPlugin(HookBaseClass):
         """
 
         publisher = self.parent
-        template_name = settings["Dailies Template"].value
+        if item.type == "maya.session":
+            template_name = settings["Dailies Low Template"].value
+        elif item.type == "maya.session.render":
+            template_name = settings["Dailies Template"].value
         dailies_template = publisher.get_template_by_name(template_name)
         item.properties["dailies_template"] = dailies_template
 

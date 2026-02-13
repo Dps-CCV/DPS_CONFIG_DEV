@@ -319,6 +319,8 @@ settings.tk-multi-publish2.maya.shot_step:
     settings:
       File Extensions: "jpeg, jpg, png, mov, mp4, pdf, avi, exr, ma, mb"
       Link Local File: True
+      Dailies Template: maya_shot_dailies_publish
+      Dailies Low Template: maya_shot_low_dailies_publish
   post_phase: "{self}/post_phase.py"
   help_url: *help_url
   location: "@apps.tk-multi-publish2.location"
