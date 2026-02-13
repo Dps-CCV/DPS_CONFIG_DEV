@@ -410,7 +410,7 @@ class UploadVersionPlugin(HookBaseClass):
             "sg_first_frame": int(first),
             "sg_last_frame": int(last),
             "frame_count": int(int(last) - int(first)),
-            "frame_range": first + "-" + last,
+            "frame_range": str(first) + "-" + str(last),
         }
 
         if "sg_publish_data" in item.properties:
