@@ -210,7 +210,7 @@ class RenderPublishPlugin(HookBaseClass):
 
         # get the current scene path and extract fields from it using the work
         # template:
-        work_fields = work_template.get_fields(path)
+        work_fields = work_template.get_fields(item.properties["path"])
 
         # include the extension in the fields
         filename, extension = os.path.splitext(item.properties["path"])

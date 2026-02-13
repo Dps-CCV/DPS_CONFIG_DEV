@@ -613,3 +613,15 @@ class UploadVersionPlugin(HookBaseClass):
 
 
         return dailies_path
+
+    def _session_path():
+        """
+        Return the path to the current session
+        :return:
+        """
+        path = cmds.file(query=True, sn=True)
+
+        if path is not None:
+            path = six.ensure_str(path)
+
+        return path
