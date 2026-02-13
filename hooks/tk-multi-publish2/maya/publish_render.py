@@ -350,26 +350,6 @@ class RenderPublishPlugin(HookBaseClass):
 
                 first = item.properties['sequence_paths'][0][-8:-4]
                 last =item.properties['sequence_paths'][-1][-8:-4]
-                pathNum = path.replace("####", str(first))
-                # # create an image plane for the supplied path, visible in all views
-                # (dumyCam, dumyCam_shape) = cmds.camera()
-                # (img_plane, img_plane_shape) = cmds.imagePlane(camera=dumyCam, fileName=pathNum, showInAllViews=True)
-                #
-                # cmds.setAttr("%s.useFrameExtension" % (img_plane_shape,), 1)
-                # cmds.setAttr("%s.depth" % (img_plane_shape,), 0.1)
-                # cmds.setAttr("%s.displayMode" % (img_plane_shape,), 2)
-                # if 'EXR' in path:
-                #     cmds.setAttr("%s.colorSpace" % (img_plane_shape,), 'ACEScg', type='string')
-                # elif 'JPG' in path:
-                #     cmds.setAttr("%s.colorSpace" % (img_plane_shape,), 'Output - Rec.709', type='string')
-                # cmds.lookThru(dumyCam)
-                # # viewport = cmds.getPanel(withFocus=True)
-                # # cmds.modelEditor(viewport, da="smoothShaded", wos=False, swf=False)
-                # cmds.playblast(format="movie", filename=uploadPath, forceOverwrite=True, percent=100,
-                #                widthHeight=[1920, 1080], showOrnaments=False, viewer=False, startTime=int(first), endTime=int(last))
-                # # cmds.playblast(fmt= "movie", completeFilename="C:\Users\USER\Desktop\test.avi", viewer=False, showOrnaments=False, percent=100, width=1920, height=1080, startTime=1001, endTime=1020)
-                # cmds.delete(img_plane)
-                # cmds.delete(dumyCam)
 
                 framerate = "24"
                 start_number = first
@@ -407,6 +387,7 @@ class RenderPublishPlugin(HookBaseClass):
                 ) as proc:
                     for line in proc.stdout:
                         sys.stdout.write(line)  # stream to your console (or handle it as you like)
+                        self.logger.info(line)
                     return_code = proc.wait()
 
                 print("Exit code:", return_code)
