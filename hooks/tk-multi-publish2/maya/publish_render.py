@@ -131,6 +131,13 @@ class RenderPublishPlugin(HookBaseClass):
         publish_path = publish_template.apply_fields(work_fields)
         item.properties["publish_path"] = publish_path.replace("6969", "####")
 
+        number = '{0:03d}'.format(item.properties["publish_version"])
+        rawversion = "_v" + str(number)
+        publish_name = self.get_publish_name(settings, item).replace(rawversion, '')
+        self.logger.info(number)
+        self.logger.info(rawversion)
+        self.logger.info(self.get_publish_name(settings, item))
+        self.logger.info(publish_name)
 
 
         # TBR: revise if any parent class code is reusable
