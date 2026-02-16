@@ -15,6 +15,8 @@ import sgtk
 from tank_vendor import six
 import maya.mel as mel
 import maya.cmds as cmds
+import subprocess
+import sys
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -31,7 +33,7 @@ class UploadVersionPlugin(HookBaseClass):
         """
 
         # look for icon one level up from this hook's folder in "icons" folder
-        return os.path.join(self.disk_location, "icons", "review.png")
+        return os.path.join(self.disk_location, "icons", "video.png")
 
     @property
     def name(self):
@@ -236,6 +238,7 @@ class UploadVersionPlugin(HookBaseClass):
 
 
             first = item.properties['sequence_paths'][0][-8:-4]
+            last = item.properties['sequence_paths'][-1][-8:-4]
 
             framerate = str(mel.eval('float $fps = `currentTimeUnitToFPS`'))
             start_number = first
