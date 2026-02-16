@@ -182,7 +182,7 @@ class RenderPublishPlugin(HookBaseClass):
         publish_template_name = settings["Publish Template"].value
         publish_template = publisher.get_template_by_name(publish_template_name)
         if publish_template:
-            item.properties["publish_template"] = publish_template
+            # item.properties["publish_template"] = publish_template
             # because a publish template is configured, disable context change.
             # This is a temporary measure until the publisher handles context
             # switching natively.
@@ -203,17 +203,20 @@ class RenderPublishPlugin(HookBaseClass):
         # self.logger.debug("PlayblastPublishPlugin.validate")
 
         path = _session_path()
+        publisher = self.parent
 
         # get the configured work file template
         work_template = item.properties.get("work_template")
+        publish_template_name = settings["Publish Template"].value
+        publish_template = publisher.get_template_by_name(publish_template_name)
         publish_template = item.properties.get("publish_template")
 
         # get the current scene path and extract fields from it using the work
         # template:
-        work_fields = work_template.get_fields(item.properties["path"])
+        work_fields = work_template.get_fields(path)
 
         # include the extension in the fields
-        filename, extension = os.path.splitext(item.properties["path"])
+        filename, extension = os.path.splitext(path)
         work_fields["extension"] = extension[1:]
         work_fields["frame_num"] = 6969
         work_fields["maya.layer_name"] = item.properties.get("maya.layer_name")
@@ -224,7 +227,7 @@ class RenderPublishPlugin(HookBaseClass):
         if missing_keys:
             error_msg = (
                 "Work file '%s' missing keys required for the "
-                "publish template: %s" % (item.properties["path"], missing_keys)
+                "publish template: %s" % (path, missing_keys)
             )
             self.logger.error(error_msg)
             raise Exception(error_msg)
