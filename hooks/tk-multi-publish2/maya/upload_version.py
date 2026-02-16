@@ -524,7 +524,7 @@ class UploadVersionPlugin(HookBaseClass):
         # fall back to template/path logic
         path = _session_path()
         work_template = item.properties.get("work_template")
-        dailies_template = item.properties["Dailies Template"]
+        dailies_template = item.properties["dailies_template"]
 
 
 
