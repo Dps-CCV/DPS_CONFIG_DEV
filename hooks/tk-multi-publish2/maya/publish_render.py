@@ -138,6 +138,7 @@ class RenderPublishPlugin(HookBaseClass):
         self.logger.info(rawversion)
         self.logger.info(self.get_publish_name(settings, item))
         self.logger.info(publish_name)
+        self.logger.info(pself.get_publish_kwargs(settings, item))
 
 
         # TBR: revise if any parent class code is reusable
