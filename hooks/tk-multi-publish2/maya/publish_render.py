@@ -208,9 +208,10 @@ class RenderPublishPlugin(HookBaseClass):
             "dependency_ids": publish_dependencies_ids,
             "sg_fields": publish_fields,
         }
-
+        self.logger.info(publish_data)
         # add extra kwargs
         publish_data.update(publish_kwargs)
+        self.logger.info(publish_data)
 
         # log the publish data for debugging
         self.logger.debug(
