@@ -15,7 +15,8 @@ Hook that gets executed every time a new PipelineConfiguration instance is creat
 from tank import Hook
 import tank
 import os
-
+import shutil
+import stat
 
 class PipelineConfigurationInit(Hook):
     def execute(self, **kwargs):
@@ -29,5 +30,24 @@ class PipelineConfigurationInit(Hook):
         os.environ['CONFIG_FOLDER'] = config
         os.environ["FormExt"] = 'exr'
         os.environ["CompressionExt"] = 'none'
+
+        ##Delete old configs
+        parent_folder = os.path.dirname(os.path.dirname(config))
+        def fix_permissions(path):
+            for root, dirs, files in os.walk(path, topdown=False):
+                for d in dirs:
+                    os.chmod(os.path.join(root, d), stat.S_IWUSR)
+                for f in files:
+                    os.chmod(os.path.join(root, f), stat.S_IWUSR)
+
+        for c in os.listdir(parent_folder):
+            full_path = os.path.join(parent_folder, c)
+            if full_path not in config:
+                print(full_path)
+                os.chmod(full_path, stat.S_IWUSR)
+                fix_permissions(full_path)
+                shutil.rmtree(full_path)
+        ##synchronize path cache
+        tk.synchronize_filesystem_structure(full_sync=True)
 
         pass
