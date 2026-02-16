@@ -204,7 +204,6 @@ class UploadVersionPlugin(HookBaseClass):
 
         :returns: True if item is valid, False otherwise.
         """
-        path = item.properties["path"]
         return True
 
     def publish(self, settings, item):
@@ -588,10 +587,7 @@ class UploadVersionPlugin(HookBaseClass):
 
         # fall back to template/path logic
         path = _session_path()
-        if item.type == "maya.session":
-            work_template = item.properties.get("work_template")
-        elif item.type == "maya.session.render":
-            work_template = item.parent.properties.get("work_template")
+        work_template = item.properties.get("work_template")
         dailies_template = self.get_dailies_template(settings, item)
 
 

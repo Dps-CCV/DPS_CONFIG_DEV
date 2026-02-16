@@ -346,6 +346,7 @@ class MayaSessionCollector(HookBaseClass):
                     item.properties["sequence_paths"] = rendered_paths
                     item.type_spec = "maya.session.render"
                     item.properties["publish_type"] = "RENDER_MAYA"
+                    item.properties["work_template"] = work_template
                     stringLayer = layer
                     if layer.startswith("rs_"):
                         stringLayer = layer[3:]
@@ -452,6 +453,7 @@ class MayaSessionCollector(HookBaseClass):
 
             # store the camera name so that any attached plugin knows which
             # camera this item represents!
+            cam_item.properties["work_template"] = work_template
             cam_item.properties["camera_name"] = camera_name
             cam_item.properties["camera_shape"] = camera_shape
             cam_item.properties["publish_name"] = camera_name + '_' + self.parent.context.step["name"]
