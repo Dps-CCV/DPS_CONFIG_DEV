@@ -162,9 +162,7 @@ class RenderPublishPlugin(HookBaseClass):
         # base class plugin. They may have more information than is available
         # here such as custom type or template settings.
 
-        number = '{0:03d}'.format(item.properties["publish_version"])
-        rawversion = "_v" + str(number)
-        publish_name = self.get_publish_name(settings, item).replace(rawversion, '')
+
         publish_type = item.properties["publish_type"]
         publish_version = item.properties["publish_version"]
         publish_path = item.properties.get("publish_path")
@@ -173,6 +171,10 @@ class RenderPublishPlugin(HookBaseClass):
         publish_fields = self.get_publish_fields(settings, item)
         # catch-all for any extra kwargs that should be passed to register_publish.
         publish_kwargs = self.get_publish_kwargs(settings, item)
+
+        number = '{0:03d}'.format(item.properties["publish_version"])
+        rawversion = "_v" + str(number)
+        publish_name = self.get_publish_name(settings, item).replace(rawversion, '')
 
 
 
@@ -196,7 +198,7 @@ class RenderPublishPlugin(HookBaseClass):
             "context": item.context,
             "comment": item.description,
             "path": publish_path,
-            "code": publish_name,
+            "name": publish_name,
             "created_by": publish_user,
             "version_number": publish_version,
             "thumbnail_path": item.get_thumbnail_as_path(),
