@@ -355,6 +355,18 @@ class MayaSessionCollector(HookBaseClass):
                         item.properties["maya.layer_name"] = "masterLayer"
                     else:
                         item.properties["maya.layer_name"] = stringLayer
+
+                    item.properties["path"] = rendered_paths[0]
+
+                    work_fields = work_template.get_fields(item.properties["path"])
+
+                    # include the extension in the fields
+                    filename, extension = os.path.splitext(rendered_paths[0])
+                    work_fields["extension"] = extension[1:]
+                    work_fields["frame_num"] = 6969
+                    work_fields["maya.layer_name"] = item.properties["maya.layer_name"]
+                    item.properties["work_fields"] = work_fields
+                    item.properties["publish_version"] = work_fields["version"]
                     self.logger.info("collecting render layer %s", item.properties["maya.layer_name"])
 
     # def _collect_meshes(self, parent_item):
@@ -730,5 +742,16 @@ class MayaSessionCollector(HookBaseClass):
                 return True
 
         return False
+def _session_path():
+    """
+    Return the path to the current session
+    :return:
+    """
+    path = cmds.file(query=True, sn=True)
+
+    if path is not None:
+        path = six.ensure_str(path)
+
+    return path
 
 

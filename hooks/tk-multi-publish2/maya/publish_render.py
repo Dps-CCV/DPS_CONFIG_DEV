@@ -25,60 +25,23 @@ from sgtk.util.filesystem import copy_file, ensure_folder_exists
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
-try:
-    from sgtk.platform.qt import QtCore, QtGui
-except ImportError:
-    CustomWidgetController = None
-else:
-    class RenderVersionWidget(QtGui.QWidget):
-        """
-        This is the plugin's custom UI.
-        It is meant to allow the user to generate a version qt of the render layer and upload it as a version
-        """
-
-        def __init__(self, parent):
-            super(RenderVersionWidget, self).__init__(parent)
-
-            # Create a nice simple layout with a checkbox in it.
-            layout = QtGui.QFormLayout(self)
-            self.setLayout(layout)
-
-            label = QtGui.QLabel(
-                "Clicking this checkbox will create a version of the render layer during publish.",
-                self
-            )
-            label.setWordWrap(True)
-            layout.addRow(label)
-
-            self._check_box = QtGui.QCheckBox("Create Version", self)
-            self._check_box.setTristate(False)
-            layout.addRow(self._check_box)
-
-        @property
-        def state(self):
-            """
-            :returns: ``True`` if the checkbox is checked, ``False`` otherwise.
-            """
-            return self._check_box.checkState() == QtCore.Qt.Checked
-
-        @state.setter
-        def state(self, is_checked):
-            """
-            Update the status of the checkbox.
-            :param bool is_checked: When set to ``True``, the checkbox will be
-                checked.
-            """
-            if is_checked:
-                self._check_box.setCheckState(QtCore.Qt.Checked)
-            else:
-                self._check_box.setCheckState(QtCore.Qt.Unchecked)
-
-
 class RenderPublishPlugin(HookBaseClass):
     """
     Plugin for creating publishing renders
     """
-    _CREATE_VERSION = "Create Version"
+    @property
+    def description(self):
+        """
+        Verbose, multi-line description of what the plugin does. This can
+        contain simple html for formatting.
+        """
+
+        return """
+        <p>This plugin publishes session geometry for the current session. Any
+        session geometry will be exported to the path defined by this plugin's
+        configured "Publish Template" setting. The plugin will fail to validate
+        if the "AbcExport" plugin is not enabled or cannot be found.</p>
+        """
     @property
     def settings(self):
 
@@ -94,22 +57,10 @@ class RenderPublishPlugin(HookBaseClass):
                 "correspond to a template defined in "
                 "templates.yml.",
             },
-            "Dailies Template": {
-                "type": "template",
-                "default": None,
-                "description": "Template path for published renders. Should"
-                               "correspond to a template defined in "
-                               "templates.yml.",
-            },
             "Link Local File": {
                 "type": "bool",
                 "default": True,
                 "description": "Should the local file be referenced by Shotgun",
-            },
-            self._CREATE_VERSION: {
-                "type": "bool",
-                "default": False,
-                "description": "Create Version for render layer."
             },
         }
 
@@ -117,40 +68,6 @@ class RenderPublishPlugin(HookBaseClass):
         plugin_settings.update(maya_render_publish_settings)
 
         return plugin_settings
-
-    def create_settings_widget(self, parent):
-        """
-        Creates the widget for our plugin.
-        :param parent: Parent widget for the settings widget.
-        :type parent: :class:`QtGui.QWidget`
-        :returns: Custom widget for this plugin.
-        :rtype: :class:`QtGui.QWidget`
-        """
-        return RenderVersionWidget(parent)
-
-    def get_ui_settings(self, widget):
-        """
-        Retrieves the state of the ui and returns a settings dictionary.
-        :param parent: The settings widget returned by :meth:`create_settings_widget`
-        :type parent: :class:`QtGui.QWidget`
-        :returns: Dictionary of settings.
-        """
-        return {self._CREATE_VERSION: widget.state}
-
-    def set_ui_settings(self, widget, settings):
-        """
-        Populates the UI with the settings for the plugin.
-        :param parent: The settings widget returned by :meth:`create_settings_widget`
-        :type parent: :class:`QtGui.QWidget`
-        :param list(dict) settings: List of settings dictionaries, one for each
-            item in the publisher's selection.
-        :raises NotImplementeError: Raised if this implementation does not
-            support multi-selection.
-        """
-        if len(settings) > 1:
-            raise NotImplementedError()
-        settings = settings[0]
-        widget.state = settings[self._CREATE_VERSION]
 
     @property
     def item_filters(self):
@@ -165,10 +82,7 @@ class RenderPublishPlugin(HookBaseClass):
         return ["maya.session.render"]
 
     def accept(self, settings, item):
-        # self.logger.debug("PlayblastPublishPlugin.accept")
 
-        # ensure a camera file template is available on the parent item
-        # item.properties["path"] = _session_path()
         work_template = item.properties.get("work_template")
         if not work_template:
             self.logger.debug(
@@ -182,7 +96,7 @@ class RenderPublishPlugin(HookBaseClass):
         publish_template_name = settings["Publish Template"].value
         publish_template = publisher.get_template_by_name(publish_template_name)
         if publish_template:
-            # item.properties["publish_template"] = publish_template
+            item.properties["publish_template"] = publish_template
             # because a publish template is configured, disable context change.
             # This is a temporary measure until the publisher handles context
             # switching natively.
@@ -200,26 +114,12 @@ class RenderPublishPlugin(HookBaseClass):
             return {"accepted": True, "checked": False}
         
     def validate(self, settings, item):
-        # self.logger.debug("PlayblastPublishPlugin.validate")
 
-        path = _session_path()
-        publisher = self.parent
 
         # get the configured work file template
-        work_template = item.properties.get("work_template")
-        publish_template_name = settings["Publish Template"].value
-        publish_template = publisher.get_template_by_name(publish_template_name)
         publish_template = item.properties.get("publish_template")
 
-        # get the current scene path and extract fields from it using the work
-        # template:
-        work_fields = work_template.get_fields(path)
-
-        # include the extension in the fields
-        filename, extension = os.path.splitext(path)
-        work_fields["extension"] = extension[1:]
-        work_fields["frame_num"] = 6969
-        work_fields["maya.layer_name"] = item.properties.get("maya.layer_name")
+        work_fields = item.properties.get("work_fields")
 
         # ensure the fields work for the publish template
         missing_keys = publish_template.missing_keys(work_fields)
@@ -227,7 +127,7 @@ class RenderPublishPlugin(HookBaseClass):
         if missing_keys:
             error_msg = (
                 "Work file '%s' missing keys required for the "
-                "publish template: %s" % (path, missing_keys)
+                "publish template: %s" % (item.properties["path"], missing_keys)
             )
             self.logger.error(error_msg)
             raise Exception(error_msg)
@@ -237,17 +137,12 @@ class RenderPublishPlugin(HookBaseClass):
         # publish plugin. Also set the publish_path to be explicit.
         publish_path = publish_template.apply_fields(work_fields)
         item.properties["publish_path"] = publish_path.replace("6969", "####")
-        item.properties["publish_template"] = publish_template
-        item.properties["work_fields"] = work_fields
 
-        # use the work file's version number when publishing
-        if "version" in work_fields:
-            item.properties["publish_version"] = work_fields["version"]
 
 
         # TBR: revise if any parent class code is reusable
         # return super(PlayblastPublishPlugin, self).validate(settings, item)
-        return super(RenderPublishPlugin, self).accept(settings, item)
+        return super(RenderPublishPlugin, self).validate(settings, item)
 
     def publish(self, settings, item):
         """
@@ -271,7 +166,6 @@ class RenderPublishPlugin(HookBaseClass):
         rawversion = "_v" + str(number)
         publish_name = self.get_publish_name(settings, item).replace(rawversion, '')
         publish_type = self.get_publish_type(settings, item)
-        #publish_name = self.get_publish_name(settings, item)
         publish_version = self.get_publish_version(settings, item)
         publish_path = item.properties.get("publish_path")
         publish_dependencies_paths = self.get_publish_dependencies(settings, item)
@@ -282,8 +176,6 @@ class RenderPublishPlugin(HookBaseClass):
 
 
 
-        # if item.properties.get("maya.layer_name") != "masterLayer":
-        #     publish_name = self.newPublishName(settings, item)
 
         # if the parent item has publish data, get it id to include it in the list of
         # dependencies
@@ -345,125 +237,6 @@ class RenderPublishPlugin(HookBaseClass):
             },
         )
 
-        # DPS Workaround to be able to generate video file while publishing exr render sequences. It creates an image plane of the render and then process a playblast.
-        if settings[self._CREATE_VERSION].value == True:
-            try:
-                path = publish_path
-
-                uploadPath = self.get_dailies_path(settings, item).replace(".avi", ".mov")
-
-                first = item.properties['sequence_paths'][0][-8:-4]
-                last =item.properties['sequence_paths'][-1][-8:-4]
-
-                framerate = "24"
-                start_number = first
-                in_path = path.replace("####", '%04d')
-                in_sequence = in_path.replace('\\', '/')
-                lut_path = r"L\:/NUKE_CONFIG/ACESCg_to_Rec709.cube"  # keep the backslash before the colon
-                out_mov = uploadPath.replace('\\', '/')
-
-                # Build the filter string (double-quoted on the command line; single quotes inside for lut3d path)
-                vf = (
-                    "format=gbrpf32le,"
-                    f"lut3d='{lut_path}',"
-                    "scale=1920:1080,format=yuv422p10le"
-                )
-
-                # Assemble the final command with all quotes preserved
-                cmd = (
-                    f'ffmpeg -framerate {framerate} -start_number {start_number} '
-                    f'-i "{in_sequence}" '
-                    f'-vf "{vf}" '
-                    f'-c:v prores_ks -profile:v 3 -pix_fmt yuv422p10le '
-                    f'-movflags +write_colr -color_primaries bt709 -color_trc bt709 -colorspace bt709 '
-                    f'"{out_mov}"'
-                )
-                self.logger.info(cmd)
-                self.logger.info(os.environ['PATH'])
-
-                with subprocess.Popen(
-                        cmd,
-                        shell=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        text=True,
-                        bufsize=1  # line-buffered
-                ) as proc:
-                    for line in proc.stdout:
-                        sys.stdout.write(line)  # stream to your console (or handle it as you like)
-                        self.logger.info(line)
-                    return_code = proc.wait()
-
-                print("Exit code:", return_code)
-
-                publish_name = item.properties.get("publish_name")
-                if not publish_name:
-                    self.logger.debug("Using path info hook to determine publish name.")
-
-                    # use the path's filename as the publish name
-                    path_components = publisher.util.get_file_path_components(path)
-                    publish_name = path_components["filename"]
-
-                self.logger.debug("Publish name: %s" % (publish_name,))
-
-                self.logger.info("Creating Version...")
-                version_data = {
-                    "project": item.context.project,
-                    "code": publish_name,
-                    "description": item.description,
-                    "entity": self._get_version_entity(item),
-                    "sg_task": item.context.task,
-                }
-
-                if "sg_publish_data" in item.properties:
-                    publish_data = item.properties["sg_publish_data"]
-                    version_data["published_files"] = [publish_data]
-
-                if settings["Link Local File"].value:
-                    version_data["sg_path_to_movie"] = uploadPath
-
-                version_data["sg_path_to_frames"] = publish_path
-                version_data["frame_count"] = int(int(last)-int(first))
-                version_data["frame_range"] = first + "-" + last
-
-                # log the version data for debugging
-                self.logger.debug(
-                    "Populated Version data...",
-                    extra={
-                        "action_show_more_info": {
-                            "label": "Version Data",
-                            "tooltip": "Show the complete Version data dictionary",
-                            "text": "<pre>%s</pre>" % (pprint.pformat(version_data),),
-                        }
-                    },
-                )
-
-                # Create the version
-                version = publisher.shotgun.create("Version", version_data)
-                self.logger.info("Version created!")
-
-                # stash the version info in the item just in case
-                item.properties["sg_version_data"] = version
-
-                thumb = item.get_thumbnail_as_path()
-
-                self.logger.info("Uploading content...")
-
-                # on windows, ensure the path is utf-8 encoded to avoid issues with
-                # the shotgun api
-
-                if sgtk.util.is_windows():
-                    upload_path = six.ensure_text(uploadPath)
-                else:
-                    upload_path = uploadPath
-
-                self.parent.shotgun.upload(
-                    "Version", version["id"], upload_path, "sg_uploaded_movie"
-                )
-
-                self.logger.info("Upload complete!")
-            except Exception as e:
-                self.logger.info(e)
 
         status = {"sg_status_list": "rev"}
         self.parent.sgtk.shotgun.update("Task", item.context.task['id'], status)
@@ -471,11 +244,6 @@ class RenderPublishPlugin(HookBaseClass):
 
 
     def _copy_work_to_publish(self, settings, item):
-
-        publish_template = item.properties.publish_template
-
-        # by default, the path that was collected for publishing
-        work_files = [item.properties.path]
 
         # if this is a sequence, get the attached files
         if "sequence_paths" in item.properties:
@@ -492,19 +260,7 @@ class RenderPublishPlugin(HookBaseClass):
         # ---- copy the work files to the publish location
         for work_file in work_files:
 
-            work_fields = item.properties["work_fields"]
-            work_fields["frame_num"] = int(work_file.split(".")[-2])
-
-            missing_keys = publish_template.missing_keys(work_fields)
-
-            if missing_keys:
-                self.logger.warning(
-                    "Work file '%s' missing keys required for the publish "
-                    "template: %s" % (work_file, missing_keys)
-                )
-                continue
-
-            publish_file = publish_template.apply_fields(work_fields)
+            publish_file = item.properties["publish_path"].replace("####", int(work_file.split(".")[-2]))
 
             # copy the file
             try:
@@ -525,128 +281,3 @@ class RenderPublishPlugin(HookBaseClass):
                 % (work_file, publish_file)
             )
 
-        # # copy the file
-        # try:
-        #     publish_folder = os.path.dirname(publish_file)
-        #     ensure_folder_exists(publish_folder)
-        #     workFileNorm = os.path.normpath(work_file)
-        #     publishFileNorm = os.path.normpath(publish_file)
-        #     print (workFileNorm)
-        #     os.rename(workFileNorm, publishFileNorm)
-        # except Exception:
-        #     raise Exception(
-        #         "Failed to move work file from '%s' to '%s'.\n%s"
-        #         % (work_file, publish_file, traceback.format_exc())
-        #     )
-        #
-        # self.logger.debug(
-        #     "Copied work file '%s' to publish file '%s'." % (work_file, publish_file)
-        # )
-
-    def get_dailies_template(self, settings, item):
-        """
-        Get a publish template for the supplied settings and item.
-
-        :param settings: This plugin instance's configured settings
-        :param item: The item to determine the publish template for
-
-        :return: A template representing the publish path of the item or
-            None if no template could be identified.
-        """
-
-        publisher = self.parent
-        template_name = settings["Dailies Template"].value
-        dailies_template = publisher.get_template_by_name(template_name)
-        item.properties["dailies_template"] = dailies_template
-
-
-
-
-        return dailies_template
-
-    def get_dailies_path(self, settings, item):
-        """
-        Get a publish path for the supplied settings and item.
-
-        :param settings: This plugin instance's configured settings
-        :param item: The item to determine the publish path for
-
-        :return: A string representing the output path to supply when
-            registering a publish for the supplied item
-
-        Extracts the publish path via the configured work and publish templates
-        if possible.
-        """
-
-
-
-        # fall back to template/path logic
-        path = _session_path()
-
-        work_template = item.parent.properties.get("work_template")
-        dailies_template = self.get_dailies_template(settings, item)
-
-
-
-        work_fields = []
-        dailies_path = None
-
-        # We need both work and publish template to be defined for template
-        # support to be enabled.
-        if work_template and dailies_template:
-
-            if work_template.validate(path):
-                work_fields = work_template.get_fields(path)
-                work_fields["maya.layer_name"] = item.properties["maya.layer_name"]
-
-                if platform.system() == 'Windows':
-                    work_fields["extension"] = "avi"
-                else:
-                    work_fields["extension"] = "mov"
-
-            missing_keys = dailies_template.missing_keys(work_fields)
-
-
-            if missing_keys:
-                self.logger.warning(
-                    "Not enough keys to apply work fields (%s) to "
-                    "publish template (%s)" % (work_fields, dailies_template)
-                )
-            else:
-                dailies_path = dailies_template.apply_fields(work_fields)
-                self.logger.debug(
-                    "Used publish template to determine the publish path: %s"
-                    % (dailies_path,)
-                )
-        else:
-            self.logger.debug("dailies_template: %s" % dailies_template)
-            self.logger.debug("work_template: %s" % work_template)
-
-
-        return dailies_path
-
-    def _get_version_entity(self, item):
-        """
-        Returns the best entity to link the version to.
-        """
-
-        if item.context.entity:
-            return item.context.entity
-        elif item.context.project:
-            return item.context.project
-        else:
-            return None
-
-
-
-def _session_path():
-    """
-    Return the path to the current session
-    :return:
-    """
-    path = cmds.file(query=True, sn=True)
-
-    if path is not None:
-        path = six.ensure_str(path)
-
-    return path
