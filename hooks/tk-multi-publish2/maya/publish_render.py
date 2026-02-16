@@ -158,8 +158,8 @@ class RenderPublishPlugin(HookBaseClass):
         number = '{0:03d}'.format(self.get_publish_version(settings, item))
         rawversion = "_v" + str(number)
         publish_name = self.get_publish_name(settings, item).replace(rawversion, '')
-        publish_type = self.get_publish_type(settings, item)
-        publish_version = self.get_publish_version(settings, item)
+        publish_type = item.properties["publish_type"]
+        publish_version = item.properties["publish_version"]
         publish_path = item.properties.get("publish_path")
         publish_dependencies_paths = self.get_publish_dependencies(settings, item)
         publish_user = self.get_publish_user(settings, item)
@@ -252,7 +252,7 @@ class RenderPublishPlugin(HookBaseClass):
         # ---- copy the work files to the publish location
         for work_file in work_files:
 
-            publish_file = item.properties["publish_path"].replace("####", int(work_file.split(".")[-2]))
+            publish_file = item.properties["publish_path"].replace("####", work_file.split(".")[-2])
 
             # copy the file
             try:

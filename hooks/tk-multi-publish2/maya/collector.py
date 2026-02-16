@@ -186,6 +186,7 @@ class MayaSessionCollector(HookBaseClass):
             work_fields = work_template.get_fields(path)
             publish_name = str(work_fields["name"]) + "_" + str(work_fields["Step"])
             session_item.properties["publish_name"] = publish_name
+            session_item.properties["path"] = path
             self.logger.debug("Work template defined for Maya collection.")
 
         self.logger.info("Collected current Maya scene")

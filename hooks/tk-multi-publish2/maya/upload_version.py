@@ -161,7 +161,7 @@ class UploadVersionPlugin(HookBaseClass):
         """
 
         publisher = self.parent
-        path = _session_path()
+        path = item.properties["path"]
 
         # Accept any files with a valid extension defined in the setting "File Extensions"
         file_info = publisher.util.get_file_path_components(path)
@@ -175,15 +175,24 @@ class UploadVersionPlugin(HookBaseClass):
 
         self.logger.debug("Valid extensions: %s" % valid_extensions)
 
-        if extension in valid_extensions or item.type == "maya.session":
-            # log the accepted file and display a button to reveal it in the fs
-            self.logger.info(
-                "Version upload plugin accepted: %s" % (path,),
-                extra={"action_show_folder": {"path": path}},
-            )
+        if item.type == "maya.session":
+            template_name = settings["Dailies Low Template"].value
+        elif item.type == "maya.session.render":
+            template_name = settings["Dailies Template"].value
+        dailies_template = publisher.get_template_by_name(template_name)
+        item.properties["dailies_template"] = dailies_template
 
-            # return the accepted info
-            return {"accepted": True}
+        if dailies_template:
+            if extension in valid_extensions or item.type == "maya.session":
+                # log the accepted file and display a button to reveal it in the fs
+                self.logger.info(
+                    "Version upload plugin accepted: %s" % (path,),
+                    extra={"action_show_folder": {"path": path}},
+                )
+
+                # return the accepted info
+                return {"accepted": True}
+
         else:
             self.logger.debug(
                 "%s is not in the valid extensions list for Version creation"
@@ -204,7 +213,11 @@ class UploadVersionPlugin(HookBaseClass):
 
         :returns: True if item is valid, False otherwise.
         """
-        return True
+        if self.get_dailies_path(settings, item) != None:
+            item.properties["Dailies_path"] = self.get_dailies_path(settings, item)
+            return True
+        else:
+            return False
 
     def publish(self, settings, item):
         """
@@ -217,10 +230,10 @@ class UploadVersionPlugin(HookBaseClass):
         """
 
         publisher = self.parent
+        uploadPath = item.properties["Dailies_path"]
 
         if "sequence_paths" in item.properties.keys() and item.type == "maya.session.render":
 
-            uploadPath = self.get_dailies_path(settings, item)
 
             first = item.properties['sequence_paths'][0][-8:-4]
 
@@ -269,7 +282,7 @@ class UploadVersionPlugin(HookBaseClass):
 
             # Create Playblast either by generating a turntable camera or using camMain
 
-            uploadPath = self.get_dailies_path(settings, item)
+
 
             '''En esta funcion chequeo que la estructura en la escena y del propia escena sea la correcta,
             es decir que contenga los nulls geo, basemesh debajo del nombre del asset'''
@@ -493,76 +506,6 @@ class UploadVersionPlugin(HookBaseClass):
         else:
             return None
 
-    def _get_publish_type(self, settings, item):
-        """
-        Get a publish type for the supplied settings and item.
-
-        :param settings: This plugin instance's configured settings
-        :param item: The item to determine the publish type for
-
-        :return: A publish type or None if one could not be found.
-        """
-
-        # fall back to the path info hook logic
-        publisher = self.parent
-        path = item.get_property("path")
-        if path is None:
-            raise AttributeError("'PublishData' object has no attribute 'path'")
-
-        # get the publish path components
-        path_info = publisher.util.get_file_path_components(path)
-
-        # determine the publish type
-        extension = path_info["extension"]
-
-        # ensure lowercase and no dot
-        if extension:
-            extension = extension.lstrip(".").lower()
-
-            for type_def in settings["File Types"].value:
-
-                publish_type = type_def[0]
-                file_extensions = type_def[1:]
-
-                if extension in file_extensions:
-                    # found a matching type in settings. use it!
-                    return publish_type
-
-        # --- no pre-defined publish type found...
-
-        if extension:
-            # publish type is based on extension
-            publish_type = "%s File" % extension.capitalize()
-        else:
-            # no extension, assume it is a folder
-            publish_type = "Folder"
-
-        return publish_type
-
-    def get_dailies_template(self, settings, item):
-        """
-        Get a publish template for the supplied settings and item.
-
-        :param settings: This plugin instance's configured settings
-        :param item: The item to determine the publish template for
-
-        :return: A template representing the publish path of the item or
-            None if no template could be identified.
-        """
-
-        publisher = self.parent
-        if item.type == "maya.session":
-            template_name = settings["Dailies Low Template"].value
-        elif item.type == "maya.session.render":
-            template_name = settings["Dailies Template"].value
-        dailies_template = publisher.get_template_by_name(template_name)
-        item.properties["dailies_template"] = dailies_template
-
-
-
-
-        return dailies_template
-
 
     def get_dailies_path(self, settings, item):
         """
@@ -583,7 +526,7 @@ class UploadVersionPlugin(HookBaseClass):
         # fall back to template/path logic
         path = _session_path()
         work_template = item.properties.get("work_template")
-        dailies_template = self.get_dailies_template(settings, item)
+        dailies_template = item.properties["Dailies Template"]
 
 
 
