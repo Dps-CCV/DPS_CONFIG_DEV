@@ -223,7 +223,7 @@ class UploadVersionPlugin(HookBaseClass):
 
         if "sequence_paths" in item.properties.keys() and item.type == "maya.session.render":
 
-            path = item.properties['publish_data']['path']
+            path = item.properties['sg_publish_data']['path']
 
             uploadPath = self.get_dailies_path(settings, item)
 
