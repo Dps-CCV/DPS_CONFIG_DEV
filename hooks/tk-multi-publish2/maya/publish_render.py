@@ -155,7 +155,7 @@ class RenderPublishPlugin(HookBaseClass):
         # base class plugin. They may have more information than is available
         # here such as custom type or template settings.
 
-        number = '{0:03d}'.format(self.get_publish_version(settings, item))
+        number = '{0:03d}'.format(item.properties["publish_version"])
         rawversion = "_v" + str(number)
         publish_name = self.get_publish_name(settings, item).replace(rawversion, '')
         publish_type = item.properties["publish_type"]
