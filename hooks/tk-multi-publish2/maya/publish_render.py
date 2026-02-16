@@ -168,7 +168,7 @@ class RenderPublishPlugin(HookBaseClass):
         # self.logger.debug("PlayblastPublishPlugin.accept")
 
         # ensure a camera file template is available on the parent item
-        item.properties["path"] = _session_path()
+        # item.properties["path"] = _session_path()
         work_template = item.properties.get("work_template")
         if not work_template:
             self.logger.debug(
@@ -202,10 +202,10 @@ class RenderPublishPlugin(HookBaseClass):
     def validate(self, settings, item):
         # self.logger.debug("PlayblastPublishPlugin.validate")
 
-        # path = _session_path()
+        path = _session_path()
 
         # get the configured work file template
-        work_template = item.parent.properties.get("work_template")
+        work_template = item.properties.get("work_template")
         publish_template = item.properties.get("publish_template")
 
         # get the current scene path and extract fields from it using the work
@@ -270,7 +270,7 @@ class RenderPublishPlugin(HookBaseClass):
         publish_type = self.get_publish_type(settings, item)
         #publish_name = self.get_publish_name(settings, item)
         publish_version = self.get_publish_version(settings, item)
-        publish_path = self.get_publish_path(settings, item)
+        publish_path = item.properties.get("publish_path")
         publish_dependencies_paths = self.get_publish_dependencies(settings, item)
         publish_user = self.get_publish_user(settings, item)
         publish_fields = self.get_publish_fields(settings, item)
@@ -466,25 +466,10 @@ class RenderPublishPlugin(HookBaseClass):
         self.parent.sgtk.shotgun.update("Task", item.context.task['id'], status)
         # self.parent.sgtk.shotgun.update("Shot", item.context.entity['id'], status)
 
-    def get_publish_path(self, settings, item):
-
-        return item.properties.get("publish_path")
-
-    # def newPublishName(self, settings, item):
-    #     number = '{0:03d}'.format(self.get_publish_version(settings, item))
-    #     rawversion = "_v" + str(number)
-    #     layer = item.properties.get("maya.layer_name")
-    #     #newname = "_" + layer + rawversion
-    #     newname = "_" + layer
-    #     publish_name = self.get_publish_name(settings, item).replace(rawversion, newname)
-    #     item.properties["publish_name"] = publish_name
-    #
-    #     return publish_name
 
     def _copy_work_to_publish(self, settings, item):
 
         publish_template = item.properties.publish_template
-        work_file = item.properties.path
 
         # by default, the path that was collected for publishing
         work_files = [item.properties.path]
@@ -504,14 +489,6 @@ class RenderPublishPlugin(HookBaseClass):
         # ---- copy the work files to the publish location
         for work_file in work_files:
 
-            # if not work_template.validate(work_file):
-            #     self.logger.warning(
-            #         "Work file '%s' did not match work template '%s'. "
-            #         "Publishing in place." % (work_file, work_template)
-            #     )
-            #     return
-
-            # work_fields = work_template.get_fields(work_file)
             work_fields = item.properties["work_fields"]
             work_fields["frame_num"] = int(work_file.split(".")[-2])
 
