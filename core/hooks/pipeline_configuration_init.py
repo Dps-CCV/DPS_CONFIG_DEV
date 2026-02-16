@@ -47,7 +47,5 @@ class PipelineConfigurationInit(Hook):
                 os.chmod(full_path, stat.S_IWUSR)
                 fix_permissions(full_path)
                 shutil.rmtree(full_path)
-        ##synchronize path cache
-        tk.synchronize_filesystem_structure(full_sync=True)
 
         pass
