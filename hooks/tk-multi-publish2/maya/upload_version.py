@@ -429,7 +429,7 @@ class UploadVersionPlugin(HookBaseClass):
             version_data["sg_path_to_frames"] = item.properties["publish_path"]
 
         # log the version data for debugging
-        self.logger.debug(
+        self.logger.info(
             "Populated Version data...",
             extra={
                 "action_show_more_info": {

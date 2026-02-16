@@ -208,13 +208,15 @@ class RenderPublishPlugin(HookBaseClass):
             "dependency_ids": publish_dependencies_ids,
             "sg_fields": publish_fields,
         }
-        self.logger.info(publish_data)
+        for a in publish_data.keys():
+            self.logger.info(a)
         # add extra kwargs
         publish_data.update(publish_kwargs)
-        self.logger.info(publish_data)
+        for a in publish_data.keys():
+            self.logger.info(a)
 
         # log the publish data for debugging
-        self.logger.debug(
+        self.logger.info(
             "Populated Publish data...",
             extra={
                 "action_show_more_info": {
@@ -229,7 +231,7 @@ class RenderPublishPlugin(HookBaseClass):
         # plugins to use.
         item.properties.sg_publish_data = sgtk.util.register_publish(**publish_data)
         self.logger.info("Publish registered!")
-        self.logger.debug(
+        self.logger.info(
             "Shotgun Publish data...",
             extra={
                 "action_show_more_info": {
