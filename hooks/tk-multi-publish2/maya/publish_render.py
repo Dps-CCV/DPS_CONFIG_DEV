@@ -196,7 +196,7 @@ class RenderPublishPlugin(HookBaseClass):
             "context": item.context,
             "comment": item.description,
             "path": publish_path,
-            "name": publish_name,
+            "code": publish_name,
             "created_by": publish_user,
             "version_number": publish_version,
             "thumbnail_path": item.get_thumbnail_as_path(),
