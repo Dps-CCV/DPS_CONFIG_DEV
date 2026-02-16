@@ -9,16 +9,9 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
-import subprocess
 import pprint
 import traceback
-
-import maya.cmds as cmds
-from pkg_resources import find_on_path
-
 from tank_vendor import six
-import sys
-import platform
 
 import sgtk
 from sgtk.util.filesystem import copy_file, ensure_folder_exists
