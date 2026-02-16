@@ -240,7 +240,6 @@ class RenderPublishPlugin(HookBaseClass):
 
         status = {"sg_status_list": "rev"}
         self.parent.sgtk.shotgun.update("Task", item.context.task['id'], status)
-        # self.parent.sgtk.shotgun.update("Shot", item.context.entity['id'], status)
 
 
     def _copy_work_to_publish(self, settings, item):

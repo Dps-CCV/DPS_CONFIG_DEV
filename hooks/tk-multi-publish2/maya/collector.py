@@ -358,7 +358,7 @@ class MayaSessionCollector(HookBaseClass):
 
                     item.properties["path"] = rendered_paths[0]
 
-                    work_fields = work_template.get_fields(item.properties["path"])
+                    work_fields = work_template.get_fields(_session_path())
 
                     # include the extension in the fields
                     filename, extension = os.path.splitext(rendered_paths[0])

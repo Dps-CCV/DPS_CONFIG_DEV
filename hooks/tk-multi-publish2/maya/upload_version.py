@@ -217,11 +217,8 @@ class UploadVersionPlugin(HookBaseClass):
         """
 
         publisher = self.parent
-        path = _session_path()
 
         if "sequence_paths" in item.properties.keys() and item.type == "maya.session.render":
-
-            path = item.properties['publish_path']
 
             uploadPath = self.get_dailies_path(settings, item)
 
@@ -229,7 +226,7 @@ class UploadVersionPlugin(HookBaseClass):
 
             framerate = str(mel.eval('float $fps = `currentTimeUnitToFPS`'))
             start_number = first
-            in_path = path.replace("####", '%04d')
+            in_path = item.properties['publish_path'].replace("####", '%04d')
             in_sequence = in_path.replace('\\', '/')
             lut_path = r"L\:/NUKE_CONFIG/ACESCg_to_Rec709.cube"  # keep the backslash before the colon
             out_mov = uploadPath.replace('\\', '/')
@@ -273,7 +270,6 @@ class UploadVersionPlugin(HookBaseClass):
             # Create Playblast either by generating a turntable camera or using camMain
 
             uploadPath = self.get_dailies_path(settings, item)
-            publisher = self.parent
 
             '''En esta funcion chequeo que la estructura en la escena y del propia escena sea la correcta,
             es decir que contenga los nulls geo, basemesh debajo del nombre del asset'''
