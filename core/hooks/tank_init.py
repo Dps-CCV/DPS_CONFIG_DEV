@@ -29,6 +29,7 @@ class TankInit(Hook):
         """
         tk = self.parent
         engine = sgtk.platform.current_engine()
+        self.logger.info(engine)
         if engine:
             if engine.name == "tk-desktop":
                 ##synchronize path cache
