@@ -33,7 +33,9 @@ class TankInit(Hook):
             ##synchronize path cache
             tk.synchronize_filesystem_structure(full_sync=True)
             ##Delete old configs
-            parent_folder = os.path.dirname(os.path.dirname(os.environ['CONFIG']))
+            index = __file__.find("core\\")
+            config = __file__[:index]
+            parent_folder = os.path.dirname(os.path.dirname(config))
             def fix_permissions(path):
                 for root, dirs, files in os.walk(path, topdown=False):
                     for d in dirs:
