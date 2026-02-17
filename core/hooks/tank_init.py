@@ -26,10 +26,10 @@ class TankInit(Hook):
 
         The default implementation does nothing.
         """
+        tk = self.parent
         engine = tk.platform.current_engine()
         if engine.name == "tk-desktop":
             ##synchronize path cache
-            tk = self.parent
             tk.synchronize_filesystem_structure(full_sync=True)
             ##Delete old configs
             parent_folder = os.path.dirname(os.path.dirname(os.environ['CONFIG']))
