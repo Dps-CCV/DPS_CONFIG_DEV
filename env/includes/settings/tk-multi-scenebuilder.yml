@@ -31,7 +31,7 @@ settings.tk-multi-scenebuilder.main:
 
   actions_hook:
 
-  presets:
+  presets: []
 
   supported_engines:
 

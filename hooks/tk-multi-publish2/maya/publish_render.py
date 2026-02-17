@@ -132,15 +132,6 @@ class RenderPublishPlugin(HookBaseClass):
         publish_path = publish_template.apply_fields(work_fields)
         item.properties["publish_path"] = publish_path.replace("6969", "####")
 
-        number = '{0:03d}'.format(item.properties["publish_version"])
-        rawversion = "_v" + str(number)
-        publish_name = self.get_publish_name(settings, item).replace(rawversion, '')
-        self.logger.info(number)
-        self.logger.info(rawversion)
-        self.logger.info(self.get_publish_name(settings, item))
-        self.logger.info(publish_name)
-        self.logger.info(self.get_publish_kwargs(settings, item))
-
 
         # TBR: revise if any parent class code is reusable
         # return super(PlayblastPublishPlugin, self).validate(settings, item)
@@ -209,12 +200,8 @@ class RenderPublishPlugin(HookBaseClass):
             "dependency_ids": publish_dependencies_ids,
             "sg_fields": publish_fields,
         }
-        for a in publish_data.keys():
-            self.logger.info(a)
         # add extra kwargs
         publish_data.update(publish_kwargs)
-        for a in publish_data.keys():
-            self.logger.info(a)
 
         # log the publish data for debugging
         self.logger.info(
