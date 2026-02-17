@@ -16,6 +16,7 @@ from tank import Hook
 import os
 import shutil
 import stat
+import sgtk
 
 class TankInit(Hook):
     def execute(self, **kwargs):
@@ -27,7 +28,7 @@ class TankInit(Hook):
         The default implementation does nothing.
         """
         tk = self.parent
-        engine = tk.platform.current_engine()
+        engine = sgtk.platform.current_engine()
         if engine.name == "tk-desktop":
             ##synchronize path cache
             tk.synchronize_filesystem_structure(full_sync=True)
