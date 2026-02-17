@@ -69,7 +69,8 @@ class BeforeAppLaunch(tank.Hook):
         ocio_path = os.path.join(
             project_path, "CONFIG", "COLOR", "ACES", "studio-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
         )
-        os.environ["OCIO"] = "ocio://studio-config-v4.0.0_aces-v2.0_ocio-v2.5"
+        #os.environ["OCIO"] = "ocio://studio-config-v4.0.0_aces-v2.0_ocio-v2.5"
+        os.environ["OCIO"] = ocio_path
 
         getColor = tank.platform.current_engine().shotgun.find_one("Project", [["name", "is", str(current_context.project["name"])]], ["code", "sg_espacio___color", "sg_format", "sg_compression", "sg_formato___ratio"])
 
