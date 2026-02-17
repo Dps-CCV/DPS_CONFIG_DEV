@@ -89,6 +89,7 @@ settings.tk-nuke-writenode.asset:
         colorspace: "Output - Rec.709"
       tank_type: Rendered Image
       tile_color: [ 107, 115, 184 ]
+      promote_write_knobs: []
     - file_type: tiff
       name: MATTE_PAINT
       proxy_publish_template: nuke_asset_mattepaint_pub_proxy
@@ -193,6 +194,7 @@ settings.tk-nuke-writenode.shot:
       colorspace: "Output - Rec.709"
     tank_type: Rendered Image
     tile_color: [ 107, 115, 184 ]
+    promote_write_knobs: []
   - file_type: tiff
     name: MATTE_PAINT
     proxy_publish_template: nuke_mattepaint_pub_proxy

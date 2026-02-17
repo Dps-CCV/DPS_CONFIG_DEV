@@ -75,6 +75,7 @@ settings.tk-nuke-writenode.asset:
         colorspace: "Output - Rec.709"
       tank_type: Rendered Image
       tile_color: [ 148, 7, 178 ]
+      promote_write_knobs: ["compression"]
     - file_type: mov
       name: IMAGE_PLANE_MOV
       proxy_publish_template: nuke_asset_imageplane_mov_pub_proxy
@@ -88,7 +89,7 @@ settings.tk-nuke-writenode.asset:
         colorspace: "Output - Rec.709"
       tank_type: Rendered Image
       tile_color: [ 107, 115, 184 ]
-      promote_write_knobs: ["compression"]
+      promote_write_knobs: []
     - file_type: tiff
       name: MATTE_PAINT
       proxy_publish_template:
@@ -191,6 +192,7 @@ settings.tk-nuke-writenode.shot:
       colorspace: "Output - Rec.709"
     tank_type: Rendered Image
     tile_color: [ 107, 115, 184 ]
+    promote_write_knobs: []
   - file_type: tiff
     name: MATTE_PAINT
     proxy_publish_template:
