@@ -32,14 +32,10 @@ apps.tk-multi-breakdown2.location:
   type: app_store
   name: tk-multi-breakdown2
   version: v0.4.4
-apps.tk-multi-breakdown2.mayalocation:
-  type: app_store
-  name: tk-multi-breakdown2
-  version: v0.4.4
 apps.tk-multi-data-validation.location:
   type: app_store
   name: tk-multi-data-validation
-  version: v0.1.3
+  version: v0.3.3
 apps.tk-multi-demo.location:
   type: app_store
   name: tk-multi-demo
@@ -64,6 +60,10 @@ apps.tk-multi-reviewsubmission.location:
   type: app_store
   name: tk-multi-reviewsubmission
   version: v1.3.1
+apps.tk-multi-scenebuilder.location:
+  type: app_store
+  name: tk-multi-scenebuilder
+  version: v0.1.1
 apps.tk-multi-screeningroom.location:
   type: app_store
   name: tk-multi-screeningroom
@@ -88,11 +88,10 @@ apps.tk-multi-devutils.location:
   type: app_store
   name: tk-multi-devutils
   version: v1.3.2
-#apps.tk-multi-bg-publish.location:
-#  type: app_store
-#  name: tk-multi-bg-publish
-#  version: v0.2.1
-
+apps.tk-multi-bg-publish.location:
+  type: app_store
+  name: tk-multi-bg-publish
+  version: v0.2.2
 apps.tk-shotgun-folders.location:
   type: app_store
   name: tk-shotgun-folders
