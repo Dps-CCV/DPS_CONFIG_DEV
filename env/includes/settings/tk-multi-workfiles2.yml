@@ -55,7 +55,7 @@ settings.tk-multi-workfiles2: &settings_tk-multi-workfiles2
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}']
   allow_task_creation: False
   hook_get_badge: "{config}/tk-multi-workfiles2/get_badge.py"
@@ -89,7 +89,7 @@ settings.tk-multi-workfiles2.launch_at_startup:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}']
   allow_task_creation: False
   location: "@apps.tk-multi-workfiles2.location"
@@ -221,7 +221,7 @@ settings.tk-multi-workfiles2.houdini.asset_step:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}']
   allow_task_creation: False
   hook_scene_operation: "{config}/tk-multi-workfiles2/scene_operation_tk-houdini.py"
@@ -258,7 +258,7 @@ settings.tk-multi-workfiles2.houdini.shot_step:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}']
   allow_task_creation: False
   hook_scene_operation: "{config}/tk-multi-workfiles2/scene_operation_tk-houdini.py"
@@ -299,7 +299,7 @@ settings.tk-multi-workfiles2.maya.asset_step:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}']
   allow_task_creation: False
   hook_scene_operation: "{config}/tk-multi-workfiles2/scene_operation_tk-maya.py"
@@ -336,7 +336,7 @@ settings.tk-multi-workfiles2.maya.shot_step:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}']
   allow_task_creation: False
   hook_scene_operation: "{config}/tk-multi-workfiles2/scene_operation_tk-maya.py"
@@ -377,7 +377,7 @@ settings.tk-multi-workfiles2.nuke.asset_step:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}']
   allow_task_creation: False
   hook_scene_operation: "{config}/tk-multi-workfiles2/scene_operation_tk-nuke.py"
@@ -415,7 +415,7 @@ settings.tk-multi-workfiles2.nuke.shot_step:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}']
   sort_fields:
     tasks:
@@ -464,7 +464,7 @@ settings.tk-multi-workfiles2.photoshop.asset_step:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}' ]
   allow_task_creation: False
   location: "@apps.tk-multi-workfiles2.location"
@@ -501,7 +501,7 @@ settings.tk-multi-workfiles2.photoshop.shot_step:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}' ]
   allow_task_creation: False
   location: "@apps.tk-multi-workfiles2.location"
@@ -537,7 +537,7 @@ settings.tk-multi-workfiles2.aftereffects:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}' ]
   allow_task_creation: False
   hook_scene_operation: "{engine}/tk-multi-workfiles2/basic/scene_operation.py"
@@ -574,7 +574,7 @@ settings.tk-multi-workfiles2.aftereffects.asset_step:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}' ]
   allow_task_creation: False
   hook_scene_operation: "{engine}/tk-multi-workfiles2/basic/scene_operation.py"
@@ -611,7 +611,7 @@ settings.tk-multi-workfiles2.aftereffects.shot_step:
       hierarchy: [step]
   my_tasks_extra_display_fields: [sg_person.HumanUser.name, sg_status_list]
   my_tasks_filters:
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr'] ]
+    - [ sg_status_list, not_in, ['bid', 'omt', 'hld', 'otr', 'sap', 'apr', 'psu', 'pcl'] ]
     - [ task_assignees, is, '{context.user}' ]
   allow_task_creation: False
   hook_scene_operation: "{engine}/tk-multi-workfiles2/basic/scene_operation.py"
