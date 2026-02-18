@@ -309,7 +309,7 @@ class NukeSessionCollector(HookBaseClass):
         for node in sg_writenode_app.get_write_nodes():
             publish_path_CHECK = sg_writenode_app.get_node_render_path(node)
 
-            self.logger.info(str(node))
+
             # see if any frames have been rendered for this write node
             rendered_files = sg_writenode_app.get_node_render_files(node)
             if not rendered_files:
@@ -318,6 +318,9 @@ class NukeSessionCollector(HookBaseClass):
             # some files rendered, use first frame to get some publish item info
             path = rendered_files[0]
             item_info = super(NukeSessionCollector, self)._get_item_info(path)
+            self.logger.info(item_info)
+            self.logger.info(path)
+            self.logger.info(rendered_files)
 
             # item_info will be for the single file. we'll update the type and
             # display to represent a sequence. This is the same pattern used by
@@ -331,7 +334,7 @@ class NukeSessionCollector(HookBaseClass):
             else:
                 item_type = "%s.precompSequence" % (item_info["item_type"],)
             type_display = "%s Sequence" % (item_info["type_display"],)
-
+            self.logger.info(item_type)
             # we'll publish the path with the frame/eye spec (%V, %04d)
             publish_path = sg_writenode_app.get_node_render_path(node)
 
