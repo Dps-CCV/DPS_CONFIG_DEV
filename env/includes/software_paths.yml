@@ -25,7 +25,7 @@ path.windows.motionbuilder: C:\Program Files\Autodesk\MotionBuilder 2020\bin\x64
 # Hiero
 path.linux.hiero: "Nuke14.0"
 path.mac.hiero: "/Applications/Nuke14.0v2/Hiero14.0v2.app"
-path.windows.hiero: C:\Program Files\Nuke*\Nuke*.exe
+path.windows.hiero: "C:\Program Files\Nuke*\Nuke*.exe"
 
 # RV
 path.linux.rv: "rv"
