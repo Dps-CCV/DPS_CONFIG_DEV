@@ -310,8 +310,6 @@ class NukeSessionCollector(HookBaseClass):
             publish_path_CHECK = sg_writenode_app.get_node_render_path(node)
 
             self.logger.info(str(node))
-            # if 'PRECOMP' not in node.knob('tk_profile_list').value():
-            # if item.context.entity == 'Asset':
             # see if any frames have been rendered for this write node
             rendered_files = sg_writenode_app.get_node_render_files(node)
             if not rendered_files:
@@ -328,7 +326,7 @@ class NukeSessionCollector(HookBaseClass):
             # the sequence path, template knowledge provided by the
             # tk-nuke-writenode app. The base collector makes some "zero config"
             # assupmtions about the path that we don't need to make here.
-            if node.knob('tk_profile_list').value() in ["Render 16bits", "Render JPG", "IMAGE_PLANE"]:
+            if node.knob('tk_profile_list').value() in ["Render 16bits", "Render JPG", "IMAGE_PLANE", "IMAGE_PLANE_MOV", "ALPHA", "MATTE_PAINT"]:
                 item_type = "%s.sequence" % (item_info["item_type"],)
             else:
                 item_type = "%s.precompSequence" % (item_info["item_type"],)
