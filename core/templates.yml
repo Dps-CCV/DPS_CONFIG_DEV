@@ -578,13 +578,13 @@ paths:
     nuke_imageplane_pub_proxy:
         definition: '@shot_root/PUBLISH/IMAGE_PLANE/PNG/{Step}/NUKE_IMP_{task_name}_v{version}_proxy/{Shot}_IMP_{task_name}_v{version}_proxy.{SEQ}.png'
     nuke_imageplane_mov:
-        definition: '@shot_root/STEPS/{Step}/NUKE/IMAGES/NUKE_IMP_{task_name}_v{version}/{Shot}_IMP_{task_name}_v{version}.mp4'
+        definition: '@shot_root/STEPS/{Step}/NUKE/IMAGES/{Shot}_IMP_{task_name}_v{version}.mp4'
     nuke_imageplane_mov_proxy:
-        definition: '@shot_root/STEPS/{Step}/NUKE/IMAGES/NUKE_IMP_{task_name}_v{version}_proxy/{Shot}_IMP_{task_name}_v{version}_proxy.mp4'
+        definition: '@shot_root/STEPS/{Step}/NUKE/IMAGES/{Shot}_IMP_{task_name}_v{version}_proxy.mp4'
     nuke_imageplane_mov_pub:
-        definition: '@shot_root/PUBLISH/IMAGE_PLANE/PNG/{Step}/NUKE_IMP_{task_name}_v{version}/{Shot}_IMP_{task_name}_v{version}.mp4'
+        definition: '@shot_root/PUBLISH/IMAGE_PLANE/{Step}/{Shot}_IMP_{task_name}_v{version}.mp4'
     nuke_imageplane_mov_pub_proxy:
-        definition: '@shot_root/PUBLISH/IMAGE_PLANE/PNG/{Step}/NUKE_IMP_{task_name}_v{version}_proxy/{Shot}_IMP_{task_name}_v{version}_proxy.mp4'
+        definition: '@shot_root/PUBLISH/IMAGE_PLANE/{Step}/{Shot}_IMP_{task_name}_v{version}_proxy.mp4'
     nuke_mattepaint:
         definition: '@shot_root/STEPS/{Step}/NUKE/IMAGES/NUKE_BMP_{task_name}_v{version}/{Shot}_BMP_{nuke.output}_{task_name}_v{version}.{SEQ}.tiff'
     nuke_mattepaint_proxy:
@@ -888,13 +888,13 @@ paths:
     nuke_asset_imageplane_pub_proxy:
         definition: '@asset_root/PUBLISH/IMAGE_PLANE/PNG/{Step}/NUKE_IMP_v{version}_proxy/{Asset}_IMP_v{version}_proxy.{SEQ}.png'
     nuke_asset_imageplane_mov:
-        definition: '@asset_root/STEPS/{Step}/NUKE/IMAGES/NUKE_IMP_v{version}/{Asset}_IMP_v{version}.mp4'
+        definition: '@asset_root/STEPS/{Step}/NUKE/IMAGES/{Asset}_IMP_v{version}.mp4'
     nuke_asset_imageplane_mov_proxy:
-        definition: '@asset_root/STEPS/{Step}/NUKE/IMAGES/NUKE_IMP_v{version}_proxy/{Asset}_IMP_v{version}_proxy.mp4'
+        definition: '@asset_root/STEPS/{Step}/NUKE/IMAGES/{Asset}_IMP_v{version}_proxy.mp4'
     nuke_asset_imageplane_mov_pub:
-        definition: '@asset_root/PUBLISH/IMAGE_PLANE/PNG/{Step}/NUKE_IMP_v{version}/{Asset}_IMP_v{version}.mp4'
+        definition: '@asset_root/PUBLISH/IMAGE_PLANE/{Step}/{Asset}_IMP_v{version}.mp4'
     nuke_asset_imageplane_mov_pub_proxy:
-        definition: '@asset_root/PUBLISH/IMAGE_PLANE/PNG/{Step}/NUKE_IMP_v{version}_proxy/{Asset}_IMP_v{version}_proxy.mp4'
+        definition: '@asset_root/PUBLISH/IMAGE_PLANE/{Step}/{Asset}_IMP_v{version}_proxy.mp4'
     nuke_asset_mattepaint:
         definition: '@asset_root/STEPS/{Step}/NUKE/IMAGES/NUKE_BMP_{task_name}_v{version}/{Asset}_BMP_{nuke.output}_{task_name}_v{version}.{SEQ}.tiff'
     nuke_asset_mattepaint_proxy:
