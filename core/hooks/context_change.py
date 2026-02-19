@@ -146,7 +146,7 @@ class ContextChange(get_hook_baseclass()):
                         nuke.menu('Nodes').findItem("Flow Production Tracking").findItem(
                             "TECH_PRECOMP").setShortcut('Alt+j')
                     except:
-                        self.engine.logger.debug("No se ha podido registrar los atajos de nuke write")
+                        self.engine.logger.info("No se ha podido registrar los atajos de nuke write")
 
 
 
