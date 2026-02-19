@@ -32,7 +32,6 @@ class MayaSessionPublishPlugin(HookBaseClass):
 
     """
 
-    _CREATE_PLAYBLAST = "Create Playblast"
 
     # NOTE: The plugin icon and name are defined by the base file plugin.
 
