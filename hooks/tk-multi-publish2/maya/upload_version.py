@@ -246,9 +246,9 @@ class UploadVersionPlugin(HookBaseClass):
             in_sequence = in_path.replace('\\', '/')
             lut_path = r"L\:/NUKE_CONFIG/ACESCg_to_Rec709.cube"  # keep the backslash before the colon
             out_mov = uploadPath.replace('\\', '/')
-            font_path = "C\:/Windows/Fonts/arial.ttf
-            Project = "IDOLOS"
-            Entity = "IDO_B03_103"
+            font_path = "C\:/Windows/Fonts/arial.ttf"
+            Project = item.context.project['name']
+            Entity = item.context.entity['name']
             Logo = os.path.join(self.disk_location, os.pardir, "icons", "EFCT_LOGO.png")
 
             Project_esc = _escape_drawtext_text(Project)
