@@ -246,19 +246,56 @@ class UploadVersionPlugin(HookBaseClass):
             in_sequence = in_path.replace('\\', '/')
             lut_path = r"L\:/NUKE_CONFIG/ACESCg_to_Rec709.cube"  # keep the backslash before the colon
             out_mov = uploadPath.replace('\\', '/')
+            font_path = "C\:/Windows/Fonts/arial.ttf
+            Project = "IDOLOS"
+            Entity = "IDO_B03_103"
+            Logo = os.path.join(self.disk_location, os.pardir, "icons", "EFCT_LOGO.png")
 
-            # Build the filter string (double-quoted on the command line; single quotes inside for lut3d path)
-            vf = (
+            Project_esc = _escape_drawtext_text(Project)
+            Entity_esc = _escape_drawtext_text(Entity)
+
+            # Build the vf chain:
+            vf_original = (
                 "format=gbrpf32le,"
                 f"lut3d='{lut_path}',"
                 "scale=1920:1080,format=yuv422p10le"
             )
 
+            # Build the vf chain:
+            filter_complex = (
+                f"[0:v]{vf_original}[base];"
+                f"[base]"
+                # Top-left: Project
+                f"drawtext=fontfile='{font_path}':"
+                f"text='{Project_esc}':"
+                f"fontcolor=white:fontsize=36:x=20:y=20:"
+                f"borderw=2:bordercolor=black@0.6,"
+
+                # Bottom-left: Entity
+                f"drawtext=fontfile='{font_path}':"
+                f"text='{Entity_esc}':"
+                f"fontcolor=white:fontsize=32:x=20:y=H-th-20:"
+                f"borderw=2:bordercolor=black@0.6,"
+
+                # Bottom-right: current (absolute) frame number = start_number + n
+                # Note: escape colons inside eif with \\
+                f"drawtext=fontfile='{font_path}':"
+                f"text='%{{eif\\:n+{start_number}\\:d}}':"
+                f"fontcolor=white:fontsize=32:x=W-tw-20:y=H-th-20:"
+                f"borderw=2:bordercolor=black@0.6"
+                f"[txt];"
+                # Logo overlay on top-right (20px margin)
+                # main W/H come from [txt]; overlay w/h come from [1:v]
+                f"[txt][1:v]overlay=W-w-20:20:format=auto:eval=init"
+            )
+
+
             # Assemble the final command with all quotes preserved
             cmd = (
                 f'ffmpeg -framerate {framerate} -start_number {start_number} '
                 f'-i "{in_sequence}" '
-                f'-vf "{vf}" '
+                f'-i "{Logo}" '          # logo image
+                f'-filter_complex "{filter_complex}" '
                 f'-c:v prores_ks -profile:v 3 -pix_fmt yuv422p10le '
                 f'-movflags +write_colr -color_primaries bt709 -color_trc bt709 -colorspace bt709 '
                 f'"{out_mov}"'
@@ -579,3 +616,12 @@ def _session_path():
         path = six.ensure_str(path)
 
     return path
+
+
+def _escape_drawtext_text(s: str) -> str:
+    """
+    Escape a Python string for safe use inside FFmpeg drawtext text='...'.
+    - Escape backslashes and single quotes.
+    - Leave ffmpeg expression placeholders like %{...} alone if you pass them as raw strings.
+    """
+    return s.replace("\\", "\\\\").replace("'", r"\'")
