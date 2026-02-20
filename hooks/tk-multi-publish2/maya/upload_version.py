@@ -249,7 +249,7 @@ class UploadVersionPlugin(HookBaseClass):
             font_path = "C\:/Windows/Fonts/arial.ttf"
             Project = item.context.project['name']
             Entity = item.context.entity['name']
-            Logo = os.path.join(self.disk_location, os.pardir, "icons", "EFCT_LOGO.png")
+            Logo = os.path.join(self.disk_location, os.pardir, "icons", "EFCT_LOGO_v2.png")
 
             Project_esc = _escape_drawtext_text(Project)
             Entity_esc = _escape_drawtext_text(Entity)
