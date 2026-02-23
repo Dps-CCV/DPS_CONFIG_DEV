@@ -195,10 +195,10 @@ settings.tk-multi-publish2.maya.asset_step:
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_session.py"
     settings:
         Publish Template: maya_asset_publish
-  - name: Publish OBJECT GEO USD
-    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_object_geo_usd.py"
-    settings:
-      Publish Template: maya_asset_object_usd_publish
+#  - name: Publish OBJECT GEO USD
+#    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_object_geo_usd.py"
+#    settings:
+#      Publish Template: maya_asset_object_usd_publish
 
   - name: Publish OBJECT GEO to Shotgun
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_object_geo.py"
@@ -257,10 +257,10 @@ settings.tk-multi-publish2.maya.shot_step:
     hook: "{config}/tk-multi-publish2/maya/publish_file.py:{config}/tk-multi-publish2/maya/publish_camera.py"
     settings:
         Publish Template: maya_shot_camera_publish
-  - name: Publish OBJECT GEO USD
-    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_object_geo_usd.py"
-    settings:
-      Publish Template: maya_shot_object_usd_publish
+#  - name: Publish OBJECT GEO USD
+#    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_object_geo_usd.py"
+#    settings:
+#      Publish Template: maya_shot_object_usd_publish
 
   - name: Publish OBJECT GEO to Shotgun
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_object_geo.py"
