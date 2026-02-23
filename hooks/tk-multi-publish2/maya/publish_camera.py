@@ -424,7 +424,8 @@ class MayaCameraPublishPlugin(HookBaseClass):
             # only export selection
             "-sl",
         ]
-
+        alembic_args.append("-root")
+        alembic_args.append(cmds.ls(selection=True)[0])
         # find the animated frame range to use:
         # ~ start_frame, end_frame = _find_scene_animation_range()
         start_frame = int(cmds.playbackOptions(q=True, min=True))
