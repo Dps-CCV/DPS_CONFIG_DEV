@@ -27,7 +27,7 @@ settings.tk-hiero-export:
   template_layer_path: hiero_layer_path
   template_sound_path: hiero_sound_path
   template_version: hiero_version
-  custom_template_fields: [{keyword: Episode, description: The episode name}, {keyword: Project, description: The project code}]
+  custom_template_fields: [{keyword: Episode, description: The episode name}, {keyword: Project, description: The project code}, {keyword: version_folder, description: version number for layer numeration}]
   hook_get_shot: '{config}/tk-hiero-export/hiero_get_shot.py'
   hook_resolve_custom_strings: '{config}/tk-hiero-export/hiero_resolve_custom_strings.py'
   hook_customize_export_ui: '{config}/tk-hiero-export/hiero_customize_export_ui.py'
