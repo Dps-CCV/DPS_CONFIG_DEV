@@ -23,8 +23,8 @@ path.windows.mari: C:\Program Files\Mari4.6v4\Bundle\bin\Mari4.6v4.exe
 path.windows.motionbuilder: C:\Program Files\Autodesk\MotionBuilder 2020\bin\x64\motionbuilder.exe
 
 # Hiero
-path.linux.hiero:
-path.mac.hiero:
+path.linux.hiero: ""
+path.mac.hiero: ""
 path.windows.hiero: ""
 
 # RV
