@@ -53,17 +53,24 @@ class HieroCustomizeExportUI(HookBaseClass):
                 tooltip="Update 'sg_tail_out' on the Shot entity.",
             ),
             dict(
-                label="Source Clip:",
+                label=" Export Source Clip:",
                 name="custom_sourceClip_bool_property",
                 value=True,
                 tooltip="Update 'sg_source_clip' on the Shot entity.",
+            ),
+            dict(
+                label="Source Clip Field::",
+                name="custom_sourceClip_text_property",
+                value="exr/owner",
+                tooltip="Update source clip data looking to this metadata field.",
             ),
             dict(
                 label="Metadata:",
                 name="custom_metadata_bool_property",
                 value=True,
                 tooltip="Update metadata fields on the Shot entity.",
-            )
+            ),
+
         ]
 
     def set_shot_processor_ui_properties(self, widget, properties):

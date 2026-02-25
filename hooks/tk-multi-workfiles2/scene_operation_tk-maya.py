@@ -178,9 +178,9 @@ class SceneOperation(HookClass):
                 fps) + ". Deberías comprobar los settings de la escena"
 
             if float(projectFps['sg_formato___ratio']) != maskRatio:
-                texto+= "\n" + "El frame rate del proyecto es " + str(
+                texto+= "\n" + "El device aspect del proyecto es " + str(
                     projectFps['sg_formato___ratio']) + " y los settings de esta escena son " + str(
-                    maskRatio) + ". Deberías comprobar los settings de la escena"
+                    maskRatio) + ". Deberías comprobar los settings de render"
             cmds.confirmDialog(title="Change status", message=texto)
 
     def vaccineFix(self):

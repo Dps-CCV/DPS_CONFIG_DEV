@@ -417,7 +417,9 @@ class UploadVersionPlugin(HookBaseClass):
                     first = cmds.playbackOptions(q=True, min=True)
                     last = cmds.playbackOptions(q=True, max=True)
                     cmds.lookThru(main)
-                    cmds.setAttr((main + '..displayGateMaskColor'), 0, 0, 0, type="double3")
+                    previousMaskOpacity = cmds.getAttr((main + '.displayGateMaskOpacity'))
+                    previosAspectRatio = cmds.getAttr("defaultResolution.deviceAspectRatio")
+                    cmds.setAttr((main + '.displayGateMaskColor'), 0, 0, 0, type="double3")
                     cmds.setAttr((main + '.displayGateMaskOpacity'), 1)
                     proj = sgtk.platform.current_engine().shotgun.find_one('Project', [['name', 'is', item.context.project['name']]], ['sg_formato___ratio'])
                     cmds.setAttr("defaultResolution.deviceAspectRatio", proj['sg_formato___ratio'])
@@ -439,9 +441,9 @@ class UploadVersionPlugin(HookBaseClass):
 
                 if turntable == True:
                     cmds.delete('rotGrp')
-
-
-
+                else:
+                    cmds.setAttr((main + '.displayGateMaskOpacity'), previousMaskOpacity)
+                    cmds.setAttr("defaultResolution.deviceAspectRatio", previosAspectRatio)
 
         # use the path's filename as the publish name
         path_components = publisher.util.get_file_path_components(uploadPath)
