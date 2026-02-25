@@ -169,7 +169,7 @@ class SceneOperation(HookClass):
                     "23.976fps": 23.976, "29.97fps": 29.97, "29.97df": 29.97, "47.952fps": 47.952,
                     "59.94fps": 59.94, "44100fps": 44100, "48000fps": 48000}
         fps = timeDict[mayaStupidUnit]
-        maskRatio = cmds.getAttr("defaultResolution.deviceAspectRatio")
+        maskRatio = round(cmds.getAttr("defaultResolution.deviceAspectRatio"), 3)
         texto = ""
         if float(projectFps['sg_frame___rate'].replace(",", ".")) != fps or float(projectFps['sg_formato___ratio']) != maskRatio:
             if float(projectFps['sg_frame___rate'].replace(",", ".")) != fps:
@@ -177,7 +177,7 @@ class SceneOperation(HookClass):
                 projectFps['sg_frame___rate']) + " y los settings de esta escena son " + str(
                 fps) + ". Deberías comprobar los settings de la escena"
 
-            if float(projectFps['sg_formato___ratio']) != maskRatio:
+            if round(float(projectFps['sg_formato___ratio']), 3) != maskRatio:
                 texto+= "\n" + "El device aspect del proyecto es " + str(
                     projectFps['sg_formato___ratio']) + " y los settings de esta escena son " + str(
                     maskRatio) + ". Deberías comprobar los settings de render"
