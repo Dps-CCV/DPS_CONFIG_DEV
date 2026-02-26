@@ -191,7 +191,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         if context.step:
             step_name = context.step.get("name", "").lower()
 
-            if 'texture' in step_name or 'shading' in step_name:
+            if 'texture' in step_name or 'shading' in step_name or 'animation' in step_name:
                 self.write_facesets_cb.setChecked(True)
                 self.write_uvs_cb.setChecked(True)
                 self.write_uvSets_cb.setChecked(True)

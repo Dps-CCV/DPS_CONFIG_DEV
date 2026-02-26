@@ -418,9 +418,11 @@ class UploadVersionPlugin(HookBaseClass):
                     last = cmds.playbackOptions(q=True, max=True)
                     cmds.lookThru(main)
                     previousMaskOpacity = cmds.getAttr((main + '.displayGateMaskOpacity'))
-                    previosAspectRatio = cmds.getAttr("defaultResolution.deviceAspectRatio")
+                    previousAspectRatio = cmds.getAttr("defaultResolution.deviceAspectRatio")
+                    previousOverscan = cmds.getAttr("defaultResolution.overscan")
                     cmds.setAttr((main + '.displayGateMaskColor'), 0, 0, 0, type="double3")
                     cmds.setAttr((main + '.displayGateMaskOpacity'), 1)
+                    cmds.setAttr((main + '.overscan'), 1.0)
                     proj = sgtk.platform.current_engine().shotgun.find_one('Project', [['name', 'is', item.context.project['name']]], ['sg_formato___ratio'])
                     cmds.setAttr("defaultResolution.deviceAspectRatio", round(float(proj['sg_formato___ratio'])), 3)
 
@@ -443,7 +445,8 @@ class UploadVersionPlugin(HookBaseClass):
                     cmds.delete('rotGrp')
                 else:
                     cmds.setAttr((main + '.displayGateMaskOpacity'), previousMaskOpacity)
-                    cmds.setAttr("defaultResolution.deviceAspectRatio", previosAspectRatio)
+                    cmds.setAttr("defaultResolution.deviceAspectRatio", previousAspectRatio)
+                    cmds.setAttr("defaultResolution.deviceAspectRatio", previousOverscan)
 
         # use the path's filename as the publish name
         path_components = publisher.util.get_file_path_components(uploadPath)
