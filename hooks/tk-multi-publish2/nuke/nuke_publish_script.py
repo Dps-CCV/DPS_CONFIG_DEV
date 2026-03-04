@@ -14,6 +14,7 @@ import sgtk
 from sgtk.util.filesystem import ensure_folder_exists
 import WrapItUp
 import shutil
+import threading
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -332,21 +333,24 @@ class NukeSessionPublishPlugin(HookBaseClass):
         # do the base class finalization
         super(NukeSessionPublishPlugin, self).finalize(settings, item)
 
-        #EFECTOSCOPIO ARCHIVING
+        # EFECTOSCOPIO ARCHIVING
         scriptPath = os.path.normpath(nuke.root().name())
         base = os.path.basename(nuke.root().name()).split(".")[0]
         if 'SHOT_FOLDER' in os.environ.keys():
             ShotFolder = os.path.join(*os.environ['SHOT_FOLDER'].split(os.sep)[3:])
-            archivePath = os.path.normpath(os.path.join(os.environ['PROJECT_PATH'], 'ARCHIVE', ShotFolder, base))
+            archivePath = os.path.normpath(os.path.join(os.environ['PROJECT_PATH'], 'ARCHIVE', ShotFolder, base))[:-5]
         elif 'ASSET_FOLDER' in os.environ.keys():
             AssetFolder = os.path.join(*os.environ['ASSET_FOLDER'].split(os.sep)[3:])
-            archivePath = os.path.normpath(os.path.join(os.environ['PROJECT_PATH'], 'ARCHIVE', AssetFolder, base))
+            archivePath = os.path.normpath(os.path.join(os.environ['PROJECT_PATH'], 'ARCHIVE', AssetFolder, base))[:-5]
         if os.path.exists(archivePath):
             shutil.rmtree(archivePath)
         os.makedirs(archivePath)
-        WrapItUp.WrapItUp(
-            nk=scriptPath,
-            out=archivePath, parentdircount=10, startnow=True, fonts=False, licinteractive=True)
+
+        def wrap():
+            WrapItUp.WrapItUp(nk=scriptPath, out=archivePath, parentdircount=3, startnow=True, fonts=True,
+                              licinteractive=True, relativerelinked=True, gizmos=True)
+
+        threading.Thread(target=wrap, daemon=True).start()
 
 
         # bump the session file to the next version

@@ -74,7 +74,78 @@ class HieroCustomizeExportUI(HookBaseClass):
                 label="LMT Field:",
                 name="custom_metadata_lmt_property",
                 value="exr.lmt",
-                tooltip="Update lmt data looking to this metadata field.",
+                tooltip="""Update lmt data looking to this metadata field. Template Engine: Complete Guide
+
+This templating engine lets you build dynamic strings using variables wrapped in {} and optional transformations wrapped in []. It supports multiple variables, pipelines, slicing, regex, and concatenation with literal text.
+
+1. Variable Syntax
+Variables use curly braces:
+{variable}
+{object.property}
+{metadata.exr.width}
+Dot notation is supported. Variables are resolved using your custom resolver function.
+
+2. Transforms / Operations
+{variable}[operation]
+{variable}[op1|op2|op3]
+Transforms apply left to right.
+Examples:
+{name}[trim|title]
+{exr.width}[3:-2]
+{code}[replace:-:_|upper]
+
+3. Concatenation
+Mix literals and variables freely:
+{exr.width}[3:-2]_{exr.h}_003
+
+4. Pipeline Syntax
+{title}[trim|lower|replace: :_]
+{exr.width}[trim|:-3]
+
+5. Supported Operations
+
+5.1 Trimming
+[trim], [strip], [] → strip whitespace
+[ltrim] → left trim
+[rtrim] → right trim
+
+5.2 Case Operations
+[lower], [upper], [title], [capitalize]
+
+5.3 Slicing
+[start:end], [:], [:N], [N:], [:-N], [N]
+
+5.4 Replace & Remove
+[replace:old:new]
+[remove:substring]
+
+5.5 Split
+[split:separator:index]
+
+5.6 Join
+[join:separator]
+
+5.7 Regex
+[regex:pattern:replacement]
+
+5.8 Padding
+[padleft:len:char], [padright:len:char], [center:len:char]
+
+6. Multiple Variables
+Example:
+shot_{seq}_{shot}[upper]_v{version}[padleft:3:0]
+
+7. Real Usage Examples
+Filename building, metadata-based strings, path extraction, normalization, hashing.
+
+8. Behavior
+Unknown transforms → ignored
+Unknown variables → resolver decides
+Slicing always safe
+
+Summary:
+This engine uses {var} and [operation] to build powerful, safe, dynamic strings with trimming, casing, replacement, slicing, regex, padding, and pipelines. Literal text mixes naturally with expressions for building filenames, metadata-driven IDs, and normalized strings.
+""",
             ),
             dict(
                 label="Focal Field:",

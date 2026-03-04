@@ -14,6 +14,7 @@ import maya.mel as mel
 import sgtk
 from sgtk.util.filesystem import ensure_folder_exists
 from tank_vendor import six
+import shutil
 
 
 
@@ -344,12 +345,117 @@ class MayaSessionPublishPlugin(HookBaseClass):
             instances.
         :param item: Item to process
         """
+        if item.context.step['name'] in ['LIGHT', 'LIGHT_A', 'RIG_A', 'TEXTURE_A', 'SHADING_A']:
+            path = cmds.file(query=True, sn=True)
+            file = os.path.basename(path)[:-8]
+            base = os.path.basename(path).split(".")[0]
+            if 'SHOT_FOLDER' in os.environ.keys():
+                ShotFolder = os.path.join(*os.environ['SHOT_FOLDER'].split(os.sep)[3:])
+                archivePath = os.path.normpath(os.path.join(os.environ['PROJECT_PATH'], 'ARCHIVE', ShotFolder, base))[:-5]
+            elif 'ASSET_FOLDER' in os.environ.keys():
+                AssetFolder = os.path.join(*os.environ['ASSET_FOLDER'].split(os.sep)[3:])
+                archivePath = os.path.normpath(os.path.join(os.environ['PROJECT_PATH'], 'ARCHIVE', AssetFolder, base))[:-5]
+            if os.path.exists(archivePath):
+                shutil.rmtree(archivePath)
+            os.makedirs(archivePath)
+            try:
+                result = archive_current_scene(archivePath, file)
+
+                if result:
+                    self.logger.info("Scene archived successfully: %s" % result)
+                else:
+                    self.logger.warning("Archive creation returned None - check for errors above")
 
         # do the base class finalization
         super(MayaSessionPublishPlugin, self).finalize(settings, item)
 
         # bump the session file to the next version
         self._save_to_next_version(item.properties["path"], item, _save_session)
+
+
+    def _copy_work_to_publish(self, settings, item):
+        """
+        This method handles copying work file path(s) to a designated publish
+        location.
+
+        This method requires a "work_template" and a "publish_template" be set
+        on the supplied item.
+
+        The method will handle copying the "path" property to the corresponding
+        publish location assuming the path corresponds to the "work_template"
+        and the fields extracted from the "work_template" are sufficient to
+        satisfy the "publish_template".
+
+        The method will not attempt to copy files if any of the above
+        requirements are not met. If the requirements are met, the file will
+        ensure the publish path folder exists and then copy the file to that
+        location.
+
+        If the item has "sequence_paths" set, it will attempt to copy all paths
+        assuming they meet the required criteria with respect to the templates.
+
+        """
+        # ---- ensure templates are available
+        work_template = item.properties.get("work_template")
+        if not work_template:
+            self.logger.debug(
+                "No work template set on the item. "
+                "Skipping copy file to publish location."
+            )
+            return
+
+        publish_template = self.get_publish_template(settings, item)
+        if not publish_template:
+            self.logger.debug(
+                "No publish template set on the item. "
+                "Skipping copying file to publish location."
+            )
+            return
+
+
+        # by default, the path that was collected for publishing
+        work_file = item.properties.path
+
+        # ---- copy the work files to the publish location
+
+
+        if not work_template.validate(work_file):
+            self.logger.warning(
+                "Work file '%s' did not match work template '%s'. "
+                "Publishing in place." % (work_file, work_template)
+            )
+            return
+
+        work_fields = work_template.get_fields(work_file)
+
+        missing_keys = publish_template.missing_keys(work_fields)
+
+        if missing_keys:
+            self.logger.warning(
+                "Work file '%s' missing keys required for the publish "
+                "template: %s" % (work_file, missing_keys)
+            )
+            return
+
+        publish_file = publish_template.apply_fields(work_fields)
+        if work_fields["extension"] == "ma":
+            typeFile = "mayaAscii"
+        else:
+            typeFile = "mayaBinary"
+        if not os.path.isdir(os.path.dirname(publish_file)):
+            os.makedirs(os.path.dirname(publish_file))
+
+        if item.context.step['name'] in ['RIG_A', 'TEXTURE_A', 'SHADING_A']:
+            cmds.file(publish_file, exportAll=True, preserveReferences=False, force=True, type=typeFile)
+        else:
+            cmds.file(publish_file, exportAll=True, preserveReferences=True, force=True, type=typeFile)
+
+
+
+        self.logger.debug(
+            "Copied work file '%s' to publish file '%s'."
+            % (work_file, publish_file)
+        )
 
 
 def _maya_find_additional_session_dependencies():
@@ -443,3 +549,657 @@ def _get_save_as_action():
         }
     }
 
+
+import maya.cmds as cmds
+import maya.mel as mel
+import os
+import shutil
+import json
+from collections import defaultdict
+
+
+class MayaSceneArchiver:
+    """
+    Archive Maya scene with all dependencies including references.
+    Creates a self-contained archive without modifying the current scene.
+    """
+
+    def __init__(self, output_directory):
+        """
+        Initialize archiver.
+
+        :param output_directory: Directory where archive will be created
+        """
+        self.output_dir = output_directory
+        self.archive_structure = {}
+        self.collected_files = defaultdict(list)
+        self.reference_mapping = {}
+        self.temp_scene_path = None
+
+    def create_archive(self, archive_name=None):
+        """
+        Create complete archive of current scene.
+
+        :param archive_name: Optional name for archive (default: current scene name)
+        :return: Path to archive directory
+        """
+
+        print("=" * 70)
+        print("MAYA SCENE ARCHIVER")
+        print("=" * 70)
+
+        # Get current scene info
+        current_scene = cmds.file(query=True, sceneName=True)
+
+        if not current_scene:
+            cmds.warning("Scene is not saved. Please save before archiving.")
+            return None
+
+        if not archive_name:
+            archive_name = os.path.splitext(os.path.basename(current_scene))[0] + "_archive"
+
+        # Create archive path inside output directory
+        archive_path = os.path.join(self.output_dir, archive_name)
+
+        print("\nOutput Directory: %s" % self.output_dir)
+        print("Archive: %s" % archive_path)
+        print("Source scene: %s" % current_scene)
+
+        # Create archive structure
+        self._create_directory_structure(archive_path)
+
+        try:
+            # Step 1: Duplicate scene in memory (don't modify original)
+            print("\n[1/6] Creating temporary scene copy...")
+            self._create_temp_scene_copy()
+
+            # Step 2: Collect all file paths
+            print("\n[2/6] Collecting file dependencies...")
+            self._collect_all_files()
+
+            # Step 3: Import references in temp scene
+            print("\n[3/6] Processing references...")
+            self._process_references()
+
+            # Step 4: Copy all files to archive
+            print("\n[4/6] Copying files to archive...")
+            self._copy_files_to_archive()
+
+            # Step 5: Save archived scene with updated paths
+            print("\n[5/6] Saving archived scene...")
+            archived_scene_path = self._save_archived_scene(archive_name)
+
+            # Step 6: Create archive manifest
+            print("\n[6/6] Creating archive manifest...")
+            self._create_manifest(archive_path, archived_scene_path)
+
+            # Restore original scene
+            print("\nRestoring original scene...")
+            self._restore_original_scene(current_scene)
+
+            print("\n" + "=" * 70)
+            print("ARCHIVE COMPLETE!")
+            print("Location: %s" % archive_path)
+            print("=" * 70)
+
+            return archive_path
+
+        except Exception as e:
+            print("\nERROR during archiving: %s" % str(e))
+            import traceback
+            traceback.print_exc()
+
+            # Restore original scene
+            self._restore_original_scene(current_scene)
+
+            return None
+
+    def _create_directory_structure(self, archive_path):
+        """Create archive directory structure."""
+
+        self.archive_structure = {
+            'scenes': os.path.join(archive_path, 'scenes'),
+            'sourceimages': os.path.join(archive_path, 'sourceimages'),
+            'references': os.path.join(archive_path, 'references'),
+            'cache': os.path.join(archive_path, 'cache'),
+            'particles': os.path.join(archive_path, 'particles'),
+            'data': os.path.join(archive_path, 'data'),
+            'clips': os.path.join(archive_path, 'clips'),
+            'sound': os.path.join(archive_path, 'sound'),
+            'movies': os.path.join(archive_path, 'movies'),
+        }
+
+        for folder_path in self.archive_structure.values():
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+                print("  Created: %s" % folder_path)
+
+    def _create_temp_scene_copy(self):
+        """Create temporary copy of scene in memory."""
+
+        import tempfile
+
+        # Save current scene to temp location
+        temp_dir = tempfile.gettempdir()
+        temp_filename = "maya_archive_temp_%s.ma" % os.getpid()
+        self.temp_scene_path = os.path.join(temp_dir, temp_filename)
+
+        # Save current scene state
+        cmds.file(rename=self.temp_scene_path)
+        cmds.file(save=True, type='mayaAscii')
+
+        print("  Temporary scene created: %s" % self.temp_scene_path)
+
+    def _collect_all_files(self):
+        """Collect all file dependencies in the scene."""
+
+        # Textures
+        print("\n  Collecting textures...")
+        self._collect_file_nodes()
+
+        # Image planes
+        print("  Collecting image planes...")
+        self._collect_image_planes()
+
+        # Caches (Alembic, GPU, etc.)
+        print("  Collecting caches...")
+        self._collect_caches()
+
+        # Audio files
+        print("  Collecting audio...")
+        self._collect_audio()
+
+        # References
+        print("  Collecting references...")
+        self._collect_references()
+
+        # IES files
+        print("  Collecting IES files...")
+        self._collect_ies_files()
+
+        # Arnold standins
+        print("  Collecting Arnold standins...")
+        self._collect_arnold_standins()
+
+        # Print summary
+        total_files = sum(len(files) for files in self.collected_files.values())
+        print("\n  Total files collected: %d" % total_files)
+
+        for category, files in self.collected_files.items():
+            if files:
+                print("    %s: %d" % (category, len(files)))
+
+    def _collect_file_nodes(self):
+        """Collect texture files from file nodes."""
+
+        file_nodes = cmds.ls(type='file')
+
+        for file_node in file_nodes:
+            try:
+                file_path = cmds.getAttr(file_node + '.fileTextureName')
+
+                if file_path and os.path.exists(file_path):
+                    self.collected_files['textures'].append({
+                        'source': file_path,
+                        'node': file_node,
+                        'attr': 'fileTextureName'
+                    })
+            except:
+                pass
+
+    def _collect_image_planes(self):
+        """Collect image plane files."""
+
+        image_planes = cmds.ls(type='imagePlane')
+
+        for image_plane in image_planes:
+            try:
+                image_path = cmds.getAttr(image_plane + '.imageName')
+
+                if image_path and os.path.exists(image_path):
+                    self.collected_files['image_planes'].append({
+                        'source': image_path,
+                        'node': image_plane,
+                        'attr': 'imageName'
+                    })
+            except:
+                pass
+
+    def _collect_caches(self):
+        """Collect cache files (Alembic, GPU cache, etc.)."""
+
+        # Alembic caches
+        abc_nodes = cmds.ls(type='AlembicNode')
+        for abc_node in abc_nodes:
+            try:
+                abc_file = cmds.getAttr(abc_node + '.abc_File')
+
+                if abc_file and os.path.exists(abc_file):
+                    self.collected_files['caches'].append({
+                        'source': abc_file,
+                        'node': abc_node,
+                        'attr': 'abc_File'
+                    })
+            except:
+                pass
+
+        # GPU caches
+        gpu_nodes = cmds.ls(type='gpuCache')
+        for gpu_node in gpu_nodes:
+            try:
+                cache_file = cmds.getAttr(gpu_node + '.cacheFileName')
+
+                if cache_file and os.path.exists(cache_file):
+                    self.collected_files['caches'].append({
+                        'source': cache_file,
+                        'node': gpu_node,
+                        'attr': 'cacheFileName'
+                    })
+            except:
+                pass
+
+        # nCache
+        cache_files = cmds.ls(type='cacheFile')
+        for cache_file_node in cache_files:
+            try:
+                cache_path = cmds.getAttr(cache_file_node + '.cachePath')
+                cache_name = cmds.getAttr(cache_file_node + '.cacheName')
+
+                if cache_path and cache_name:
+                    full_path = os.path.join(cache_path, cache_name)
+
+                    if os.path.exists(full_path):
+                        self.collected_files['caches'].append({
+                            'source': full_path,
+                            'node': cache_file_node,
+                            'attr': 'cachePath'
+                        })
+            except:
+                pass
+
+    def _collect_audio(self):
+        """Collect audio files."""
+
+        audio_nodes = cmds.ls(type='audio')
+
+        for audio_node in audio_nodes:
+            try:
+                audio_file = cmds.getAttr(audio_node + '.filename')
+
+                if audio_file and os.path.exists(audio_file):
+                    self.collected_files['audio'].append({
+                        'source': audio_file,
+                        'node': audio_node,
+                        'attr': 'filename'
+                    })
+            except:
+                pass
+
+    def _collect_references(self):
+        """Collect reference files."""
+
+        references = cmds.file(query=True, reference=True) or []
+
+        for ref_path in references:
+            if os.path.exists(ref_path):
+                try:
+                    ref_node = cmds.referenceQuery(ref_path, referenceNode=True)
+
+                    self.collected_files['references'].append({
+                        'source': ref_path,
+                        'node': ref_node,
+                        'namespace': cmds.referenceQuery(ref_path, namespace=True)
+                    })
+                except:
+                    pass
+
+    def _collect_ies_files(self):
+        """Collect IES light profile files (Arnold, etc.)."""
+
+        # Arnold lights
+        arnold_lights = cmds.ls(type='aiPhotometricLight')
+
+        for light in arnold_lights:
+            try:
+                ies_file = cmds.getAttr(light + '.aiFilename')
+
+                if ies_file and os.path.exists(ies_file):
+                    self.collected_files['ies'].append({
+                        'source': ies_file,
+                        'node': light,
+                        'attr': 'aiFilename'
+                    })
+            except:
+                pass
+
+    def _collect_arnold_standins(self):
+        """Collect Arnold standin (.ass) files."""
+
+        standins = cmds.ls(type='aiStandIn')
+
+        for standin in standins:
+            try:
+                dso_path = cmds.getAttr(standin + '.dso')
+
+                if dso_path and os.path.exists(dso_path):
+                    self.collected_files['standins'].append({
+                        'source': dso_path,
+                        'node': standin,
+                        'attr': 'dso'
+                    })
+            except:
+                pass
+
+    def _process_references(self):
+        """Import all references into the temp scene."""
+
+        if not self.collected_files['references']:
+            print("  No references to process")
+            return
+
+        # Get all references
+        references = cmds.file(query=True, reference=True) or []
+
+        print("  Found %d reference(s)" % len(references))
+
+        # Import each reference (in reverse to handle nested refs)
+        references.reverse()
+
+        for ref_path in references:
+            try:
+                ref_node = cmds.referenceQuery(ref_path, referenceNode=True)
+                namespace = cmds.referenceQuery(ref_path, namespace=True)
+
+                print("    Importing: %s (namespace: %s)" % (
+                    os.path.basename(ref_path),
+                    namespace
+                ))
+
+                # Import reference
+                cmds.file(ref_path, importReference=True, referenceNode=ref_node)
+
+                # Store mapping
+                self.reference_mapping[ref_node] = {
+                    'original_path': ref_path,
+                    'namespace': namespace
+                }
+
+            except Exception as e:
+                print("    WARNING: Could not import reference %s: %s" % (ref_path, str(e)))
+
+        print("  All references imported")
+
+    def _copy_files_to_archive(self):
+        """Copy all collected files to archive."""
+
+        copied_count = 0
+
+        for category, files in self.collected_files.items():
+            if not files:
+                continue
+
+            print("\n  Copying %s..." % category)
+
+            # Determine target directory
+            if category == 'textures':
+                target_dir = self.archive_structure['sourceimages']
+            elif category == 'references':
+                target_dir = self.archive_structure['references']
+            elif category in ['caches', 'standins']:
+                target_dir = self.archive_structure['cache']
+            elif category == 'audio':
+                target_dir = self.archive_structure['sound']
+            elif category == 'image_planes':
+                target_dir = self.archive_structure['sourceimages']
+            elif category == 'ies':
+                target_dir = self.archive_structure['data']
+            else:
+                target_dir = self.archive_structure['data']
+
+            for file_info in files:
+                source_path = file_info['source']
+
+                if not os.path.exists(source_path):
+                    print("    WARNING: File not found: %s" % source_path)
+                    continue
+
+                # Generate unique filename to avoid conflicts
+                filename = os.path.basename(source_path)
+                target_path = os.path.join(target_dir, filename)
+
+                # Handle duplicate filenames
+                counter = 1
+                base_name, ext = os.path.splitext(filename)
+
+                while os.path.exists(target_path):
+                    filename = "%s_%d%s" % (base_name, counter, ext)
+                    target_path = os.path.join(target_dir, filename)
+                    counter += 1
+
+                try:
+                    # Copy file
+                    shutil.copy2(source_path, target_path)
+
+                    # Update file info with new path
+                    file_info['archive_path'] = target_path
+                    file_info['relative_path'] = os.path.relpath(target_path, self.output_dir)
+
+                    copied_count += 1
+
+                    # Update path in scene (for non-reference files)
+                    if category != 'references' and 'node' in file_info and 'attr' in file_info:
+                        try:
+                            cmds.setAttr(
+                                file_info['node'] + '.' + file_info['attr'],
+                                target_path,
+                                type='string'
+                            )
+                        except:
+                            pass
+
+                except Exception as e:
+                    print("    ERROR copying %s: %s" % (filename, str(e)))
+
+        print("\n  Total files copied: %d" % copied_count)
+
+    def _save_archived_scene(self, archive_name):
+        """Save the archived scene with updated paths."""
+
+        archived_scene_path = os.path.join(
+            self.archive_structure['scenes'],
+            archive_name + '.ma'
+        )
+
+        # Rename and save
+        cmds.file(rename=archived_scene_path)
+        cmds.file(save=True, type='mayaAscii')
+
+        print("  Archived scene saved: %s" % archived_scene_path)
+
+        return archived_scene_path
+
+    def _create_manifest(self, archive_path, archived_scene_path):
+        """Create JSON manifest with archive information."""
+
+        manifest_path = os.path.join(archive_path, 'archive_manifest.json')
+
+        manifest = {
+            'archive_name': os.path.basename(archive_path),
+            'creation_date': cmds.date(),
+            'maya_version': cmds.about(version=True),
+            'archived_scene': os.path.relpath(archived_scene_path, archive_path),
+            'file_counts': {
+                category: len(files)
+                for category, files in self.collected_files.items()
+            },
+            'total_files': sum(len(files) for files in self.collected_files.values()),
+            'references_imported': len(self.reference_mapping),
+            'structure': {
+                key: os.path.relpath(path, archive_path)
+                for key, path in self.archive_structure.items()
+            }
+        }
+
+        with open(manifest_path, 'w') as f:
+            json.dump(manifest, f, indent=2)
+
+        print("  Manifest created: %s" % manifest_path)
+
+    def _restore_original_scene(self, original_scene_path):
+        """Restore the original scene without changes."""
+
+        # Open original scene
+        cmds.file(original_scene_path, open=True, force=True)
+
+        # Clean up temp file
+        if self.temp_scene_path and os.path.exists(self.temp_scene_path):
+            try:
+                os.remove(self.temp_scene_path)
+            except:
+                pass
+
+        print("Original scene restored: %s" % original_scene_path)
+
+
+# ============================================================================
+# USAGE FUNCTIONS
+# ============================================================================
+
+def archive_current_scene(output_directory, archive_name=None):
+    """
+    Archive the current Maya scene with all dependencies.
+
+    :param output_directory: Directory where archive folder will be created
+    :param archive_name: Optional name for archive folder
+    :return: Path to archive directory
+
+    Usage:
+        # Archive to specific directory
+        archive_path = archive_current_scene('D:/archives')
+
+        # Archive with custom name
+        archive_path = archive_current_scene('D:/archives', 'shot010_v003')
+
+        # Result will be: D:/archives/shot010_v003/
+    """
+
+    # Validate output directory
+    if not os.path.exists(output_directory):
+        try:
+            os.makedirs(output_directory)
+            print("Created output directory: %s" % output_directory)
+        except Exception as e:
+            cmds.error("Cannot create output directory: %s" % str(e))
+            return None
+
+    archiver = MayaSceneArchiver(output_directory)
+    return archiver.create_archive(archive_name)
+
+
+def archive_scene_interactive():
+    """
+    Interactive version - prompts user for output directory.
+    """
+
+    import maya.cmds as cmds
+
+    # Prompt for output directory
+    output_dir = cmds.fileDialog2(
+        dialogStyle=2,
+        fileMode=3,  # Directory mode
+        caption='Select Archive Output Directory'
+    )
+
+    if not output_dir:
+        print("Archive cancelled")
+        return None
+
+    output_dir = output_dir[0]
+
+    # Get current scene name for default archive name
+    current_scene = cmds.file(query=True, sceneName=True)
+
+    if current_scene:
+        default_name = os.path.splitext(os.path.basename(current_scene))[0] + "_archive"
+    else:
+        default_name = "maya_scene_archive"
+
+    # Prompt for archive name
+    result = cmds.promptDialog(
+        title='Archive Name',
+        message='Enter archive name:',
+        text=default_name,
+        button=['OK', 'Cancel'],
+        defaultButton='OK',
+        cancelButton='Cancel',
+        dismissString='Cancel'
+    )
+
+    if result == 'OK':
+        archive_name = cmds.promptDialog(query=True, text=True)
+        return archive_current_scene(output_dir, archive_name)
+
+    return None
+
+
+def archive_to_project_archives_folder(archive_name=None):
+    """
+    Archive to the current project's 'archives' folder.
+    Creates 'archives' folder in project if it doesn't exist.
+
+    :param archive_name: Optional archive name
+    :return: Path to archive
+
+    Usage:
+        archive_path = archive_to_project_archives_folder('shot010_final')
+    """
+
+    # Get current project path
+    workspace = cmds.workspace(query=True, rootDirectory=True)
+
+    if not workspace:
+        cmds.warning("No project set. Please set a project first.")
+        return None
+
+    # Create archives folder in project
+    archives_folder = os.path.join(workspace, 'archives')
+
+    if not os.path.exists(archives_folder):
+        os.makedirs(archives_folder)
+        print("Created archives folder: %s" % archives_folder)
+
+    return archive_current_scene(archives_folder, archive_name)
+
+
+# ============================================================================
+# EXAMPLE USAGE
+# ============================================================================
+
+"""
+# Basic usage - archive to specific folder:
+archive_path = archive_current_scene('D:/my_archives')
+# Result: D:/my_archives/scene_name_archive/
+
+# With custom archive name:
+archive_path = archive_current_scene('D:/my_archives', 'shot010_anim_v003')
+# Result: D:/my_archives/shot010_anim_v003/
+
+# Interactive with dialogs:
+archive_path = archive_scene_interactive()
+
+# Archive to project's archives folder:
+archive_path = archive_to_project_archives_folder('final_delivery')
+# Result: /current/project/archives/final_delivery/
+
+# Windows paths:
+archive_path = archive_current_scene('C:/Users/Artist/Desktop/archives')
+
+# Network paths:
+archive_path = archive_current_scene('//server/shared/maya_archives')
+
+# Relative to current project:
+import maya.cmds as cmds
+project_path = cmds.workspace(query=True, rootDirectory=True)
+output_dir = os.path.join(project_path, 'deliveries')
+archive_path = archive_current_scene(output_dir, 'final_v001')
+"""
