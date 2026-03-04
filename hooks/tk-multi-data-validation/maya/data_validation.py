@@ -189,7 +189,7 @@ class MayaDataValidationHook(HookBaseClass):
         # Asset - Modelling specific checks
         # ----------------------------------------------------------------
 
-        if self.parent.context.step and self.parent.context.step["name"] == "Model":
+        if self.parent.context.step and self.parent.context.step["name"] == "MODEL" or self.parent.context.step and self.parent.context.step["name"] == "MODEL_A":
             # Remove check 'FPTR Published Files References only' from Asset Model context,
             # it already has a check for 'No References'
             check_list.pop("sg_references", None)
@@ -273,7 +273,7 @@ class MayaDataValidationHook(HookBaseClass):
         # Shot - Light specific checks
         # ----------------------------------------------------------------
 
-        elif self.parent.context.step and self.parent.context.step["name"] == "Light":
+        elif self.parent.context.step and self.parent.context.step["name"] == "LIGHT" or self.parent.context.step and self.parent.context.step["name"] == "LIGHT_A":
 
             check_list.update(
                 {
@@ -294,7 +294,7 @@ class MayaDataValidationHook(HookBaseClass):
         # ----------------------------------------------------------------
 
         elif (
-            self.parent.context.step and self.parent.context.step["name"] == "Animation"
+            self.parent.context.step and self.parent.context.step["name"] == "ANIMATION" or self.parent.context.step and self.parent.context.step["name"] == "ANIMATION_A"
         ):
 
             check_list.update(

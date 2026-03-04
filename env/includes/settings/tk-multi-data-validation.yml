@@ -85,7 +85,7 @@ settings.tk-multi-data-validation.vred:
 
 # asset_step
 settings.tk-multi-data-validation.maya.asset_step:
-  hook_data_validation: "{engine}/tk-multi-data-validation/basic/data_validation.py"
+  hook_data_validation: "{config}/tk-multi-data-validation/basic/data_validation.py"
   hook_scene_operations: "{engine}/tk-multi-data-validation/basic/scene_operations.py"
   rules:
     # Common checks
@@ -114,7 +114,7 @@ settings.tk-multi-data-validation.maya.asset_step:
 
 # shot_step
 settings.tk-multi-data-validation.maya.shot_step:
-  hook_data_validation: "{engine}/tk-multi-data-validation/basic/data_validation.py"
+  hook_data_validation: "{config}/tk-multi-data-validation/basic/data_validation.py"
   hook_scene_operations: "{engine}/tk-multi-data-validation/basic/scene_operations.py"
   rules:
     # Common checks
