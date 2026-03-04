@@ -11,12 +11,11 @@
 import os
 import pprint
 import traceback
-import datetime
 
 import sgtk
 from sgtk.util.filesystem import copy_file, ensure_folder_exists
-import platform
 import nuke
+import shutil
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -856,7 +855,8 @@ class NukeCameraPublishPlugin(HookBaseClass):
                 # copystring = copyCommand + workFileNorm + ' ' + publishFileNorm
                 # os.popen(copystring)
 
-                os.rename(workFileNorm, publishFileNorm)
+                # os.rename(workFileNorm, publishFileNorm)
+                shutil.move(workFileNorm, publishFileNorm)
 
 
             except Exception:

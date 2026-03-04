@@ -10,14 +10,15 @@
 
 import os
 import pprint
-import traceback
-import datetime
+# import traceback
+# import datetime
 
 import sgtk
 from sgtk.util.filesystem import copy_file, ensure_folder_exists
-import platform
+# import platform
 import nuke
-import subprocess
+# import subprocess
+import shutil
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -835,7 +836,8 @@ class BasicFilePublishPlugin(HookBaseClass):
         workFileNorm = os.path.normpath(work_files[0])
         workFileDir = os.path.normpath(os.path.dirname(workFileNorm))
         ensure_folder_exists(os.path.dirname(publish_folder))
-        os.rename(workFileDir, publish_folder)
+        # os.rename(workFileDir, publish_folder)
+        shutil.move(workFileDir, publish_folder)
 
         # for work_file in work_files:
         #
@@ -956,7 +958,6 @@ class BasicFilePublishPlugin(HookBaseClass):
             unreg_cmd = sgtk.get_command('unregister_folders', tk)
             parameters = {"path": oldFolder}
             unreg_cmd.execute(parameters)
-            import shutil
             shutil.rmtree(oldFolder)
             self.logger.info(
                 " Folder %s was deleted" % (oldFolder)

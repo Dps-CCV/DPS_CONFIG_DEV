@@ -12,6 +12,7 @@ import os
 import pprint
 import traceback
 from tank_vendor import six
+import shutil
 
 
 import sgtk
@@ -262,7 +263,8 @@ class RenderPublishPlugin(HookBaseClass):
                 ensure_folder_exists(publish_folder)
                 workFileNorm = os.path.normpath(work_file)
                 publishFileNorm = os.path.normpath(publish_file)
-                os.rename(workFileNorm, publishFileNorm)
+                # os.rename(workFileNorm, publishFileNorm)
+                shutil.move(workFileNorm, publishFileNorm)
             except Exception:
                 raise Exception(
                     "Failed to move work file from '%s' to '%s'.\n%s"
