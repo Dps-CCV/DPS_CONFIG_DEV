@@ -110,6 +110,13 @@ settings.tk-multi-data-validation.maya.asset_step:
       data_type: Meshes
     - id: mesh_history
       data_type: Meshes
+    #EFECTOSCOPIO CUSTOM RULES
+    - id: FPS
+      data_type: Settings
+    - id: Masking Ratio
+      data_type: Settings
+    - id: Shot Resolution
+      data_type: Settings
   location: "@apps.tk-multi-data-validation.location"
 
 # shot_step
@@ -123,11 +130,20 @@ settings.tk-multi-data-validation.maya.shot_step:
     - id: sg_references
       data_type: References
     - id: sync_frame_range
-      data_type: Timeline
+      data_type: Settings
+    - id: one_top_node
+      data_type: Top-Node
     # Light checks
     - id: render_engine
       data_type: Render
     # Animation checks
     - id: empty_anim_layers
       data_type: Layers
+    #EFECTOSCOPIO CUSTOM RULES
+    - id: FPS
+      data_type: Settings
+    - id: Masking Ratio
+      data_type: Settings
+    - id: Shot Resolution
+      data_type: Settings
   location: "@apps.tk-multi-data-validation.location"

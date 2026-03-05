@@ -13,6 +13,8 @@ Hook that gets executed every time an engine has been fully initialized.
 """
 
 from tank import Hook
+import maya.cmds as cmds
+import sgtk
 
 
 class EngineInit(Hook):
@@ -30,22 +32,19 @@ class EngineInit(Hook):
         """
         if engine.name == "tk-maya":
             def SetResolution(self):
-                import maya.cmds as cmds
-                import maya.mel as mel
-                import sgtk
                 engine = sgtk.platform.current_engine()
                 sg = engine.shotgun
                 context = engine.context.entity
                 shot = sg.find_one(context['type'], [['id', 'is', context['id']]], ['sg_width', 'sg_height'])
                 if shot['sg_width'] != None:
-                    pAx = maya.cmds.getAttr("defaultResolution.pixelAspect")
-                    pAr = maya.cmds.getAttr("defaultResolution.deviceAspectRatio")
-                    maya.cmds.setAttr("defaultResolution.aspectLock", 0)
-                    maya.cmds.setAttr("defaultResolution.width", shot['sg_width'])
-                    maya.cmds.setAttr("defaultResolution.height", shot['sg_height'])
-                    maya.cmds.setAttr("defaultResolution.pixelAspect", pAx)
-                    maya.cmds.setAttr("defaultResolution.deviceAspectRatio", pAr)
-                    maya.cmds.setAttr("defaultResolution.aspectLock", 1)
+                    pAx = cmds.getAttr("defaultResolution.pixelAspect")
+                    pAr = cmds.getAttr("defaultResolution.deviceAspectRatio")
+                    cmds.setAttr("defaultResolution.aspectLock", 0)
+                    cmds.setAttr("defaultResolution.width", shot['sg_width'])
+                    cmds.setAttr("defaultResolution.height", shot['sg_height'])
+                    cmds.setAttr("defaultResolution.pixelAspect", pAx)
+                    cmds.setAttr("defaultResolution.deviceAspectRatio", pAr)
+                    cmds.setAttr("defaultResolution.aspectLock", 1)
                     texto = "Render settings resolution changed to: " + str(shot['sg_width']) + "x" + str(shot['sg_height'])
                     cmds.confirmDialog(title="Change status", message=texto)
                 else:
