@@ -15,6 +15,8 @@ import sgtk
 from sgtk.util.filesystem import ensure_folder_exists
 from tank_vendor import six
 import shutil
+import json
+from collections import defaultdict
 
 
 
@@ -363,8 +365,20 @@ class MayaSessionPublishPlugin(HookBaseClass):
 
                 if result:
                     self.logger.info("Scene archived successfully: %s" % result)
+                    # Access the published entity created earlier
+                    sg_publish = item.get_property("sg_publish_data")
+
+                    if sg_publish:
+                        # Update Shotgun/FPT fields as needed
+                        self.sgtk.shotgun.update(
+                            sg_publish["type"],
+                            sg_publish["id"],
+                            {"sg_archived": True}  # Any field you want to update
+                        )
                 else:
                     self.logger.warning("Archive creation returned None - check for errors above")
+            except:
+                self.logger.warning("Archive was not possible")
 
         # do the base class finalization
         super(MayaSessionPublishPlugin, self).finalize(settings, item)
@@ -550,12 +564,7 @@ def _get_save_as_action():
     }
 
 
-import maya.cmds as cmds
-import maya.mel as mel
-import os
-import shutil
-import json
-from collections import defaultdict
+
 
 
 class MayaSceneArchiver:

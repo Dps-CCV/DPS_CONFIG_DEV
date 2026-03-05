@@ -349,8 +349,24 @@ class NukeSessionPublishPlugin(HookBaseClass):
         def wrap():
             WrapItUp.WrapItUp(nk=scriptPath, out=archivePath, parentdircount=3, startnow=True, fonts=True,
                               licinteractive=True, relativerelinked=True, gizmos=True)
+        try:
+            threading.Thread(target=wrap, daemon=True).start()
 
-        threading.Thread(target=wrap, daemon=True).start()
+            # Access the published entity created earlier
+            sg_publish = item.get_property("sg_publish_data")
+
+            if sg_publish:
+                # Update Shotgun/FPT fields as needed
+                self.sgtk.shotgun.update(
+                    sg_publish["type"],
+                    sg_publish["id"],
+                    {"sg_archived": True}  # Any field you want to update
+                )
+
+            self.logger.info("Scene archived successfully")
+        except:
+            self.logger.warning("Archive was not possible")
+
 
 
         # bump the session file to the next version
