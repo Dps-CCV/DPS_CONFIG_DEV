@@ -13,8 +13,6 @@ Hook that gets executed every time an engine has been fully initialized.
 """
 
 from tank import Hook
-import maya.cmds as cmds
-import sgtk
 
 
 class EngineInit(Hook):
@@ -31,6 +29,8 @@ class EngineInit(Hook):
         :type engine: :class:`~sgtk.platform.Engine`
         """
         if engine.name == "tk-maya":
+            import maya.cmds as cmds
+            import sgtk
             def SetResolution(self):
                 engine = sgtk.platform.current_engine()
                 sg = engine.shotgun
