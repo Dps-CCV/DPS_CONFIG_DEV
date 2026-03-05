@@ -46,10 +46,10 @@ class EngineInit(Hook):
                     cmds.setAttr("defaultResolution.deviceAspectRatio", pAr)
                     cmds.setAttr("defaultResolution.aspectLock", 1)
                     texto = "Render settings resolution changed to: " + str(shot['sg_width']) + "x" + str(shot['sg_height'])
-                    cmds.confirmDialog(title="Change status", message=texto)
+                    cmds.confirmDialog(title="Resolution Mismatch", message=texto)
                 else:
                     texto = "Resolution fields could not be found in Shotgun"
-                    cmds.confirmDialog(title="Change status", message=texto)
+                    cmds.confirmDialog(title="Resolution Mismatch", message=texto)
 
             # first, set up our callback, calling out to a method inside the app module contained
             # in the python folder of the app

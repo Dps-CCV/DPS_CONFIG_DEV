@@ -15,8 +15,7 @@ This hook gets executed before and after the context changes in Toolkit.
 from tank import get_hook_baseclass
 import os
 import sgtk
-import maya.cmds as cmds
-import maya.mel as mel
+
 
 
 
@@ -160,6 +159,8 @@ class ContextChange(get_hook_baseclass()):
                     self.logger.info("Reload Config %s", str(current_engine._Engine__engine_instance_name))
 
                 elif current_engine._Engine__engine_instance_name == 'tk-maya':
+                    import maya.cmds as cmds
+                    import maya.mel as mel
                     mel.eval("colorManagementPrefs -refresh;")
 
                     def SetResolution(self):
@@ -178,10 +179,10 @@ class ContextChange(get_hook_baseclass()):
                             cmds.setAttr("defaultResolution.deviceAspectRatio", pAr)
                             cmds.setAttr("defaultResolution.aspectLock", 1)
                             texto = "Render settings resolution changed to: " + str(shot['sg_width']) + "x" + str(shot['sg_height'])
-                            cmds.confirmDialog(title="Change status", message=texto)
+                            cmds.confirmDialog(title="Resolution Mismatch", message=texto)
                         else:
                             texto = "Resolution fields could not be found in Shotgun"
-                            cmds.confirmDialog(title="Change status", message=texto)
+                            cmds.confirmDialog(title="Resolution Mismatch", message=texto)
 
                     # first, set up our callback, calling out to a method inside the app module contained
                     # in the python folder of the app

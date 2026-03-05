@@ -519,9 +519,23 @@ class MayaDataValidationHook(HookBaseClass):
 
     def check_render_engine(self):
         """Check that the current renderer is the one defined in the RENDERER class variable."""
+        engine = sgtk.platform.current_engine()
+        sg = engine.shotgun
+        context = engine.context.entity
+        project = sg.find_one('Project', [['id', 'is', context.project['id']]], ['sg_arnold_version'])
 
         current_renderer = cmds.getAttr("defaultRenderGlobals.currentRenderer")
-        return [] if current_renderer == self.RENDERER["name"] else [current_renderer]
+        if current_renderer == self.RENDERER["name"]:
+            if cmds.pluginInfo("mtoa", query=True, loaded=True):
+                version = cmds.pluginInfo("mtoa", query=True, version=True)
+                FlowVersion = project['sg_arnold_version']
+                if version != FlowVersion:
+                    return ["Version Error-- installed: " + version + " set on Flow: " + FlowVersion]
+            else:
+                return []
+        else:
+            return [current_renderer]
+
 
     def check_empty_animation_layers(self):
         """Check that the animation layers are not empty."""
@@ -651,21 +665,25 @@ class MayaDataValidationHook(HookBaseClass):
     def set_renderer(self, errors):
         """Set Maya renderer."""
 
-        # make sure the plugin is loaded
-        if self.RENDERER["plugin"] and not cmds.pluginInfo(
-            self.RENDERER["plugin"], query=True, loaded=True
-        ):
-            cmds.loadPlugin(self.RENDERER["plugin"])
+        if "version" not in errors:
+            # make sure the plugin is loaded
+            if self.RENDERER["plugin"] and not cmds.pluginInfo(
+                self.RENDERER["plugin"], query=True, loaded=True
+            ):
+                cmds.loadPlugin(self.RENDERER["plugin"])
 
-        if not self.RENDERER["short_name"] in cmds.renderer(
-            query=True, namesOfAvailableRenderers=True
-        ):
-            return
+            if not self.RENDERER["short_name"] in cmds.renderer(
+                query=True, namesOfAvailableRenderers=True
+            ):
+                return
 
-        cmds.setAttr("defaultRenderGlobals.currentRenderer", l=False)
-        cmds.setAttr(
-            "defaultRenderGlobals.currentRenderer", self.RENDERER["name"], type="string"
-        )
+            cmds.setAttr("defaultRenderGlobals.currentRenderer", l=False)
+            cmds.setAttr(
+                "defaultRenderGlobals.currentRenderer", self.RENDERER["name"], type="string"
+            )
+        else:
+            cmds.confirmDialog(title="Arnold version problem", message="Review Arnold version installed. It is not the one set on Flow")
+
 
     ##EFECTOSCOPIO CUSTOM FUNCTIONS
     def fix_resolution(self):
@@ -683,7 +701,7 @@ class MayaDataValidationHook(HookBaseClass):
         cmds.setAttr("defaultResolution.deviceAspectRatio", pAr)
         cmds.setAttr("defaultResolution.aspectLock", 1)
         texto = "Render settings resolution changed to: " + str(shot['sg_width']) + "x" + str(shot['sg_height'])
-        cmds.confirmDialog(title="Change status", message=texto)
+        cmds.confirmDialog(title="Fixed Resolution", message=texto)
 
     def fix_device_aspect(self, context):
         ### Routine for checking frame rate against project settings in the web
