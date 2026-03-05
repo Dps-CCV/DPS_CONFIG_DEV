@@ -419,7 +419,7 @@ class UploadVersionPlugin(HookBaseClass):
                     cmds.lookThru(main)
                     previousMaskOpacity = cmds.getAttr((main + '.displayGateMaskOpacity'))
                     previousAspectRatio = cmds.getAttr("defaultResolution.deviceAspectRatio")
-                    previousOverscan = cmds.getAttr("defaultResolution.overscan")
+                    previousOverscan = cmds.getAttr(main + ".overscan")
                     cmds.setAttr((main + '.displayGateMaskColor'), 0, 0, 0, type="double3")
                     cmds.setAttr((main + '.displayGateMaskOpacity'), 1)
                     cmds.setAttr((main + '.overscan'), 1.0)
@@ -446,7 +446,7 @@ class UploadVersionPlugin(HookBaseClass):
                 else:
                     cmds.setAttr((main + '.displayGateMaskOpacity'), previousMaskOpacity)
                     cmds.setAttr("defaultResolution.deviceAspectRatio", previousAspectRatio)
-                    cmds.setAttr("defaultResolution.deviceAspectRatio", previousOverscan)
+                    cmds.setAttr(main + ".overscan", previousOverscan)
 
         # use the path's filename as the publish name
         path_components = publisher.util.get_file_path_components(uploadPath)
