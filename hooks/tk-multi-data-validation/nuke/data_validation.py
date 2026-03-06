@@ -11,8 +11,8 @@
 import os
 
 import sgtk
-import maya.cmds as cmds
-import maya.mel as mel
+import nuke
+import reportUnusedNodes
 
 
 HookBaseClass = sgtk.get_hook_baseclass()
@@ -77,15 +77,15 @@ class MayaDataValidationHook(HookBaseClass):
         """
 
         check_list = {
-            "unknown_nodes": {
-                "name": "Delete Unknown Nodes",
-                "description": """Check: Unknown nodes<br/>
+            "unused_nodes": {
+                "name": "Delete Unused Nodes",
+                "description": """Check: Unused nodes<br/>
                                 Fix: Delete""",
                 "error_msg": "Found unknown nodes",
-                "check_func": self.check_unknown_nodes,
-                "fix_func": self.delete_items,
+                "check_func": self.check_unused_nodes,
+                "fix_func": self.fix_unused_nodes,
                 "fix_name": "Delete All",
-                "fix_tooltip": "Delete Unknown Nodes.",
+                "fix_tooltip": "Delete Uused Nodes.",
                 "actions": [
                     {"name": "Select All", "callback": self.select_items},
                 ],
@@ -96,27 +96,27 @@ class MayaDataValidationHook(HookBaseClass):
     # Check methods
     # ---------------------------------------------------------------------------
 
-    def check_unknown_nodes(self):
+    def check_unused_nodes(self):
         """Check if there are unknown nodes in the current Maya session."""
 
-        unknown_nodes = cmds.ls(type="unknown")
-        return unknown_nodes
+        x = reportUnusedNodes.analyze()
+        return x
 
     # ---------------------------------------------------------------------------
     # Fix and actions methods
     # ---------------------------------------------------------------------------
 
-    def create_root_node(self, errors):
-        """Create a root top node and group all the previous top nodes under it."""
-        top_nodes = [item["id"] for item in errors]
-        cmds.group(top_nodes, name=self.ROOT_NODE_NAME)
+    def fix_unused_nodes(self, errors):
+        for n in errors:
+            nuke.delete(n)
 
     def select_items(self, errors):
         """Select a list of items."""
         # clear the previous selection before selecting the items
-        cmds.select(cl=True)
+        for node in nuke.allNodes():
+            node.knob('selected').setValue(False)
         for item in errors:
-            cmds.select(item["id"], add=True)
+            item.knob('selected').setValue(True)
 
     # ---------------------------------------------------------------------------
     # Utilities

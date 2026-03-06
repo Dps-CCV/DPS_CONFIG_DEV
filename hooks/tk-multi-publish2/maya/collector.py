@@ -310,66 +310,71 @@ class MayaSessionCollector(HookBaseClass):
         layerList = []
 
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "image_sequence.png")
+
+
         for layer in cmds.ls(type="renderLayer"):
             # layerFixed = cmds.renderSetup(q=True, renderLayers=True)
 
 
             self.logger.info("Processing render layer: %s" % (layer,))
+            renderable_cameras = cmds.ls(type="camera", long=True)
+            renderable_cameras = [cam for cam in renderable_cameras if cmds.getAttr(cam + ".renderable")]
+            for cam in renderable_cameras:
+                if "camMain" in cam:
 
-            # use the render settings api to get a path where the frame number
-            # spec is replaced with a '*' which we can use to glob
-            (frame_glob,) = cmds.renderSettings(
-                genericFrameImageName="*", fullPath=True, layer=layer
-            )
-            if frame_glob not in layerList:
-                layerList.append(frame_glob)
-                # see if there are any files on disk that match this pattern
-                rendered_paths = glob.glob(frame_glob)
+                # use the render settings api to get a path where the frame number
+                # spec is replaced with a '*' which we can use to glob
+                (frame_glob,) = cmds.renderSettings(
+                    genericFrameImageName="*", fullPath=True, layer=layer, camera=cam)
+                if frame_glob not in layerList:
+                    layerList.append(frame_glob)
+                    # see if there are any files on disk that match this pattern
+                    rendered_paths = glob.glob(frame_glob)
 
-                if rendered_paths:
+                    if rendered_paths:
 
-                    if "renders" not in item_types:
-                        renderdivider = parent_item.create_item("maya.session.renders", "Renders",
-                                                             "All Session Renders")
-                        renderdivider.set_icon_from_path(icon_path)
-                        renderdivider.expanded = False
-                        item_types["renders"] = renderdivider
-                        renderdivider.properties["work_template"] = work_template
+                        if "renders" not in item_types:
+                            renderdivider = parent_item.create_item("maya.session.renders", "Renders",
+                                                                 "All Session Renders")
+                            renderdivider.set_icon_from_path(icon_path)
+                            renderdivider.expanded = False
+                            item_types["renders"] = renderdivider
+                            renderdivider.properties["work_template"] = work_template
 
-                    # we only need one path to publish, so take the first one and
-                    # let the base class collector handle it
-                    item = super(MayaSessionCollector, self)._collect_file(
-                        item_types["renders"], rendered_paths[0], frame_sequence=True
-                    )
+                        # we only need one path to publish, so take the first one and
+                        # let the base class collector handle it
+                        item = super(MayaSessionCollector, self)._collect_file(
+                            item_types["renders"], rendered_paths[0], frame_sequence=True
+                        )
 
-                    # the item has been created. update the display name to include
-                    # the an indication of what it is and why it was collected
-                    item.name = "%s (Render Layer: %s)" % (item.name, layer)
-                    item.properties["sequence_paths"] = rendered_paths
-                    item.type_spec = "maya.session.render"
-                    item.properties["publish_type"] = "RENDER_MAYA"
-                    item.properties["work_template"] = work_template
-                    stringLayer = layer
-                    if layer.startswith("rs_"):
-                        stringLayer = layer[3:]
+                        # the item has been created. update the display name to include
+                        # the an indication of what it is and why it was collected
+                        item.name = "%s (Render Layer: %s)" % (item.name, layer)
+                        item.properties["sequence_paths"] = rendered_paths
+                        item.type_spec = "maya.session.render"
+                        item.properties["publish_type"] = "RENDER_MAYA"
+                        item.properties["work_template"] = work_template
+                        stringLayer = layer
+                        if layer.startswith("rs_"):
+                            stringLayer = layer[3:]
 
-                    if "masterLayer" in rendered_paths[0]:
-                        item.properties["maya.layer_name"] = "masterLayer"
-                    else:
-                        item.properties["maya.layer_name"] = stringLayer
+                        if "masterLayer" in rendered_paths[0]:
+                            item.properties["maya.layer_name"] = "masterLayer"
+                        else:
+                            item.properties["maya.layer_name"] = stringLayer
 
-                    item.properties["path"] = rendered_paths[0]
+                        item.properties["path"] = rendered_paths[0]
 
-                    work_fields = work_template.get_fields(_session_path())
+                        work_fields = work_template.get_fields(_session_path())
 
-                    # include the extension in the fields
-                    filename, extension = os.path.splitext(rendered_paths[0])
-                    work_fields["extension"] = extension[1:]
-                    work_fields["frame_num"] = 6969
-                    work_fields["maya.layer_name"] = item.properties["maya.layer_name"]
-                    item.properties["work_fields"] = work_fields
-                    item.properties["publish_version"] = work_fields["version"]
-                    self.logger.info("collecting render layer %s", item.properties["maya.layer_name"])
+                        # include the extension in the fields
+                        filename, extension = os.path.splitext(rendered_paths[0])
+                        work_fields["extension"] = extension[1:]
+                        work_fields["frame_num"] = 6969
+                        work_fields["maya.layer_name"] = item.properties["maya.layer_name"]
+                        item.properties["work_fields"] = work_fields
+                        item.properties["publish_version"] = work_fields["version"]
+                        self.logger.info("collecting render layer %s", item.properties["maya.layer_name"])
 
     # def _collect_meshes(self, parent_item):
     #     """
