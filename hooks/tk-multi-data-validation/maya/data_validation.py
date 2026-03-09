@@ -531,8 +531,8 @@ class MayaDataValidationHook(HookBaseClass):
                 FlowVersion = project['sg_arnold_version']
                 if version != FlowVersion:
                     return ["Version Error-- installed: " + version + " set on Flow: " + FlowVersion]
-            else:
-                return []
+                else:
+                    return [current_renderer]
         else:
             return [current_renderer]
 
