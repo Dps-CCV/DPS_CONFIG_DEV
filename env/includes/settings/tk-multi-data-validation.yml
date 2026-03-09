@@ -154,7 +154,6 @@ settings.tk-multi-data-validation.maya.shot_step:
 # shot_step
 settings.tk-multi-data-validation.nuke:
   hook_data_validation: "{config}/tk-multi-data-validation/nuke/data_validation.py"
-  hook_scene_operations: "{engine}/tk-multi-data-validation/basic/scene_operations.py"
   rules:
     # Common checks
     - id: unused_nodes

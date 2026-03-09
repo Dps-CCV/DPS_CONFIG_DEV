@@ -582,13 +582,10 @@ class MayaDataValidationHook(HookBaseClass):
                     "59.94fps": 59.94, "44100fps": 44100, "48000fps": 48000}
         fps = timeDict[mayaStupidUnit]
         texto = ""
-        if float(projectFps['sg_frame___rate'].replace(",", ".")) != fps or float(
-                projectFps['sg_formato___ratio']) != maskRatio:
-            if float(projectFps['sg_frame___rate'].replace(",", ".")) != fps:
-                texto += "\n" + "El frame rate del proyecto es " + str(
-                    projectFps['sg_frame___rate']) + " y los settings de esta escena son " + str(
-                    fps) + ". Deberías comprobar los settings de la escena"
-            # cmds.confirmDialog(title="Change status", message=texto)
+        if float(projectFps['sg_frame___rate'].replace(",", ".")) != fps:
+            texto += "\n" + "El frame rate del proyecto es " + str(
+                projectFps['sg_frame___rate']) + " y los settings de esta escena son " + str(
+                fps) + ". Deberías comprobar los settings de la escena"
             return [texto]
         else:
             return []
@@ -605,7 +602,6 @@ class MayaDataValidationHook(HookBaseClass):
             texto += "\n" + "El device aspect del proyecto es " + str(
                 project['sg_formato___ratio']) + " y los settings de esta escena son " + str(
                 maskRatio) + ". Deberías comprobar los settings de render"
-            # cmds.confirmDialog(title="Change status", message=texto)
             return [texto]
         else:
             return []
