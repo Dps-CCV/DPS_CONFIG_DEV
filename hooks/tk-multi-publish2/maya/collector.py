@@ -372,6 +372,7 @@ class MayaSessionCollector(HookBaseClass):
                         work_fields["extension"] = extension[1:]
                         work_fields["frame_num"] = 6969
                         work_fields["maya.layer_name"] = item.properties["maya.layer_name"]
+                        work_fields["camera"] = cam
                         item.properties["work_fields"] = work_fields
                         item.properties["publish_version"] = work_fields["version"]
                         self.logger.info("collecting render layer %s", item.properties["maya.layer_name"])
