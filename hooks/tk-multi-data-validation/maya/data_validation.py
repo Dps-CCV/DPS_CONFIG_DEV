@@ -521,7 +521,7 @@ class MayaDataValidationHook(HookBaseClass):
         """Check that the current renderer is the one defined in the RENDERER class variable."""
         engine = sgtk.platform.current_engine()
         sg = engine.shotgun
-        context = engine.context.entity
+        context = engine.context
         project = sg.find_one('Project', [['id', 'is', context.project['id']]], ['sg_arnold_version'])
 
         current_renderer = cmds.getAttr("defaultRenderGlobals.currentRenderer")
