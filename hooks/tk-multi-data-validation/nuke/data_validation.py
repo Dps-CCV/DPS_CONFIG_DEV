@@ -91,7 +91,7 @@ class MayaDataValidationHook(HookBaseClass):
                 ],
             },
         }
-
+        return check_list
 
     # Check methods
     # ---------------------------------------------------------------------------
