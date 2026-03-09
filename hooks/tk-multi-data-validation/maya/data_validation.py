@@ -573,7 +573,7 @@ class MayaDataValidationHook(HookBaseClass):
         ### Routine for checking frame rate against project settings in the web
         engine = sgtk.platform.current_engine()
         sg = engine.shotgun
-        context = engine.context.entity
+        context = engine.context
         projectFps = sg.find_one('Project', [['id', 'is', context.project['id']]],
                                  ['sg_frame___rate', 'sg_formato___ratio'])
         mayaStupidUnit = cmds.currentUnit(query=True, time=True)
@@ -597,7 +597,7 @@ class MayaDataValidationHook(HookBaseClass):
         ### Routine for checking frame rate against project settings in the web
         engine = sgtk.platform.current_engine()
         sg = engine.shotgun
-        context = engine.context.entity
+        context = engine.context
         project = sg.find_one('Project', [['id', 'is', context.project['id']]], ['sg_formato___ratio'])
         maskRatio = round(cmds.getAttr("defaultResolution.deviceAspectRatio"), 3)
         texto = ""
@@ -707,7 +707,7 @@ class MayaDataValidationHook(HookBaseClass):
         ### Routine for checking frame rate against project settings in the web
         engine = sgtk.platform.current_engine()
         sg = engine.shotgun
-        context = engine.context.entity
+        context = engine.context
         project = sg.find_one('Project', [['id', 'is', context.project['id']]], ['sg_formato___ratio'])
         cmds.setAttr("defaultResolution.deviceAspectRatio", round(float(project['sg_formato___ratio'])), 3)
 
