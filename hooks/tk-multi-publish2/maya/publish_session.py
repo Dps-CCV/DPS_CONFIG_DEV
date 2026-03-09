@@ -361,7 +361,8 @@ class MayaSessionPublishPlugin(HookBaseClass):
                 shutil.rmtree(archivePath)
             os.makedirs(archivePath)
             try:
-                result = archive_current_scene(archivePath, file)
+                self.logger.info("Starting archive of the scene")
+                result = archive_current_scene(archivePath, self.logger, file)
 
                 if result:
                     self.logger.info("Scene archived successfully: %s" % result)
@@ -585,7 +586,7 @@ class MayaSceneArchiver:
         self.reference_mapping = {}
         self.temp_scene_path = None
 
-    def create_archive(self, archive_name=None):
+    def create_archive(self, logger, archive_name=None):
         """
         Create complete archive of current scene.
 
@@ -593,9 +594,9 @@ class MayaSceneArchiver:
         :return: Path to archive directory
         """
 
-        print("=" * 70)
-        print("MAYA SCENE ARCHIVER")
-        print("=" * 70)
+        logger.info("=" * 70)
+        logger.info("MAYA SCENE ARCHIVER")
+        logger.info("=" * 70)
 
         # Get current scene info
         current_scene = cmds.file(query=True, sceneName=True)
@@ -610,60 +611,60 @@ class MayaSceneArchiver:
         # Create archive path inside output directory
         archive_path = os.path.join(self.output_dir, archive_name)
 
-        print("\nOutput Directory: %s" % self.output_dir)
-        print("Archive: %s" % archive_path)
-        print("Source scene: %s" % current_scene)
+        logger.info("\nOutput Directory: %s" % self.output_dir)
+        logger.info("Archive: %s" % archive_path)
+        logger.info("Source scene: %s" % current_scene)
 
         # Create archive structure
-        self._create_directory_structure(archive_path)
+        self._create_directory_structure(logger, archive_path)
 
         try:
             # Step 1: Duplicate scene in memory (don't modify original)
-            print("\n[1/6] Creating temporary scene copy...")
-            self._create_temp_scene_copy()
+            logger.info("\n[1/6] Creating temporary scene copy...")
+            self._create_temp_scene_copy(logger)
 
             # Step 2: Collect all file paths
-            print("\n[2/6] Collecting file dependencies...")
-            self._collect_all_files()
+            logger.info("\n[2/6] Collecting file dependencies...")
+            self._collect_all_files(logger)
 
             # Step 3: Import references in temp scene
-            print("\n[3/6] Processing references...")
-            self._process_references()
+            logger.info("\n[3/6] Processing references...")
+            self._process_references(logger)
 
             # Step 4: Copy all files to archive
-            print("\n[4/6] Copying files to archive...")
-            self._copy_files_to_archive()
+            logger.info("\n[4/6] Copying files to archive...")
+            self._copy_files_to_archive(logger)
 
             # Step 5: Save archived scene with updated paths
-            print("\n[5/6] Saving archived scene...")
-            archived_scene_path = self._save_archived_scene(archive_name)
+            logger.info("\n[5/6] Saving archived scene...")
+            archived_scene_path = self._save_archived_scene(logger, archive_name)
 
             # Step 6: Create archive manifest
-            print("\n[6/6] Creating archive manifest...")
-            self._create_manifest(archive_path, archived_scene_path)
+            logger.info("\n[6/6] Creating archive manifest...")
+            self._create_manifest(logger, archive_path, archived_scene_path)
 
             # Restore original scene
-            print("\nRestoring original scene...")
-            self._restore_original_scene(current_scene)
+            logger.info("\nRestoring original scene...")
+            self._restore_original_scene(logger, current_scene)
 
-            print("\n" + "=" * 70)
-            print("ARCHIVE COMPLETE!")
-            print("Location: %s" % archive_path)
-            print("=" * 70)
+            logger.info("\n" + "=" * 70)
+            logger.info("ARCHIVE COMPLETE!")
+            logger.info("Location: %s" % archive_path)
+            logger.info("=" * 70)
 
             return archive_path
 
         except Exception as e:
-            print("\nERROR during archiving: %s" % str(e))
+            logger.info("\nERROR during archiving: %s" % str(e))
             import traceback
             traceback.print_exc()
 
             # Restore original scene
-            self._restore_original_scene(current_scene)
+            self._restore_original_scene(logger, current_scene)
 
             return None
 
-    def _create_directory_structure(self, archive_path):
+    def _create_directory_structure(self, logger, archive_path):
         """Create archive directory structure."""
 
         self.archive_structure = {
@@ -681,9 +682,9 @@ class MayaSceneArchiver:
         for folder_path in self.archive_structure.values():
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
-                print("  Created: %s" % folder_path)
+                logger.info("  Created: %s" % folder_path)
 
-    def _create_temp_scene_copy(self):
+    def _create_temp_scene_copy(self, logger):
         """Create temporary copy of scene in memory."""
 
         import tempfile
@@ -697,46 +698,46 @@ class MayaSceneArchiver:
         cmds.file(rename=self.temp_scene_path)
         cmds.file(save=True, type='mayaAscii')
 
-        print("  Temporary scene created: %s" % self.temp_scene_path)
+        logger.info("  Temporary scene created: %s" % self.temp_scene_path)
 
-    def _collect_all_files(self):
+    def _collect_all_files(self, logger):
         """Collect all file dependencies in the scene."""
 
         # Textures
-        print("\n  Collecting textures...")
+        logger.info("\n  Collecting textures...")
         self._collect_file_nodes()
 
         # Image planes
-        print("  Collecting image planes...")
+        logger.info("  Collecting image planes...")
         self._collect_image_planes()
 
         # Caches (Alembic, GPU, etc.)
-        print("  Collecting caches...")
+        logger.info("  Collecting caches...")
         self._collect_caches()
 
         # Audio files
-        print("  Collecting audio...")
+        logger.info("  Collecting audio...")
         self._collect_audio()
 
         # References
-        print("  Collecting references...")
+        logger.info("  Collecting references...")
         self._collect_references()
 
         # IES files
-        print("  Collecting IES files...")
+        logger.info("  Collecting IES files...")
         self._collect_ies_files()
 
         # Arnold standins
-        print("  Collecting Arnold standins...")
+        logger.info("  Collecting Arnold standins...")
         self._collect_arnold_standins()
 
         # Print summary
         total_files = sum(len(files) for files in self.collected_files.values())
-        print("\n  Total files collected: %d" % total_files)
+        logger.info("\n  Total files collected: %d" % total_files)
 
         for category, files in self.collected_files.items():
             if files:
-                print("    %s: %d" % (category, len(files)))
+                logger.info("    %s: %d" % (category, len(files)))
 
     def _collect_file_nodes(self):
         """Collect texture files from file nodes."""
@@ -899,17 +900,17 @@ class MayaSceneArchiver:
             except:
                 pass
 
-    def _process_references(self):
+    def _process_references(self, logger):
         """Import all references into the temp scene."""
 
         if not self.collected_files['references']:
-            print("  No references to process")
+            logger.info("  No references to process")
             return
 
         # Get all references
         references = cmds.file(query=True, reference=True) or []
 
-        print("  Found %d reference(s)" % len(references))
+        logger.info("  Found %d reference(s)" % len(references))
 
         # Import each reference (in reverse to handle nested refs)
         references.reverse()
@@ -919,7 +920,7 @@ class MayaSceneArchiver:
                 ref_node = cmds.referenceQuery(ref_path, referenceNode=True)
                 namespace = cmds.referenceQuery(ref_path, namespace=True)
 
-                print("    Importing: %s (namespace: %s)" % (
+                logger.info("    Importing: %s (namespace: %s)" % (
                     os.path.basename(ref_path),
                     namespace
                 ))
@@ -934,11 +935,11 @@ class MayaSceneArchiver:
                 }
 
             except Exception as e:
-                print("    WARNING: Could not import reference %s: %s" % (ref_path, str(e)))
+                logger.info("    WARNING: Could not import reference %s: %s" % (ref_path, str(e)))
 
-        print("  All references imported")
+        logger.info("  All references imported")
 
-    def _copy_files_to_archive(self):
+    def _copy_files_to_archive(self, logger):
         """Copy all collected files to archive."""
 
         copied_count = 0
@@ -947,7 +948,7 @@ class MayaSceneArchiver:
             if not files:
                 continue
 
-            print("\n  Copying %s..." % category)
+            logger.info("\n  Copying %s..." % category)
 
             # Determine target directory
             if category == 'textures':
@@ -969,7 +970,7 @@ class MayaSceneArchiver:
                 source_path = file_info['source']
 
                 if not os.path.exists(source_path):
-                    print("    WARNING: File not found: %s" % source_path)
+                    logger.info("    WARNING: File not found: %s" % source_path)
                     continue
 
                 # Generate unique filename to avoid conflicts
@@ -1007,11 +1008,11 @@ class MayaSceneArchiver:
                             pass
 
                 except Exception as e:
-                    print("    ERROR copying %s: %s" % (filename, str(e)))
+                    logger.info("    ERROR copying %s: %s" % (filename, str(e)))
 
-        print("\n  Total files copied: %d" % copied_count)
+        logger.info("\n  Total files copied: %d" % copied_count)
 
-    def _save_archived_scene(self, archive_name):
+    def _save_archived_scene(self, logger, archive_name):
         """Save the archived scene with updated paths."""
 
         archived_scene_path = os.path.join(
@@ -1023,11 +1024,11 @@ class MayaSceneArchiver:
         cmds.file(rename=archived_scene_path)
         cmds.file(save=True, type='mayaAscii')
 
-        print("  Archived scene saved: %s" % archived_scene_path)
+        logger.info("  Archived scene saved: %s" % archived_scene_path)
 
         return archived_scene_path
 
-    def _create_manifest(self, archive_path, archived_scene_path):
+    def _create_manifest(self, logger, archive_path, archived_scene_path):
         """Create JSON manifest with archive information."""
 
         manifest_path = os.path.join(archive_path, 'archive_manifest.json')
@@ -1052,9 +1053,9 @@ class MayaSceneArchiver:
         with open(manifest_path, 'w') as f:
             json.dump(manifest, f, indent=2)
 
-        print("  Manifest created: %s" % manifest_path)
+        logger.info("  Manifest created: %s" % manifest_path)
 
-    def _restore_original_scene(self, original_scene_path):
+    def _restore_original_scene(self, logger, original_scene_path):
         """Restore the original scene without changes."""
 
         # Open original scene
@@ -1067,14 +1068,14 @@ class MayaSceneArchiver:
             except:
                 pass
 
-        print("Original scene restored: %s" % original_scene_path)
+        logger.info("Original scene restored: %s" % original_scene_path)
 
 
 # ============================================================================
 # USAGE FUNCTIONS
 # ============================================================================
 
-def archive_current_scene(output_directory, archive_name=None):
+def archive_current_scene(output_directory, logger, archive_name=None):
     """
     Archive the current Maya scene with all dependencies.
 
@@ -1096,16 +1097,16 @@ def archive_current_scene(output_directory, archive_name=None):
     if not os.path.exists(output_directory):
         try:
             os.makedirs(output_directory)
-            print("Created output directory: %s" % output_directory)
+            logger.info("Created output directory: %s" % output_directory)
         except Exception as e:
             cmds.error("Cannot create output directory: %s" % str(e))
             return None
 
     archiver = MayaSceneArchiver(output_directory)
-    return archiver.create_archive(archive_name)
+    return archiver.create_archive(logger, archive_name)
 
 
-def archive_scene_interactive():
+def archive_scene_interactive(logger):
     """
     Interactive version - prompts user for output directory.
     """
@@ -1120,7 +1121,7 @@ def archive_scene_interactive():
     )
 
     if not output_dir:
-        print("Archive cancelled")
+        logger.info("Archive cancelled")
         return None
 
     output_dir = output_dir[0]
@@ -1146,12 +1147,12 @@ def archive_scene_interactive():
 
     if result == 'OK':
         archive_name = cmds.promptDialog(query=True, text=True)
-        return archive_current_scene(output_dir, archive_name)
+        return archive_current_scene(output_dir, logger, archive_name)
 
     return None
 
 
-def archive_to_project_archives_folder(archive_name=None):
+def archive_to_project_archives_folder(logger, archive_name=None):
     """
     Archive to the current project's 'archives' folder.
     Creates 'archives' folder in project if it doesn't exist.
@@ -1175,9 +1176,9 @@ def archive_to_project_archives_folder(archive_name=None):
 
     if not os.path.exists(archives_folder):
         os.makedirs(archives_folder)
-        print("Created archives folder: %s" % archives_folder)
+        logger.info("Created archives folder: %s" % archives_folder)
 
-    return archive_current_scene(archives_folder, archive_name)
+    return archive_current_scene(archives_folder, logger, archive_name)
 
 
 # ============================================================================
