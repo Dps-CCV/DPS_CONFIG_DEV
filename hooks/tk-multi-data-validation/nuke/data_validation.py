@@ -146,8 +146,8 @@ class MayaDataValidationHook(HookBaseClass):
         undo.begin()
         item = errors[0]
         nuke.delete(item)
+        self.check_unused_nodes()
         undo.end()
-
     # ---------------------------------------------------------------------------
     # Utilities
     # ---------------------------------------------------------------------------
