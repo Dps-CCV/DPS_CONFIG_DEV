@@ -92,11 +92,11 @@ class MayaDataValidationHook(HookBaseClass):
                 "item_actions": [
                     {
                         "name": "Select",
-                        "callback": lambda errors: nuke.toNode(errors[0]['name']).setSelected(True),
+                        "callback": lambda errors: errors[0].setSelected(True),
                     },
                     {
                         "name": "Delete",
-                        "callback": lambda errors: nuke.delete(nuke.toNode(errors[0]['name'])),
+                        "callback": lambda errors: nuke.delete(errors[0]),
                     },
                 ],
             },
