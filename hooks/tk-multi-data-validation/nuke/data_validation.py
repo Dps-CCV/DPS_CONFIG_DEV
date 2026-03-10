@@ -92,11 +92,11 @@ class MayaDataValidationHook(HookBaseClass):
                 "item_actions": [
                     {
                         "name": "Select",
-                        "callback": lambda errors: nuke.toNode(errors[1]).setSelected(True),
+                        "callback": lambda errors: nuke.toNode(errors[0]['name']).setSelected(True),
                     },
                     {
                         "name": "Delete",
-                        "callback": lambda errors: nuke.delete(nuke.toNode(errors[1])),
+                        "callback": lambda errors: nuke.delete(nuke.toNode(errors[0]['name'])),
                     },
                 ],
             },
@@ -119,8 +119,8 @@ class MayaDataValidationHook(HookBaseClass):
         print("nodes listed as errors")
         print(errors)
         for item in errors:
-            #a = nuke.toNode(n)
-            nuke.delete(item)
+            a = nuke.toNode(item['name'])
+            nuke.delete(a)
 
     def select_all_items(self, errors):
         """Select a list of items."""
@@ -128,7 +128,7 @@ class MayaDataValidationHook(HookBaseClass):
         for node in nuke.allNodes():
             node.knob('selected').setValue(False)
         for item in errors:
-            a = nuke.toNode(item)
+            a = nuke.toNode(item['name'])
             a.knob('selected').setValue(True)
 
     # ---------------------------------------------------------------------------
