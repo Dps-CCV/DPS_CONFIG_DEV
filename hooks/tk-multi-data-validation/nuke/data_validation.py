@@ -59,7 +59,7 @@ class MayaDataValidationHook(HookBaseClass):
         formatted_errors = []
 
         for err in errors:
-            formatted_errors.append({"id": err, "name": err})
+            formatted_errors.append({"id": err, "name": err.name()})
 
         return {"is_valid": not errors, "errors": formatted_errors}
 
@@ -81,13 +81,23 @@ class MayaDataValidationHook(HookBaseClass):
                 "name": "Delete Unused Nodes",
                 "description": """Check: Unused nodes<br/>
                                 Fix: Delete""",
-                "error_msg": "Found unknown nodes",
+                "error_msg": "Found unused nodes",
                 "check_func": self.check_unused_nodes,
                 "fix_func": self.fix_unused_nodes,
-                "fix_name": "Delete All",
-                "fix_tooltip": "Delete Uused Nodes.",
+                "fix_name": "Delete All unused nodes",
+                "fix_tooltip": "Delete Unused Nodes.",
                 "actions": [
-                    {"name": "Select All", "callback": self.select_items},
+                    {"name": "Select All", "callback": self.select_all_items},
+                ],
+                "item_actions": [
+                    {
+                        "name": "Select",
+                        "callback": lambda errors: nuke.toNode(errors[1]).setSelected(True),
+                    },
+                    {
+                        "name": "Delete",
+                        "callback": lambda errors: nuke.delete(nuke.toNode(errors[1])),
+                    },
                 ],
             },
         }
@@ -99,24 +109,27 @@ class MayaDataValidationHook(HookBaseClass):
     def check_unused_nodes(self):
         """Check if there are unknown nodes in the current Maya session."""
 
-        x = reportUnusedNodes.analyze()
-        return x
+        return reportUnusedNodes.analyze()
 
     # ---------------------------------------------------------------------------
     # Fix and actions methods
     # ---------------------------------------------------------------------------
 
     def fix_unused_nodes(self, errors):
-        for n in errors:
-            nuke.delete(n)
+        print("nodes listed as errors")
+        print(errors)
+        for item in errors:
+            #a = nuke.toNode(n)
+            nuke.delete(item)
 
-    def select_items(self, errors):
+    def select_all_items(self, errors):
         """Select a list of items."""
         # clear the previous selection before selecting the items
         for node in nuke.allNodes():
             node.knob('selected').setValue(False)
         for item in errors:
-            item.knob('selected').setValue(True)
+            a = nuke.toNode(item)
+            a.knob('selected').setValue(True)
 
     # ---------------------------------------------------------------------------
     # Utilities
