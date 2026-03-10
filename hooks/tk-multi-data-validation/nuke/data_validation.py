@@ -92,11 +92,11 @@ class MayaDataValidationHook(HookBaseClass):
                 "item_actions": [
                     {
                         "name": "Select",
-                        "callback": lambda errors: errors[0].setSelected(True),
+                        "callback": self.select_one,
                     },
                     {
                         "name": "Delete",
-                        "callback": lambda errors: nuke.delete(errors[0]),
+                        "callback": self.delete_one,
                     },
                 ],
             },
@@ -116,11 +116,12 @@ class MayaDataValidationHook(HookBaseClass):
     # ---------------------------------------------------------------------------
 
     def fix_unused_nodes(self, errors):
-        print("nodes listed as errors")
-        print(errors)
+        undo = nuke.Undo()
+        undo.begin()
         for item in errors:
             a = nuke.toNode(item['name'])
             nuke.delete(a)
+        undo.end()
 
     def select_all_items(self, errors):
         """Select a list of items."""
@@ -130,6 +131,22 @@ class MayaDataValidationHook(HookBaseClass):
         for item in errors:
             a = nuke.toNode(item['name'])
             a.knob('selected').setValue(True)
+
+    def select_one(self, errors):
+        item = errors[0]
+        # clear the previous selection before selecting the items
+        for node in nuke.allNodes():
+            node.knob('selected').setValue(False)
+
+        item.knob('selected').setValue(True)
+        nuke.zoom(3, [item.xpos(), item.ypos()])
+
+    def delete_one(self, errors):
+        undo = nuke.Undo()
+        undo.begin()
+        item = errors[0]
+        nuke.delete(item)
+        undo.end()
 
     # ---------------------------------------------------------------------------
     # Utilities
