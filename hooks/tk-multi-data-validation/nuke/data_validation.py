@@ -18,7 +18,7 @@ import reportUnusedNodes
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
-class MayaDataValidationHook(HookBaseClass):
+class NukeDataValidationHook(HookBaseClass):
     """
     Hook to define Alias scene validation functionality.
     """
@@ -131,6 +131,7 @@ class MayaDataValidationHook(HookBaseClass):
         for item in errors:
             a = nuke.toNode(item['name'])
             a.knob('selected').setValue(True)
+        return False
 
     def select_one(self, errors):
         item = errors[0]
@@ -140,6 +141,7 @@ class MayaDataValidationHook(HookBaseClass):
 
         item.knob('selected').setValue(True)
         nuke.zoom(3, [item.xpos(), item.ypos()])
+        return False
 
     def delete_one(self, errors):
         undo = nuke.Undo()
@@ -148,6 +150,7 @@ class MayaDataValidationHook(HookBaseClass):
         nuke.delete(item)
         self.check_unused_nodes()
         undo.end()
+        return True
     # ---------------------------------------------------------------------------
     # Utilities
     # ---------------------------------------------------------------------------
