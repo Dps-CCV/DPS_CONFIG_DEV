@@ -81,12 +81,12 @@ class NukeSceneOperationsHook(HookBaseClass):
     def _on_node_created(self):
         """Callback when a node is created."""
         if self.__change_callback:
-            self._defer_callback(lambda: self.__change_callback())
+            self._defer_callback(lambda: self.__change_callback(text="Node added"))
 
     def _on_node_removed(self):
         """Callback when a node is removed."""
         if self.__reset_callback:
-            self._defer_callback(lambda: self.__reset_callback())
+            self._defer_callback(lambda: self.__reset_callback)
 
     # Utility methods
     # -------------------------------------------------------------------------
@@ -112,7 +112,7 @@ class NukeSceneOperationsHook(HookBaseClass):
             self.logger.warning(
                 "Could not defer callback execution (Qt not available): %s" % str(e)
             )
-
+            # Fallback: execute immediately (may cause errors)
             try:
                 callback()
             except Exception as e2:
