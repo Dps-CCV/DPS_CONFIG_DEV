@@ -113,7 +113,7 @@ class NukeDataValidationHook(HookBaseClass):
                     },
                     {
                         "name": "Delete",
-                        "callback": self.delete_one(errors, rule_id='unused_nodes'),
+                        "callback": lambda errors: self.delete_one(errors, rule_id='unused_nodes'),
                     },
                 ],
             },
