@@ -158,5 +158,7 @@ settings.tk-multi-data-validation.nuke:
     # Common checks
     - id: unused_nodes
       data_type: Optimization
+    - id: bbox_nodes
+      data_type: Optimization
 
   location: "@apps.tk-multi-data-validation.location"

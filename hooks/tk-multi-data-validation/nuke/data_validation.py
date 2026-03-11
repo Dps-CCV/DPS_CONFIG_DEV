@@ -13,6 +13,7 @@ import os
 import sgtk
 import nuke
 import reportUnusedNodes
+import reportBboxNodes
 
 
 HookBaseClass = sgtk.get_hook_baseclass()
@@ -77,6 +78,22 @@ class NukeDataValidationHook(HookBaseClass):
         """
 
         check_list = {
+            "various_writes": {
+                "name": "More than one write render",
+                "description": """Check: write Render 16bits nodes<br/>
+                            """,
+                "error_msg": "Found more than one Render 16bit write",
+                "check_func": self.check_write_nodes,
+                "actions": [
+                    {"name": "Select All", "callback": self.select_all_items},
+                ],
+                "item_actions": [
+                    {
+                        "name": "Select",
+                        "callback": self.select_one,
+                    },
+                ],
+            },
             "unused_nodes": {
                 "name": "Delete Unused Nodes",
                 "description": """Check: Unused nodes<br/>
@@ -96,7 +113,39 @@ class NukeDataValidationHook(HookBaseClass):
                     },
                     {
                         "name": "Delete",
-                        "callback": self.delete_one,
+                        "callback": self.delete_one('unused_nodes'),
+                    },
+                ],
+            },
+            "bbox_nodes": {
+                "name": "Nodes with Big Bbox",
+                "description": """Check: bbox<br/>
+                            """,
+                "error_msg": "Found large bbox nodes",
+                "check_func": self.check_bbox_nodes,
+                "actions": [
+                    {"name": "Select All", "callback": self.select_all_items},
+                ],
+                "item_actions": [
+                    {
+                        "name": "Select",
+                        "callback": self.select_one,
+                    },
+                ],
+            },
+            "check_output_channels": {
+                "name": "Check output channels",
+                "description": """Check: channels<br/>
+                        """,
+                "error_msg": "Output tree has more than rgba channels",
+                "check_func": self.check_channels,
+                "actions": [
+                    {"name": "Select All", "callback": self.select_all_items},
+                ],
+                "item_actions": [
+                    {
+                        "name": "Select",
+                        "callback": self.select_one,
                     },
                 ],
             },
@@ -106,10 +155,85 @@ class NukeDataValidationHook(HookBaseClass):
     # Check methods
     # ---------------------------------------------------------------------------
 
+    def check_write_nodes(self):
+        """Check if there are more than one Write Render 16bits nodes in the current Nuke session."""
+        renderNodes = []
+        for node in nuke.allNodes('WriteTank'):
+            if node.knob('tk_profile_list').value() == 'Render 16bit':
+                renderNodes.append(node)
+            if renderNodes > 1:
+                return renderNodes
+            else:
+                return []
+
+
     def check_unused_nodes(self):
-        """Check if there are unknown nodes in the current Maya session."""
+        """Check if there are unknown nodes in the current Nuke session."""
 
         return reportUnusedNodes.analyze()
+
+    def check_bbox(self):
+        """Check large bbox nodes."""
+
+        return reportBboxNodes.returnBboxNodes()
+
+
+    def check_cannels(self, profile_name="Render 16bit"):
+        """
+        Deselects all nodes, then selects every node that has a 'tk_profile' knob (i.e. WriteTank gizmos)
+        where:
+          - tk_profile == profile_name
+          - the node's input(0) has any channels beyond the 'rgba' layer (e.g., depth.Z, motion, normals, etc.)
+
+        Returns:
+            list[str]: names of matching nodes (which are also selected in the DAG).
+        """
+        # Deselect everything first
+        for n in nuke.allNodes(recurseGroups=True):
+            try:
+                n['selected'].setValue(False)
+            except Exception:
+                pass
+
+        matches = []
+
+        # Look through all nodes (including inside Groups)
+        for node in nuke.allNodes('WriteTank'):
+            tk_knob = node.knob('tk_profile_list')
+            if not tk_knob:
+                continue  # not a WriteTank-style node
+
+            # Check profile
+            try:
+                if tk_knob.value() != profile_name:
+                    continue
+            except Exception:
+                continue
+
+            # Get the input to the WriteTank node
+            inp = node.input(0)
+            if inp is None:
+                continue
+
+            # Inspect the channels available at the input
+            try:
+                chs = inp.channels()  # e.g., ['rgba.red','rgba.green','rgba.blue','rgba.alpha','depth.Z', ...]
+            except Exception:
+                # Can't evaluate channels here; skip this node
+                continue
+
+            # Determine if there are any non-rgba layers present
+            has_channels_beyond_rgba = any(ch.split('.')[0] != 'rgba' for ch in chs)
+
+            if has_channels_beyond_rgba:
+                try:
+                    node['selected'].setValue(True)
+                except Exception:
+                    pass
+                matches.append(node.name())
+
+        return matches
+
 
     # ---------------------------------------------------------------------------
     # Fix and actions methods
@@ -143,14 +267,30 @@ class NukeDataValidationHook(HookBaseClass):
         nuke.zoom(3, [item.xpos(), item.ypos()])
         return False
 
-    def delete_one(self, errors):
+    def delete_one(self, errors, rule_name):
         undo = nuke.Undo()
         undo.begin()
         item = errors[0]
         nuke.delete(item)
-        self.check_unused_nodes()
         undo.end()
-        return True
+        try:
+            # Get the app instance
+            engine = sgtk.platform.current_engine()
+            app = engine.apps.get('tk-multi-data-validation')
+
+            if app:
+                # Get the validation manager
+                manager = app.validation_manager
+
+                # Find the unused_nodes rule
+                rule = manager.get_rule(rule_name)
+
+                if rule:
+                    # Manually run the validation
+                    rule.validate()
+        except Exception as e:
+            print("Could not refresh validation: %s" % str(e))
+
     # ---------------------------------------------------------------------------
     # Utilities
     # ---------------------------------------------------------------------------
