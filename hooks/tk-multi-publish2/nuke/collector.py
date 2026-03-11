@@ -342,16 +342,6 @@ class NukeSessionCollector(HookBaseClass):
             render_template = sg_writenode_app.get_node_render_template(node)
             render_path_fields = render_template.get_fields(publish_path)
 
-            # rp_name = render_path_fields.get("name")
-            # rp_channel = render_path_fields.get("channel")
-            # if not rp_name and not rp_channel:
-            #     publish_name = "%s %s" %(node.knob('tk_profile_list').value(), node.knob('tank_channel').value())
-            # elif not rp_name:
-            #     publish_name = "Channel %s" % rp_channel
-            # elif not rp_channel:
-            #     publish_name = rp_name
-            # else:
-            #     publish_name = "%s, Channel %s" % (rp_name, rp_channel)
 
             publish_name = "%s %s" % ('_'.join(os.path.splitext(os.path.basename(publish_path))[0].split('_')[:-1]), node.knob('tank_channel').value())
 

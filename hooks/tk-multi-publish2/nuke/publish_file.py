@@ -17,8 +17,9 @@ import sgtk
 from sgtk.util.filesystem import copy_file, ensure_folder_exists
 # import platform
 import nuke
-# import subprocess
+import subprocess
 import shutil
+import sys
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -836,7 +837,27 @@ class BasicFilePublishPlugin(HookBaseClass):
         workFileNorm = os.path.normpath(work_files[0])
         workFileDir = os.path.normpath(os.path.dirname(workFileNorm))
         ensure_folder_exists(os.path.dirname(publish_folder))
-        shutil.move(workFileDir, publish_folder)
+        try:
+            shutil.move(workFileDir, publish_folder)
+        except:
+            self.logger.info(
+                "Unable to move folder to publish"
+            )
+            copystring = f'robocopy "{workFileDir}" "{publish_folder}" /MT:12 /J'
+            with subprocess.Popen(
+                    copystring,
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1  # line-buffered
+            ) as proc:
+                for line in proc.stdout:
+                    sys.stdout.write(line)  # stream to your console (or handle it as you like)
+                    self.logger.info(
+                        line
+                    )
+                return_code = proc.wait()
 
 
 

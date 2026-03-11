@@ -122,7 +122,7 @@ class NukeDataValidationHook(HookBaseClass):
                 "description": """Check: bbox<br/>
                             """,
                 "error_msg": "Found large bbox nodes",
-                "check_func": self.check_bbox_nodes,
+                "check_func": self.check_bbox,
                 "actions": [
                     {"name": "Select All", "callback": self.select_all_items},
                 ],
