@@ -209,30 +209,33 @@ class NukeDataValidationHook(HookBaseClass):
         for node in nuke.allNodes('WriteTank'):
             if node.knob('tk_profile_list').value() == 'Render 16bits':
                 renderNodes.append(node)
-        return renderNodes
+        if len(renderNodes)>1:
+            return renderNodes
+        else:
+            return[]
 
 
     def check_materials(self):
+        projPath = os.environ['PROJECT_PATH'].replace("\\", "/")
         materialNodes = []
         for a in nuke.allNodes('Read'):
-            if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate():
+            if a.knob('file').evaluate() != None and projPath not in a.knob('file').evaluate():
                 materialNodes.append(a)
         for a in nuke.allNodes('Camera2'):
-            if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate() and a.knob(
+            if a.knob('file').evaluate() != None and projPath not in a.knob('file').evaluate() and a.knob(
                     'read_from_file').value() == 1:
                 materialNodes.append(a)
         for a in nuke.allNodes('Camera4'):
-            if a.knob('import_enabled').value() == 1 and a.knob('file').evaluate() != None and os.environ[
-                'PROJECT_PATH'] not in a.knob('file').evaluate():
+            if a.knob('import_enabled').value() == 1 and a.knob('file').evaluate() != None and projPath not in a.knob('file').evaluate():
                 materialNodes.append(a)
         for a in nuke.allNodes('ReadGeo2'):
-            if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate():
+            if a.knob('file').evaluate() != None and projPath not in a.knob('file').evaluate():
                 materialNodes.append(a)
         for a in nuke.allNodes('ReadGeo'):
-            if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate():
+            if a.knob('file').evaluate() != None and projPath not in a.knob('file').evaluate():
                 materialNodes.append(a)
         for a in nuke.allNodes('DeepRead'):
-            if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate():
+            if a.knob('file').evaluate() != None and projPath not in a.knob('file').evaluate():
                 materialNodes.append(a)
         return materialNodes
 
