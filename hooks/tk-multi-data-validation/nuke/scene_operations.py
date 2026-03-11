@@ -112,7 +112,7 @@ class NukeSceneOperationsHook(HookBaseClass):
             self.logger.warning(
                 "Could not defer callback execution (Qt not available): %s" % str(e)
             )
-
+            # Fallback: execute immediately (may cause errors)
             try:
                 callback()
             except Exception as e2:
