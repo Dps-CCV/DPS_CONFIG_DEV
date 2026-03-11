@@ -209,10 +209,8 @@ class NukeDataValidationHook(HookBaseClass):
         for node in nuke.allNodes('WriteTank'):
             if node.knob('tk_profile_list').value() == 'Render 16bit':
                 renderNodes.append(node)
-            if renderNodes > 1:
-                return renderNodes
-            else:
-                return []
+        return renderNodes
+
 
     def check_materials(self):
         materialNodes = []
@@ -273,7 +271,7 @@ class NukeDataValidationHook(HookBaseClass):
         return reportBboxNodes.returnBboxNodes()
 
 
-    def check_channels(self, profile_name="Render 16bit"):
+    def check_channels(self, profile_name="Render 16bits"):
         """
         Deselects all nodes, then selects every node that has a 'tk_profile' knob (i.e. WriteTank gizmos)
         where:
