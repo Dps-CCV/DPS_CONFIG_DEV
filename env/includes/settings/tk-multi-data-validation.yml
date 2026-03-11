@@ -154,8 +154,13 @@ settings.tk-multi-data-validation.maya.shot_step:
 # shot_step
 settings.tk-multi-data-validation.nuke:
   hook_data_validation: "{config}/tk-multi-data-validation/nuke/data_validation.py"
+  hook_scene_operations: "{config}/tk-multi-data-validation/nuke/scene_operations.py"
   rules:
     # Common checks
+    - id: various_writes
+      data_type: Output
+    - id: check_output_channels
+      data_type: Output
     - id: unused_nodes
       data_type: Optimization
     - id: bbox_nodes
