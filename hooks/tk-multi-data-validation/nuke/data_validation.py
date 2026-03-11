@@ -60,7 +60,7 @@ class NukeDataValidationHook(HookBaseClass):
         formatted_errors = []
 
         for err in errors:
-            formatted_errors.append({"id": err, "name": err.name()})
+            formatted_errors.append({"id": err.name(), "name": err.name()})
 
         return {"is_valid": not errors, "errors": formatted_errors}
 
@@ -354,7 +354,7 @@ class NukeDataValidationHook(HookBaseClass):
         return False
 
     def select_one(self, errors):
-        item = errors[0]
+        item = nuke.toNode(errors[0])
         # clear the previous selection before selecting the items
         for node in nuke.allNodes():
             node.knob('selected').setValue(False)
@@ -366,60 +366,6 @@ class NukeDataValidationHook(HookBaseClass):
     def delete_one(self, errors, rule_id=None):
         undo = nuke.Undo()
         undo.begin()
-        item = errors[0]
+        item = nuke.toNode(errors[0])
         nuke.delete(item)
         undo.end()
-        # Revalidate the current rule
-        self._revalidate_rule(rule_id)
-
-    def _revalidate_rule(self, rule_id):
-        """
-        Revalidate a specific rule by ID.
-
-        :param rule_id: The ID of the rule to revalidate
-        """
-        try:
-            from sgtk.platform.qt import QtCore
-
-            def do_revalidate():
-                """Deferred revalidation."""
-                try:
-                    engine = sgtk.platform.current_engine()
-                    app = engine.apps.get('tk-multi-data-validation')
-
-                    if not app or not hasattr(app, 'validation_manager'):
-                        return
-
-                    manager = app.validation_manager
-                    rule = self._find_rule(manager, rule_id)
-
-                    if rule and hasattr(rule, 'validate'):
-                        self.logger.debug("Revalidating rule: %s" % rule_id)
-                        rule.validate()
-                    else:
-                        self.logger.warning("Could not find rule: %s" % rule_id)
-
-                except Exception as e:
-                    self.logger.error("Error revalidating: %s" % str(e))
-
-            QtCore.QTimer.singleShot(100, do_revalidate)
-
-        except Exception as e:
-            self.logger.error("Could not schedule revalidation: %s" % str(e))
-
-    def _find_rule(self, manager, rule_id):
-        """Find a validation rule by ID."""
-
-        if hasattr(manager, 'rules'):
-            for rule in manager.rules:
-                rid = getattr(rule, 'id', None) or getattr(rule, 'name', None)
-                if rid == rule_id:
-                    return rule
-
-        if hasattr(manager, 'get_rule'):
-            try:
-                return manager.get_rule(rule_id)
-            except:
-                pass
-
-        return None
