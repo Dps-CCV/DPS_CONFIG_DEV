@@ -59,26 +59,26 @@ class NukeSceneOperations(HookBaseClass):
                 self._on_node_destroyed,
                 nodeClass='*'
             )
-            self.logger.debug("  Registered onDestroy callback")
+            self.logger.info("  Registered onDestroy callback")
 
             # OnCreate: Triggers when nodes are created (optional)
             nuke.addOnCreate(
                 self._on_node_created,
                 nodeClass='*'
             )
-            self.logger.debug("  Registered onCreate callback")
+            self.logger.info("  Registered onCreate callback")
 
             # OnScriptLoad: Reset validation when new script is loaded
             nuke.addOnScriptLoad(
                 self._on_script_loaded
             )
-            self.logger.debug("  Registered onScriptLoad callback")
+            self.logger.info("  Registered onScriptLoad callback")
 
             # OnScriptSave: Optional - mark as changed when script is saved
             nuke.addOnScriptSave(
                 self._on_script_saved
             )
-            self.logger.debug("  Registered onScriptSave callback")
+            self.logger.info("  Registered onScriptSave callback")
 
             self.logger.info("Nuke scene event callbacks registered successfully")
 
@@ -92,7 +92,7 @@ class NukeSceneOperations(HookBaseClass):
         Cleans up callback references when the Data Validation App is closed.
         """
 
-        self.logger.debug("Unregistering Nuke scene event callbacks")
+        self.logger.info("Unregistering Nuke scene event callbacks")
 
         # Clear callback references
         self._reset_callback = None
@@ -117,7 +117,7 @@ class NukeSceneOperations(HookBaseClass):
         # Call reset callback to refresh validation
         if self._reset_callback:
             try:
-                self.logger.debug("Node destroyed - triggering validation reset")
+                self.logger.info("Node destroyed - triggering validation reset")
                 self._reset_callback()
             except Exception as e:
                 self.logger.error("Error in reset callback: %s" % str(e))
@@ -136,7 +136,7 @@ class NukeSceneOperations(HookBaseClass):
         # Call change callback to show warning
         if self._change_callback:
             try:
-                self.logger.debug("Node created - triggering validation change warning")
+                self.logger.info("Node created - triggering validation change warning")
                 self._change_callback()
             except Exception as e:
                 self.logger.error("Error in change callback: %s" % str(e))
@@ -150,7 +150,7 @@ class NukeSceneOperations(HookBaseClass):
 
         if self._reset_callback:
             try:
-                self.logger.debug("Script loaded - resetting validation")
+                self.logger.info("Script loaded - resetting validation")
                 self._reset_callback()
             except Exception as e:
                 self.logger.error("Error in reset callback: %s" % str(e))

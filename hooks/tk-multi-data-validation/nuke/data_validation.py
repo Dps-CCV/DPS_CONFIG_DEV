@@ -149,7 +149,7 @@ class NukeDataValidationHook(HookBaseClass):
                     },
                 ],
             },
-            "check_material": {
+            "check_materials": {
                 "name": "Check material outside of the project",
                 "description": """Check: sorce material<br/>
                     """,
@@ -207,7 +207,7 @@ class NukeDataValidationHook(HookBaseClass):
         """Check if there are more than one Write Render 16bits nodes in the current Nuke session."""
         renderNodes = []
         for node in nuke.allNodes('WriteTank'):
-            if node.knob('tk_profile_list').value() == 'Render 16bit':
+            if node.knob('tk_profile_list').value() == 'Render 16bits':
                 renderNodes.append(node)
         return renderNodes
 
@@ -323,7 +323,7 @@ class NukeDataValidationHook(HookBaseClass):
                     node['selected'].setValue(True)
                 except Exception:
                     pass
-                matches.append(node.name())
+                matches.append(node)
 
         return matches
 
