@@ -186,7 +186,7 @@ class NukeDataValidationHook(HookBaseClass):
                 "description": """Check: camera trackers<br/>
                 """,
                 "error_msg": "There are more than two camera trackers. That could be slowing down the script",
-                "check_func": self.check_camera_trackers(),
+                "check_func": self.check_camera_trackers,
                 "actions": [
                     {"name": "Select All", "callback": self.select_all_items},
                 ],
@@ -214,7 +214,7 @@ class NukeDataValidationHook(HookBaseClass):
             else:
                 return []
 
-    def check_material(self):
+    def check_materials(self):
         materialNodes = []
         for a in nuke.allNodes('Read'):
             if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate():
@@ -273,7 +273,7 @@ class NukeDataValidationHook(HookBaseClass):
         return reportBboxNodes.returnBboxNodes()
 
 
-    def check_cannels(self, profile_name="Render 16bit"):
+    def check_channels(self, profile_name="Render 16bit"):
         """
         Deselects all nodes, then selects every node that has a 'tk_profile' knob (i.e. WriteTank gizmos)
         where:
