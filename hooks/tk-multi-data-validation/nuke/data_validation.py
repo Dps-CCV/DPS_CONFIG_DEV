@@ -113,7 +113,7 @@ class NukeDataValidationHook(HookBaseClass):
                     },
                     {
                         "name": "Delete",
-                        "callback": self.delete_one(),
+                        "callback": self.delete_one,
                     },
                 ],
             },
