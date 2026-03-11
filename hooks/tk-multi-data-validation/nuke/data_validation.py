@@ -111,6 +111,10 @@ class NukeDataValidationHook(HookBaseClass):
                         "name": "Select",
                         "callback": self.select_one,
                     },
+                    {
+                        "name": "Delete",
+                        "callback": self.delete_one(errors, rule_id='unused_nodes'),
+                    },
                 ],
             },
             "bbox_nodes": {
@@ -359,72 +363,63 @@ class NukeDataValidationHook(HookBaseClass):
         nuke.zoom(3, [item.xpos(), item.ypos()])
         return False
 
-    def delete_one(self, errors, rule_name=None):
+    def delete_one(self, errors, rule_id=None):
         undo = nuke.Undo()
         undo.begin()
         item = errors[0]
         nuke.delete(item)
         undo.end()
-        # Trigger widget reset with proper timing
-        self._reset_validation_widget()
-        return item
+        # Revalidate the current rule
+        self._revalidate_rule(rule_id)
 
-
-    # ---------------------------------------------------------------------------
-    # Utilities
-    # ---------------------------------------------------------------------------
-
-
-
-    def _reset_validation_widget(self):
+    def _revalidate_rule(self, rule_id):
         """
-        Reset the validation widget by calling its reset() method directly.
+        Revalidate a specific rule by ID.
 
-        This avoids the UI timing issues with callbacks.
+        :param rule_id: The ID of the rule to revalidate
         """
         try:
             from sgtk.platform.qt import QtCore
 
-            def do_reset():
-                """Execute reset after delay."""
+            def do_revalidate():
+                """Deferred revalidation."""
                 try:
-                    # Get the Data Validation app
                     engine = sgtk.platform.current_engine()
                     app = engine.apps.get('tk-multi-data-validation')
 
-                    if not app:
-                        self.logger.warning("Data Validation app not found")
+                    if not app or not hasattr(app, 'validation_manager'):
                         return
 
-                    # Get the validation widget
-                    # The app should have a reference to the widget
-                    widget = None
+                    manager = app.validation_manager
+                    rule = self._find_rule(manager, rule_id)
 
-                    # Try different possible attributes
-                    if hasattr(app, '_validation_widget'):
-                        widget = app._validation_widget
-                    elif hasattr(app, 'validation_widget'):
-                        widget = app.validation_widget
-                    elif hasattr(app, '_widget'):
-                        widget = app._widget
-                    elif hasattr(app, 'widget'):
-                        widget = app.widget
-
-                    if widget and hasattr(widget, 'reset'):
-                        self.logger.debug("Calling ValidationWidget.reset()")
-                        widget.reset()
+                    if rule and hasattr(rule, 'validate'):
+                        self.logger.debug("Revalidating rule: %s" % rule_id)
+                        rule.validate()
                     else:
-                        self.logger.warning("Could not find ValidationWidget or reset() method")
+                        self.logger.warning("Could not find rule: %s" % rule_id)
 
                 except Exception as e:
-                    self.logger.error("Error resetting validation widget: %s" % str(e))
-                    import traceback
-                    traceback.print_exc()
+                    self.logger.error("Error revalidating: %s" % str(e))
 
-            # Defer reset to avoid UI timing issues
-            # Use 100ms delay to ensure delete operation completes
-            QtCore.QTimer.singleShot(100, do_reset)
+            QtCore.QTimer.singleShot(100, do_revalidate)
 
         except Exception as e:
-            self.logger.error("Could not schedule widget reset: %s" % str(e))
+            self.logger.error("Could not schedule revalidation: %s" % str(e))
 
+    def _find_rule(self, manager, rule_id):
+        """Find a validation rule by ID."""
+
+        if hasattr(manager, 'rules'):
+            for rule in manager.rules:
+                rid = getattr(rule, 'id', None) or getattr(rule, 'name', None)
+                if rid == rule_id:
+                    return rule
+
+        if hasattr(manager, 'get_rule'):
+            try:
+                return manager.get_rule(rule_id)
+            except:
+                pass
+
+        return None
