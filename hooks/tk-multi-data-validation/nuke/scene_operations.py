@@ -14,169 +14,88 @@ import nuke
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
-class NukeSceneOperations(HookBaseClass):
-    """
-    Hook to handle Nuke scene operations and event registration.
-
-    This hook registers Nuke callbacks to automatically refresh validation
-    when the scene changes (nodes created/deleted/modified).
-    """
+class NukeSceneOperationsHook(HookBaseClass):
+    """Hook class that sets up Nuke events to update the Data Validation App."""
 
     def __init__(self, *args, **kwargs):
-        super(NukeSceneOperations, self).__init__(*args, **kwargs)
-
-        # Store callback references
-        self._reset_callback = None
-        self._change_callback = None
-
-        # Track callback IDs for cleanup
-        self._on_create_callbacks = []
-        self._on_destroy_callbacks = []
-        self._on_script_load_callbacks = []
-        self._on_script_save_callbacks = []
+        super(NukeSceneOperationsHook, self).__init__(*args, **kwargs)
+        self.__reset_callback = None
+        self.__change_callback = None
+        self.__callbacks_registered = False
 
     def register_scene_events(self, reset_callback, change_callback):
         """
         Register events for when the scene has changed.
 
+        The function reset_callback provided will reset the current Data Validation App,
+        when called. The function change_callback provided will display a warning in the
+        Data Validation App UI that the scene has changed and the current validation state
+        may be stale.
+
         :param reset_callback: Callback function to reset the Data Validation App.
         :type reset_callback: callable
-        :param change_callback: Callback function to handle changes to the scene.
+        :param change_callback: Callback function to handle the changes to the scene.
         :type change_callback: callable
         """
 
-        self.logger.info("Registering Nuke scene event callbacks")
+        if self.__callbacks_registered:
+            return  # Scene events already registered
 
         # Store callbacks
-        self._reset_callback = reset_callback
-        self._change_callback = change_callback
+        self.__reset_callback = reset_callback
+        self.__change_callback = change_callback
 
-        # Register Nuke callbacks for node deletion
-        # This will trigger when nodes are deleted (e.g., from delete_one action)
-        try:
-            # OnDestroy: Triggers when nodes are deleted
-            nuke.addOnDestroy(
-                self._on_node_destroyed,
-                nodeClass='*'
-            )
-            self.logger.info("  Registered onDestroy callback")
+        # Register Nuke scene events
+        nuke.addOnScriptLoad(self._on_script_loaded)
+        nuke.addOnScriptSave(self._on_script_saved)
+        nuke.addOnScriptClose(self._on_script_closed)
 
-            # OnCreate: Triggers when nodes are created (optional)
-            nuke.addOnCreate(
-                self._on_node_created,
-                nodeClass='*'
-            )
-            self.logger.info("  Registered onCreate callback")
+        # Register Nuke node events
+        nuke.addOnCreate(self._on_node_created, nodeClass='*')
+        nuke.addOnDestroy(self._on_node_removed, nodeClass='*')
 
-            # OnScriptLoad: Reset validation when new script is loaded
-            nuke.addOnScriptLoad(
-                self._on_script_loaded
-            )
-            self.logger.info("  Registered onScriptLoad callback")
-
-            # OnScriptSave: Optional - mark as changed when script is saved
-            nuke.addOnScriptSave(
-                self._on_script_saved
-            )
-            self.logger.info("  Registered onScriptSave callback")
-
-            self.logger.info("Nuke scene event callbacks registered successfully")
-
-        except Exception as e:
-            self.logger.error("Failed to register Nuke callbacks: %s" % str(e))
+        self.__callbacks_registered = True
 
     def unregister_scene_events(self):
         """
         Unregister the scene events.
 
-        Cleans up callback references when the Data Validation App is closed.
+        Note: Nuke doesn't provide removeOnCreate/removeOnDestroy methods,
+        so we clear the callback references to prevent them from being called.
         """
 
-        self.logger.info("Unregistering Nuke scene event callbacks")
+        self.__reset_callback = None
+        self.__change_callback = None
+        self.__callbacks_registered = False
 
-        # Clear callback references
-        self._reset_callback = None
-        self._change_callback = None
-
-        # Note: Nuke's API doesn't provide removeOnCreate/removeOnDestroy methods
-        # The callbacks will remain but won't do anything since we've cleared the references
-
-        self.logger.info("Nuke scene event callbacks unregistered")
-
-    def _on_node_destroyed(self):
-        """
-        Callback triggered when a node is destroyed.
-
-        This will call reset_callback to refresh the validation UI.
-        """
-
-        # Don't trigger during undo/redo operations
-        if self._is_undo_redo_in_progress():
-            return
-
-        # Call reset callback to refresh validation
-        if self._reset_callback:
-            try:
-                self.logger.info("Node destroyed - triggering validation reset")
-                self._reset_callback()
-            except Exception as e:
-                self.logger.error("Error in reset callback: %s" % str(e))
-
-    def _on_node_created(self):
-        """
-        Callback triggered when a node is created.
-
-        This will call change_callback to show a warning that validation may be stale.
-        """
-
-        # Don't trigger during undo/redo operations
-        if self._is_undo_redo_in_progress():
-            return
-
-        # Call change callback to show warning
-        if self._change_callback:
-            try:
-                self.logger.info("Node created - triggering validation change warning")
-                self._change_callback()
-            except Exception as e:
-                self.logger.error("Error in change callback: %s" % str(e))
+    # Scene event callbacks
+    # -------------------------------------------------------------------------
 
     def _on_script_loaded(self):
-        """
-        Callback triggered when a script is loaded.
-
-        Resets validation for the new scene.
-        """
-
-        if self._reset_callback:
-            try:
-                self.logger.info("Script loaded - resetting validation")
-                self._reset_callback()
-            except Exception as e:
-                self.logger.error("Error in reset callback: %s" % str(e))
+        """Callback when a script is loaded."""
+        if self.__reset_callback:
+            self.__reset_callback()
 
     def _on_script_saved(self):
-        """
-        Callback triggered when a script is saved.
-
-        Optionally mark validation as potentially changed.
-        """
-
-        # Usually we don't need to refresh on save
-        # Uncomment if you want to show change warning on save
-        # if self._change_callback:
-        #     self._change_callback()
+        """Callback when a script is saved."""
+        # Optionally show change warning on save
+        # Usually not needed as save doesn't affect validation
         pass
 
-    def _is_undo_redo_in_progress(self):
-        """
-        Check if an undo/redo operation is in progress.
+    def _on_script_closed(self):
+        """Callback when a script is closed."""
+        if self.__reset_callback:
+            self.__reset_callback()
 
-        :return: True if undo/redo is in progress, False otherwise
-        """
-        try:
-            # Nuke doesn't have a direct API for this
-            # This is a workaround - may not work in all versions
-            return False  # TODO: Find a reliable way to detect undo/redo
-        except:
-            return False
+    # Node event callbacks
+    # -------------------------------------------------------------------------
+
+    def _on_node_created(self):
+        """Callback when a node is created."""
+        if self.__change_callback:
+            self.__change_callback(text="Node added")
+
+    def _on_node_removed(self):
+        """Callback when a node is removed."""
+        if self.__change_callback:
+            self.__change_callback(text="Node removed")
