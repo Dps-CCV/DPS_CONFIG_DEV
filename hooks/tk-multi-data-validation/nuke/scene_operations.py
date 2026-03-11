@@ -27,11 +27,6 @@ class NukeSceneOperationsHook(HookBaseClass):
         """
         Register events for when the scene has changed.
 
-        The function reset_callback provided will reset the current Data Validation App,
-        when called. The function change_callback provided will display a warning in the
-        Data Validation App UI that the scene has changed and the current validation state
-        may be stale.
-
         :param reset_callback: Callback function to reset the Data Validation App.
         :type reset_callback: callable
         :param change_callback: Callback function to handle the changes to the scene.
@@ -55,15 +50,10 @@ class NukeSceneOperationsHook(HookBaseClass):
         nuke.addOnDestroy(self._on_node_removed, nodeClass='*')
 
         self.__callbacks_registered = True
+        self.logger.info("Callbacks registered")
 
     def unregister_scene_events(self):
-        """
-        Unregister the scene events.
-
-        Note: Nuke doesn't provide removeOnCreate/removeOnDestroy methods,
-        so we clear the callback references to prevent them from being called.
-        """
-
+        """Unregister the scene events."""
         self.__reset_callback = None
         self.__change_callback = None
         self.__callbacks_registered = False
@@ -74,18 +64,16 @@ class NukeSceneOperationsHook(HookBaseClass):
     def _on_script_loaded(self):
         """Callback when a script is loaded."""
         if self.__reset_callback:
-            self.__reset_callback()
+            self._defer_callback(self.__reset_callback)
 
     def _on_script_saved(self):
         """Callback when a script is saved."""
-        # Optionally show change warning on save
-        # Usually not needed as save doesn't affect validation
         pass
 
     def _on_script_closed(self):
         """Callback when a script is closed."""
         if self.__reset_callback:
-            self.__reset_callback()
+            self._defer_callback(self.__reset_callback)
 
     # Node event callbacks
     # -------------------------------------------------------------------------
@@ -93,9 +81,39 @@ class NukeSceneOperationsHook(HookBaseClass):
     def _on_node_created(self):
         """Callback when a node is created."""
         if self.__change_callback:
-            self.__change_callback(text="Node added")
+            self._defer_callback(lambda: self.__change_callback(text="Node added"))
 
     def _on_node_removed(self):
         """Callback when a node is removed."""
         if self.__change_callback:
-            self.__change_callback(text="Node removed")
+            self._defer_callback(lambda: self.__change_callback(text="Node removed"))
+
+    # Utility methods
+    # -------------------------------------------------------------------------
+
+    def _defer_callback(self, callback):
+        """
+        Defer callback execution to avoid UI timing issues.
+
+        CRITICAL: This prevents the "PythonObject is not attached to a node" error
+        by ensuring callbacks execute after the current operation completes and
+        the UI has time to update.
+
+        :param callback: The callback function to execute
+        """
+        try:
+            from sgtk.platform.qt import QtCore
+
+            # Execute callback after current event loop iteration completes
+            # Using 0ms delay ensures it runs after the delete operation finishes
+            QtCore.QTimer.singleShot(0, callback)
+
+        except Exception as e:
+            self.logger.warning(
+                "Could not defer callback execution (Qt not available): %s" % str(e)
+            )
+            # Fallback: execute immediately (may cause errors)
+            try:
+                callback()
+            except Exception as e2:
+                self.logger.error("Error executing callback: %s" % str(e2))
