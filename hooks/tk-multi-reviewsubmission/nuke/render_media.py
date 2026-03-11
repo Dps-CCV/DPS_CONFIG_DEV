@@ -88,9 +88,6 @@ class RenderMedia(HookBaseClass):
         output_node = None
         ctx = self.__app.context
 
-        if os.environ['PROJECT'] == 'AVATAR_GLASGOW':
-            width = 1080
-            height = 1920
 
         # create group where everything happens
         group = nuke.nodes.Group()
@@ -177,10 +174,7 @@ class RenderMedia(HookBaseClass):
             output_node.setInput(0, scale)
 
             ###Set Write colorspace output to render ACES - Output - Rec 709
-            if os.environ['PROJECT'] == 'AVATAR_GLASGOW':
-                output_node.knob('colorspace').setValue('sRGB')
-            else:
-                output_node.knob('colorspace').setValue('Output - Rec.709')
+            output_node.knob('colorspace').setValue('Output - Rec.709')
             output_node.knob('create_directories').setValue(True)
 
 
