@@ -85,8 +85,8 @@ class NukeSceneOperationsHook(HookBaseClass):
 
     def _on_node_removed(self):
         """Callback when a node is removed."""
-        if self.__change_callback:
-            self._defer_callback(lambda: self.__change_callback(text="Node removed"))
+        if self.__reset_callback:
+            self._defer_callback(lambda: self.__reset_callback(text="Node removed"))
 
     # Utility methods
     # -------------------------------------------------------------------------
