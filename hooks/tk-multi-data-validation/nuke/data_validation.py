@@ -111,10 +111,6 @@ class NukeDataValidationHook(HookBaseClass):
                         "name": "Select",
                         "callback": self.select_one,
                     },
-                    {
-                        "name": "Delete",
-                        "callback": self.delete_one,
-                    },
                 ],
             },
             "bbox_nodes": {
