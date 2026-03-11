@@ -113,7 +113,7 @@ class NukeDataValidationHook(HookBaseClass):
                     },
                     {
                         "name": "Delete",
-                        "callback": self.delete_one('unused_nodes'),
+                        "callback": self.delete_one(rule_name='unused_nodes'),
                     },
                 ],
             },
@@ -267,7 +267,7 @@ class NukeDataValidationHook(HookBaseClass):
         nuke.zoom(3, [item.xpos(), item.ypos()])
         return False
 
-    def delete_one(self, errors, rule_name):
+    def delete_one(self, errors, rule_name=None):
         undo = nuke.Undo()
         undo.begin()
         item = errors[0]
@@ -278,7 +278,7 @@ class NukeDataValidationHook(HookBaseClass):
             engine = sgtk.platform.current_engine()
             app = engine.apps.get('tk-multi-data-validation')
 
-            if app:
+            if app and rule_name != None:
                 # Get the validation manager
                 manager = app.validation_manager
 
