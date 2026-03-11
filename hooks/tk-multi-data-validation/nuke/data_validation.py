@@ -149,6 +149,54 @@ class NukeDataValidationHook(HookBaseClass):
                     },
                 ],
             },
+            "check_material": {
+                "name": "Check material outside of the project",
+                "description": """Check: sorce material<br/>
+                    """,
+                "error_msg": "Some material its outside of the project",
+                "check_func": self.check_materials,
+                "actions": [
+                    {"name": "Select All", "callback": self.select_all_items},
+                ],
+                "item_actions": [
+                    {
+                        "name": "Select",
+                        "callback": self.select_one,
+                    },
+                ],
+            },
+            "check_colorspace": {
+                "name": "Check colorspace settings",
+                "description": """Check: colorspace<br/>
+                    """,
+                "error_msg": "Some nodes have different colorspace settings than the project",
+                "check_func": self.check_colorspaces,
+                "actions": [
+                    {"name": "Select All", "callback": self.select_all_items},
+                ],
+                "item_actions": [
+                    {
+                        "name": "Select",
+                        "callback": self.select_one,
+                    },
+                ],
+            },
+            "check_camera_trackers": {
+                "name": "Check camera trackers",
+                "description": """Check: camera trackers<br/>
+                """,
+                "error_msg": "There are more than two camera trackers. That could be slowing down the script",
+                "check_func": self.check_camera_trackers(),
+                "actions": [
+                    {"name": "Select All", "callback": self.select_all_items},
+                ],
+                "item_actions": [
+                    {
+                        "name": "Select",
+                        "callback": self.select_one,
+                    },
+                ],
+            },
         }
         return check_list
 
@@ -166,6 +214,53 @@ class NukeDataValidationHook(HookBaseClass):
             else:
                 return []
 
+    def check_material(self):
+        materialNodes = []
+        for a in nuke.allNodes('Read'):
+            if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate():
+                materialNodes.append(a)
+        for a in nuke.allNodes('Camera2'):
+            if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate() and a.knob(
+                    'read_from_file').value() == 1:
+                materialNodes.append(a)
+        for a in nuke.allNodes('Camera4'):
+            if a.knob('import_enabled').value() == 1 and a.knob('file').evaluate() != None and os.environ[
+                'PROJECT_PATH'] not in a.knob('file').evaluate():
+                materialNodes.append(a)
+        for a in nuke.allNodes('ReadGeo2'):
+            if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate():
+                materialNodes.append(a)
+        for a in nuke.allNodes('ReadGeo'):
+            if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate():
+                materialNodes.append(a)
+        for a in nuke.allNodes('DeepRead'):
+            if a.knob('file').evaluate() != None and os.environ['PROJECT_PATH'] not in a.knob('file').evaluate():
+                materialNodes.append(a)
+        return materialNodes
+
+    def check_colorspaces(self):
+        x = nuke.allNodes("Read")
+        nodeErrors = []
+        for a in x:
+            if '_LGT_' in a.knob('file').evaluate() and 'AcesCg' not in a.knob('colorspace').value():
+                nodeErrors.append(a)
+            if '_PARAFX_' in a.knob('file').evaluate() and os.environ['PROJECTCOLORSPACE'] not in a.knob(
+                    'colorspace').value():
+                nodeErrors.append(a)
+        e = nuke.allNodes('WriteTank')
+        for b in e:
+            if b.knob('tk_profile_list').value() == 'Render 16bits' and os.environ['PROJECTCOLORSPACE'] not in b.knob(
+                    'colorspace').value():
+                nodeErrors.append(b)
+        if 'AcesCg' not in nuke.root().knob('workingSpaceLUT').value():
+            nodeErrors.append(nuke.root())
+        return nodeErrors
+
+    def check_camera_trackers(self):
+        if len(nuke.allNodes('CameraTracker'))>2:
+            return nuke.allNodes('CameraTracker')
+        else:
+            return []
 
     def check_unused_nodes(self):
         """Check if there are unknown nodes in the current Nuke session."""

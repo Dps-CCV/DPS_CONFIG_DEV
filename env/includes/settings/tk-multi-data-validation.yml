@@ -161,9 +161,17 @@ settings.tk-multi-data-validation.nuke:
       data_type: Output
     - id: check_output_channels
       data_type: Output
+    - id: check_colorspace
+      data_type: Settings
+    - id: check_materials
+      data_type: Settings
     - id: unused_nodes
       data_type: Optimization
     - id: bbox_nodes
+      data_type: Optimization
+    - id: check_materials
+      data_type: Optimization
+    - id: check_camera_trackers
       data_type: Optimization
 
   location: "@apps.tk-multi-data-validation.location"
