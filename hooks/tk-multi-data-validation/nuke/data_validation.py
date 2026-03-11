@@ -365,6 +365,8 @@ class NukeDataValidationHook(HookBaseClass):
         item = errors[0]
         nuke.delete(item)
         undo.end()
+        # Trigger widget reset with proper timing
+        self._reset_validation_widget()
         return item
 
 
@@ -373,4 +375,56 @@ class NukeDataValidationHook(HookBaseClass):
     # ---------------------------------------------------------------------------
 
 
+
+    def _reset_validation_widget(self):
+        """
+        Reset the validation widget by calling its reset() method directly.
+
+        This avoids the UI timing issues with callbacks.
+        """
+        try:
+            from sgtk.platform.qt import QtCore
+
+            def do_reset():
+                """Execute reset after delay."""
+                try:
+                    # Get the Data Validation app
+                    engine = sgtk.platform.current_engine()
+                    app = engine.apps.get('tk-multi-data-validation')
+
+                    if not app:
+                        self.logger.warning("Data Validation app not found")
+                        return
+
+                    # Get the validation widget
+                    # The app should have a reference to the widget
+                    widget = None
+
+                    # Try different possible attributes
+                    if hasattr(app, '_validation_widget'):
+                        widget = app._validation_widget
+                    elif hasattr(app, 'validation_widget'):
+                        widget = app.validation_widget
+                    elif hasattr(app, '_widget'):
+                        widget = app._widget
+                    elif hasattr(app, 'widget'):
+                        widget = app.widget
+
+                    if widget and hasattr(widget, 'reset'):
+                        self.logger.debug("Calling ValidationWidget.reset()")
+                        widget.reset()
+                    else:
+                        self.logger.warning("Could not find ValidationWidget or reset() method")
+
+                except Exception as e:
+                    self.logger.error("Error resetting validation widget: %s" % str(e))
+                    import traceback
+                    traceback.print_exc()
+
+            # Defer reset to avoid UI timing issues
+            # Use 100ms delay to ensure delete operation completes
+            QtCore.QTimer.singleShot(100, do_reset)
+
+        except Exception as e:
+            self.logger.error("Could not schedule widget reset: %s" % str(e))
 
