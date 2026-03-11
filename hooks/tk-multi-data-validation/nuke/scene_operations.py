@@ -45,7 +45,7 @@ class NukeSceneOperations(HookBaseClass):
         :type change_callback: callable
         """
 
-        self.logger.debug("Registering Nuke scene event callbacks")
+        self.logger.info("Registering Nuke scene event callbacks")
 
         # Store callbacks
         self._reset_callback = reset_callback
