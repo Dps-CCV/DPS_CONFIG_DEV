@@ -113,7 +113,7 @@ class NukeDataValidationHook(HookBaseClass):
                     },
                     {
                         "name": "Delete",
-                        "callback": lambda errors: self.delete_one(errors, rule_id='unused_nodes'),
+                        "callback": self.delete_one(),
                     },
                 ],
             },
@@ -363,7 +363,7 @@ class NukeDataValidationHook(HookBaseClass):
         nuke.zoom(3, [item.xpos(), item.ypos()])
         return False
 
-    def delete_one(self, errors, rule_id=None):
+    def delete_one(self, errors):
         undo = nuke.Undo()
         undo.begin()
         item = nuke.toNode(errors[0])
