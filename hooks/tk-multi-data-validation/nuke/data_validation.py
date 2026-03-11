@@ -113,7 +113,7 @@ class NukeDataValidationHook(HookBaseClass):
                     },
                     {
                         "name": "Delete",
-                        "callback": self.delete_one(rule_name='unused_nodes'),
+                        "callback": self.delete_one,
                     },
                 ],
             },
@@ -273,23 +273,8 @@ class NukeDataValidationHook(HookBaseClass):
         item = errors[0]
         nuke.delete(item)
         undo.end()
-        try:
-            # Get the app instance
-            engine = sgtk.platform.current_engine()
-            app = engine.apps.get('tk-multi-data-validation')
+        return item
 
-            if app and rule_name != None:
-                # Get the validation manager
-                manager = app.validation_manager
-
-                # Find the unused_nodes rule
-                rule = manager.get_rule(rule_name)
-
-                if rule:
-                    # Manually run the validation
-                    rule.validate()
-        except Exception as e:
-            print("Could not refresh validation: %s" % str(e))
 
     # ---------------------------------------------------------------------------
     # Utilities
