@@ -211,7 +211,11 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
         render_path = item.properties.get("path")
 
         sg_publish_data = item.properties.get("sg_publish_data")
-        sg_parent_publish_data = item.parent.properties.get("sg_publish_data")
+        try:
+            sg_parent_publish_data = item.parent.properties.get("sg_publish_data")
+            self.logger.info(sg_parent_publish_data)
+        except:
+            self.logger.info("No parent publish data found")
         if sg_publish_data is None:
             raise Exception(
                 "'sg_publish_data' was not found in the item's properties. "

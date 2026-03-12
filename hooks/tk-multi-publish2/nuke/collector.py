@@ -98,9 +98,10 @@ class NukeSessionCollector(HookBaseClass):
 
             # run node collection if not in hiero
             if hasattr(engine, "hiero_enabled") and not engine.hiero_enabled:
-                self.collect_sg_writenodes(project_item)
-                self.collect_sg_writeGeoCam_nodes(project_item)
-                self.collect_sg_writeGeo_nodes(project_item)
+                item_types = {}
+                self.collect_sg_writenodes(project_item, item_types)
+                self.collect_sg_writeGeoCam_nodes(project_item, item_types)
+                self.collect_sg_writeGeo_nodes(project_item, item_types)
                 self.collect_node_outputs(project_item)
         else:
             nuke.message("Estás en modo proxy. Desactivalo para publicar")
@@ -168,6 +169,7 @@ class NukeSessionCollector(HookBaseClass):
         import hiero.core
 
         publisher = self.parent
+
 
         # go ahead and build the path to the icon for use by any projects
         icon_path = os.path.join(
@@ -285,7 +287,7 @@ class NukeSessionCollector(HookBaseClass):
                     # collected within the current session.
                     item.name = "%s (%s)" % (item.name, node.name())
 
-    def collect_sg_writenodes(self, parent_item):
+    def collect_sg_writenodes(self, parent_item, item_types):
         """
         Collect any rendered sg write nodes in the session.
 
@@ -306,6 +308,28 @@ class NukeSessionCollector(HookBaseClass):
         first_frame = int(nuke.root()["first_frame"].value())
         last_frame = int(nuke.root()["last_frame"].value())
 
+        # mattepaintList = 0
+        # imageplaneList = 0
+        # precompList = 0
+        # techprecompList = 0
+        # alphaList = 0
+        # renderList = 0
+        # for node in sg_writenode_app.get_write_nodes():
+        #     if node.knob('tk_profile_list').value() == "MATTE_PAINT":
+        #         mattepaintList+=1
+        #     elif node.knob('tk_profile_list').value() in ["IMAGE_PLANE", "IMAGE_PLANE_MOV"]:
+        #         imageplaneList += 1
+        #     elif node.knob('tk_profile_list').value() == "PRECOMP":
+        #         precompList += 1
+        #     elif node.knob('tk_profile_list').value() == "TECH_PRECOMP":
+        #         techprecompList += 1
+        #     elif node.knob('tk_profile_list').value() == "ALPHA":
+        #         alphaList += 1
+        #     elif node.knob('tk_profile_list').value() == "Render 16bits":
+        #         renderList += 1
+
+
+
         for node in sg_writenode_app.get_write_nodes():
             publish_path_CHECK = sg_writenode_app.get_node_render_path(node)
 
@@ -322,9 +346,6 @@ class NukeSessionCollector(HookBaseClass):
             # some files rendered, use first frame to get some publish item info
             path = rendered_files[0]
             item_info = super(NukeSessionCollector, self)._get_item_info(path)
-            self.logger.info(item_info)
-            self.logger.info(path)
-            self.logger.info(rendered_files)
 
             # item_info will be for the single file. we'll update the type and
             # display to represent a sequence. This is the same pattern used by
@@ -339,7 +360,6 @@ class NukeSessionCollector(HookBaseClass):
             else:
                 item_type = "%s.sequence" % (item_info["item_type"],)
                 type_display = "%s Sequence" % (item_info["type_display"],)
-            self.logger.info(item_type)
             # we'll publish the path with the frame/eye spec (%V, %04d)
             publish_path = sg_writenode_app.get_node_render_path(node)
 
@@ -356,10 +376,78 @@ class NukeSessionCollector(HookBaseClass):
             # use the path basename and nuke writenode name for display
             (_, filename) = os.path.split(publish_path)
             display_name = "%s (%s)" % (publish_name, node.name())
+            icon_path = item_info["icon_path"]
 
-            # create and populate the item
-            item = parent_item.create_item(item_type, type_display, display_name)
-            item.set_icon_from_path(item_info["icon_path"])
+
+            if node.knob('tk_profile_list').value() == "MATTE_PAINT":
+                if "MATTE_PAINT" not in item_types:
+                    renderdivider = parent_item.create_item("nuke.session.mattepaint", "MATTE_PAINTS",
+                                                            "All Session MATTE_PAINTS")
+                    renderdivider.set_icon_from_path(icon_path)
+                    renderdivider.expanded = False
+                    item_types["MATTE_PAINT"] = renderdivider
+                # create and populate the item
+                item = item_types["MATTE_PAINT"].create_item(item_type, type_display, display_name)
+                item.set_icon_from_path(item_info["icon_path"])
+
+            elif node.knob('tk_profile_list').value() in ["IMAGE_PLANE", "IMAGE_PLANE_MOV"]:
+                if "IMAGE_PLANE" not in item_types:
+                    renderdivider = parent_item.create_item("nuke.session.imageplane", "IMAGE_PLANES",
+                                                            "All Session IMAGE_PLANES")
+                    renderdivider.set_icon_from_path(icon_path)
+                    renderdivider.expanded = False
+                    item_types["IMAGE_PLANE"] = renderdivider
+                # create and populate the item
+                item = item_types["IMAGE_PLANE"].create_item(item_type, type_display, display_name)
+                item.set_icon_from_path(item_info["icon_path"])
+
+            elif node.knob('tk_profile_list').value() == "PRECOMP":
+                if "PRECOMP" not in item_types:
+                    renderdivider = parent_item.create_item("nuke.session.precomp", "PRECOMPS",
+                                                            "All Session PRECOMPS")
+                    renderdivider.set_icon_from_path(icon_path)
+                    renderdivider.expanded = False
+                    item_types["PRECOMP"] = renderdivider
+                # create and populate the item
+                item = item_types["PRECOMP"].create_item(item_type, type_display, display_name)
+                item.set_icon_from_path(item_info["icon_path"])
+
+            elif node.knob('tk_profile_list').value() == "TECH_PRECOMP":
+                if "TECH_PRECOMP" not in item_types:
+                    renderdivider = parent_item.create_item("nuke.session.tech_precomp", "TECH_PRECOMPS",
+                                                            "All Session TECH_PRECOMPS")
+                    renderdivider.set_icon_from_path(icon_path)
+                    renderdivider.expanded = False
+                    item_types["TECH_PRECOMP"] = renderdivider
+                # create and populate the item
+                item = item_types["TECH_PRECOMP"].create_item(item_type, type_display, display_name)
+                item.set_icon_from_path(item_info["icon_path"])
+
+            elif node.knob('tk_profile_list').value() == "ALPHA":
+                if "ALPHA" not in item_types:
+                    renderdivider = parent_item.create_item("nuke.session.alpha", "ALPHAS",
+                                                            "All Session ALPHAS")
+                    renderdivider.set_icon_from_path(icon_path)
+                    renderdivider.expanded = False
+                    item_types["ALPHA"] = renderdivider
+                # create and populate the item
+                item = item_types["ALPHA"].create_item(item_type, type_display, display_name)
+                item.set_icon_from_path(item_info["icon_path"])
+
+            else:
+                if "RENDER" not in item_types:
+                    renderdivider = parent_item.create_item("nuke.session.renders", "RENDERS",
+                                                            "All Session Renders")
+                    renderdivider.set_icon_from_path(icon_path)
+                    renderdivider.expanded = False
+                    item_types["RENDER"] = renderdivider
+                # create and populate the item
+                item = item_types["RENDER"].create_item(item_type, type_display, display_name)
+                item.set_icon_from_path(item_info["icon_path"])
+
+            # # create and populate the item
+            # item = parent_item.create_item(item_type, type_display, display_name)
+            # item.set_icon_from_path(item_info["icon_path"])
 
             # if the supplied path is an image, use the path as # the thumbnail.
             item.set_thumbnail_from_path(path)
@@ -402,14 +490,10 @@ class NukeSessionCollector(HookBaseClass):
                 item.properties["publish_type"] = "PRECOMP"
                 item.properties["render_first"] = int(rendered_files[0][-8:-4])
                 item.properties["render_last"] = int(rendered_files[-1][-8:-4])
-                self.logger.info("LOLOLOLOLO: %s" % (rendered_files[0][-8:-4],))
-                self.logger.info("LOLOLOLOLO: %s" % (rendered_files[-1][-8:-4],))
             elif node.knob('tk_profile_list').value() == "TECH_PRECOMP":
                 item.properties["publish_type"] = "TECH_PRECOMP"
                 item.properties["render_first"] = int(rendered_files[0][-8:-4])
                 item.properties["render_last"] = int(rendered_files[-1][-8:-4])
-                self.logger.info("LOLOLOLOLO: %s" % (rendered_files[0][-8:-4],))
-                self.logger.info("LOLOLOLOLO: %s" % (rendered_files[-1][-8:-4],))
             elif node.knob('tk_profile_list').value() == "ALPHA":
                 item.properties["publish_type"] = "ALPHA_RENDER"
             else:
@@ -426,7 +510,7 @@ class NukeSessionCollector(HookBaseClass):
             self.logger.info("Collected file: %s" % (publish_path,))
 
 
-    def collect_sg_writeGeoCam_nodes(self, parent_item):
+    def collect_sg_writeGeoCam_nodes(self, parent_item, item_types):
         """
         Collect any rendered sg write nodes in the session.
 
@@ -556,7 +640,7 @@ class NukeSessionCollector(HookBaseClass):
 
             self.logger.info("Collected file: %s" % (publish_path,))
 
-    def collect_sg_writeGeo_nodes(self, parent_item):
+    def collect_sg_writeGeo_nodes(self, parent_item, item_types):
         """
         Collect any rendered sg write nodes in the session.
 
