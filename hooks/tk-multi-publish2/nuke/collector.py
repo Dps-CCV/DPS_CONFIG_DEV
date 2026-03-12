@@ -312,6 +312,10 @@ class NukeSessionCollector(HookBaseClass):
 
             # see if any frames have been rendered for this write node
             rendered_files = sg_writenode_app.get_node_render_files(node)
+            try:
+                rendered_files = sorted(rendered_files)
+            except:
+                self.logger.info ("Unable to sort the rendered files")
             if not rendered_files:
                 continue
 
