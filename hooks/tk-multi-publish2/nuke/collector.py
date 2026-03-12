@@ -398,10 +398,14 @@ class NukeSessionCollector(HookBaseClass):
                 item.properties["publish_type"] = "PRECOMP"
                 item.properties["render_first"] = int(rendered_files[0][-8:-4])
                 item.properties["render_last"] = int(rendered_files[-1][-8:-4])
+                self.logger.info("LOLOLOLOLO: %s" % (rendered_files[0][-8:-4],))
+                self.logger.info("LOLOLOLOLO: %s" % (rendered_files[-1][-8:-4],))
             elif node.knob('tk_profile_list').value() == "TECH_PRECOMP":
                 item.properties["publish_type"] = "TECH_PRECOMP"
                 item.properties["render_first"] = int(rendered_files[0][-8:-4])
                 item.properties["render_last"] = int(rendered_files[-1][-8:-4])
+                self.logger.info("LOLOLOLOLO: %s" % (rendered_files[0][-8:-4],))
+                self.logger.info("LOLOLOLOLO: %s" % (rendered_files[-1][-8:-4],))
             elif node.knob('tk_profile_list').value() == "ALPHA":
                 item.properties["publish_type"] = "ALPHA_RENDER"
             else:

@@ -250,26 +250,40 @@ class NukeDataValidationHook(HookBaseClass):
         x = nuke.allNodes("Read")
         nodeErrors = []
         for a in x:
-            if '_LGT_' in a.knob('file').evaluate() and 'AcesCg' not in a.knob('colorspace').value():
-                nodeErrors.append(a)
+            if '_LGT_' in a.knob('file').evaluate() and 'ACEScg' not in a.knob('colorspace').value():
+                if 'scene_linear' not in a.knob('colorspace').value():
+                    nodeErrors.append(a)
             if '_PARAFX_' in a.knob('file').evaluate() and os.environ['PROJECTCOLORSPACE'] not in a.knob(
                     'colorspace').value():
-                nodeErrors.append(a)
+                if os.environ['PROJECTCOLORSPACE'] == 'ACES2065-1' and 'aces_interchange' not in a.knob('colorspace').value():
+                    nodeErrors.append(a)
+                else:
+                    nodeErrors.append(a)
+
         e = nuke.allNodes('WriteTank')
         for b in e:
             if b.knob('tk_profile_list').value() == 'Render 16bits' and os.environ['PROJECTCOLORSPACE'] not in b.knob(
                     'colorspace').value():
-                nodeErrors.append(b)
+                if os.environ['PROJECTCOLORSPACE'] == 'ACES2065-1' and 'aces_interchange' not in b.knob('colorspace').value():
+                    nodeErrors.append(b)
+                else:
+                    nodeErrors.append(b)
             elif b.knob('tk_profile_list').value() == 'PRECOMP' and os.environ['PROJECTCOLORSPACE'] not in b.knob(
                     'colorspace').value():
-                nodeErrors.append(b)
+                if os.environ['PROJECTCOLORSPACE'] == 'ACES2065-1' and 'aces_interchange' not in b.knob('colorspace').value():
+                    nodeErrors.append(b)
+                else:
+                    nodeErrors.append(b)
             elif b.knob('tk_profile_list').value() == 'TECH_PRECOMP' and 'ACEScg' not in b.knob(
                     'colorspace').value():
-                nodeErrors.append(b)
+                if 'scene_linear' not in b.knob('colorspace').value():
+                    nodeErrors.append(b)
         if 'ACEScg' not in nuke.root().knob('workingSpaceLUT').value():
-            nodeErrors.append(nuke.root().knob('workingSpaceLUT'))
+            if 'scene_linear' not in nuke.root().knob('workingSpaceLUT').value():
+                nodeErrors.append(nuke.root().knob('workingSpaceLUT'))
         if os.environ['PROJECTCOLORSPACE'] not in nuke.root().knob('floatLut').value():
-            nodeErrors.append(nuke.root().knob('floatLut'))
+            if 'aces_interchange' not in nuke.root().knob('floatLut').value():
+                nodeErrors.append(nuke.root().knob('floatLut'))
         if nuke.root().knob('colorManagement').value() != 'OCIO':
             nodeErrors.append(nuke.root().knob('colorManagement'))
         return nodeErrors
