@@ -329,11 +329,12 @@ class NukeSessionCollector(HookBaseClass):
             # the sequence path, template knowledge provided by the
             # tk-nuke-writenode app. The base collector makes some "zero config"
             # assupmtions about the path that we don't need to make here.
-            if node.knob('tk_profile_list').value() in ["Render 16bits", "Render JPG", "IMAGE_PLANE", "ALPHA", "MATTE_PAINT"]:
-                item_type = "%s.sequence" % (item_info["item_type"],)
+            if node.knob('tk_profile_list').value() in ["IMAGE_PLANE_MOV"]:
+                item_type = "%s.video" % (item_info["item_type"],)
+                type_display = "%s Video" % (item_info["type_display"],)
             else:
-                item_type = "%s.precompSequence" % (item_info["item_type"],)
-            type_display = "%s Sequence" % (item_info["type_display"],)
+                item_type = "%s.sequence" % (item_info["item_type"],)
+                type_display = "%s Sequence" % (item_info["type_display"],)
             self.logger.info(item_type)
             # we'll publish the path with the frame/eye spec (%V, %04d)
             publish_path = sg_writenode_app.get_node_render_path(node)
@@ -384,6 +385,7 @@ class NukeSessionCollector(HookBaseClass):
             item.properties["first_frame"] = first_frame
             item.properties["last_frame"] = last_frame
 
+
             # store the nuke writenode on the item as well. this can be used by
             # secondary publish plugins
             item.properties["sg_writenode"] = node
@@ -394,8 +396,12 @@ class NukeSessionCollector(HookBaseClass):
                 item.properties["publish_type"] = "IMAGE_PLANE"
             elif node.knob('tk_profile_list').value() == "PRECOMP":
                 item.properties["publish_type"] = "PRECOMP"
+                item.properties["render_first"] = int(rendered_files[0][-8:-4])
+                item.properties["render_last"] = int(rendered_files[-1][-8:-4])
             elif node.knob('tk_profile_list').value() == "TECH_PRECOMP":
                 item.properties["publish_type"] = "TECH_PRECOMP"
+                item.properties["render_first"] = int(rendered_files[0][-8:-4])
+                item.properties["render_last"] = int(rendered_files[-1][-8:-4])
             elif node.knob('tk_profile_list').value() == "ALPHA":
                 item.properties["publish_type"] = "ALPHA_RENDER"
             else:

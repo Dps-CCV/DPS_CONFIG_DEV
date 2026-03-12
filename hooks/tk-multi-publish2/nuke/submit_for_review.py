@@ -122,6 +122,7 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
         """
 
         accepted = True
+        checked = True
         review_submission_app = self.parent.engine.apps.get("tk-multi-reviewsubmission")
         if review_submission_app is None:
             accepted = False
@@ -161,7 +162,10 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
                 "Submit for review plugin accepted: %s" % (path,),
                 extra={"action_show_folder": {"path": path}},
             )
-        return {"accepted": accepted, "checked": True}
+        if item.properties.get("publish_type") not in ['BG_MATTEPAINT', 'RENDER_NUKE']:
+            checked = False
+
+        return {"accepted": accepted, "checked": checked}
 
     def validate(self, settings, item):
         """
@@ -242,6 +246,9 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
         first_frame = item.properties.get("first_frame")
         last_frame = item.properties.get("last_frame")
         colorspace = item.properties.get("color_space")
+        if item.properties.get("publish_type") in ['PRECOMP', 'TECH_PRECOMP']:
+            first_frame = item.properties.get("render_first")
+            last_frame = item.properties.get("render_last")
 
         version = review_submission_app.render_and_submit_version(
             publish_template,

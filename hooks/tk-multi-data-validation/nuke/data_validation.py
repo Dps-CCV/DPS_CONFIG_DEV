@@ -270,6 +270,8 @@ class NukeDataValidationHook(HookBaseClass):
             nodeErrors.append(nuke.root().knob('workingSpaceLUT'))
         if os.environ['PROJECTCOLORSPACE'] not in nuke.root().knob('floatLut').value():
             nodeErrors.append(nuke.root().knob('floatLut'))
+        if nuke.root().knob('colorManagement').value() != 'OCIO':
+            nodeErrors.append(nuke.root().knob('colorManagement'))
         return nodeErrors
 
     def check_camera_trackers(self):
@@ -368,7 +370,9 @@ class NukeDataValidationHook(HookBaseClass):
 
     def fix_colorspaces(self, errors):
         for item in errors:
-            if item['name'] == 'workingSpaceLUT':
+            if item['name'] == 'colorManagement':
+                nuke.root().knob('colorManagement').setValue('OCIO')
+            elif item['name'] == 'workingSpaceLUT':
                 nuke.root().knob('workinSpaceLUT').setValue('ACEScg')
             elif item['name'] == 'floatLut':
                 nuke.root().knob('floatLut').setValue(os.environ['PROJECTCOLORSPACE'])

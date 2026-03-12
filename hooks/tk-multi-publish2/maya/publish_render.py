@@ -110,7 +110,7 @@ class RenderPublishPlugin(HookBaseClass):
         
     def validate(self, settings, item):
 
-
+        publisher = self.parent
         # get the configured work file template
         publish_template = item.properties.get("publish_template")
 
@@ -132,7 +132,61 @@ class RenderPublishPlugin(HookBaseClass):
         # publish plugin. Also set the publish_path to be explicit.
         publish_path = publish_template.apply_fields(work_fields)
         item.properties["publish_path"] = publish_path.replace("6969", "####")
+        number = '{0:03d}'.format(item.properties["publish_version"])
+        rawversion = "_v" + str(number)
+        item.properties["publish_name"] = self.get_publish_name(settings, item).replace(rawversion, '')
+        publish_path = item.properties["publish_path"]
+        publish_name = item.properties["publish_name"]
 
+        # ---- check for conflicting publishes of this path with a status
+
+        # Note the name, context, and path *must* match the values supplied to
+        # register_publish in the publish phase in order for this to return an
+        # accurate list of previous publishes of this file.
+        publishes = publisher.util.get_conflicting_publishes(
+            item.context,
+            publish_path,
+            publish_name,
+            filters=["sg_status_list", "is_not", None],
+        )
+
+        if publishes:
+
+            self.logger.debug(
+                "Conflicting publishes: %s" % (pprint.pformat(publishes),)
+            )
+
+
+
+            if "work_template" in item.properties or publish_template:
+
+                # templates are in play and there is already a publish in SG
+                # for this file path. We will raise here to prevent this from
+                # happening.
+                error_msg = (
+                    "Can not validate file path. There is already a publish in "
+                    "Shotgun that matches this path. Please uncheck this "
+                    "plugin or save the file to a different path."
+                )
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
+
+            else:
+                conflict_info = (
+                        "If you continue, these conflicting publishes will no "
+                        "longer be available to other users via the loader:<br>"
+                        "<pre>%s</pre>" % (pprint.pformat(publishes),)
+                )
+                self.logger.warn(
+                    "Found %s conflicting publishes in Shotgun" % (len(publishes),),
+                    extra={
+                        "action_show_more_info": {
+                            "label": "Show Conflicts",
+                            "tooltip": "Show conflicting publishes in Shotgun",
+                            "text": conflict_info,
+                        }
+                    },
+                )
 
         # TBR: revise if any parent class code is reusable
         # return super(PlayblastPublishPlugin, self).validate(settings, item)
@@ -166,9 +220,8 @@ class RenderPublishPlugin(HookBaseClass):
         # catch-all for any extra kwargs that should be passed to register_publish.
         publish_kwargs = self.get_publish_kwargs(settings, item)
 
-        number = '{0:03d}'.format(item.properties["publish_version"])
-        rawversion = "_v" + str(number)
-        publish_name = self.get_publish_name(settings, item).replace(rawversion, '')
+
+        publish_name = item.properties["publish_name"]
 
 
 
