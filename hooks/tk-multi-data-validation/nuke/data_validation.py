@@ -14,6 +14,7 @@ import sgtk
 import nuke
 import reportUnusedNodes
 import reportBboxNodes
+import CopyToPipeline
 
 
 HookBaseClass = sgtk.get_hook_baseclass()
@@ -155,6 +156,9 @@ class NukeDataValidationHook(HookBaseClass):
                     """,
                 "error_msg": "Some material its outside of the project",
                 "check_func": self.check_materials,
+                "fix_func": self.copy_to_pipeline,
+                "fix_name": "Copy All files to Pipeline",
+                "fix_tooltip": "Copy all files from read nodes to the selected folder in pipeline.",
                 "actions": [
                     {"name": "Select All", "callback": self.select_all_items},
                 ],
@@ -171,6 +175,9 @@ class NukeDataValidationHook(HookBaseClass):
                     """,
                 "error_msg": "Some nodes have different colorspace settings than the project",
                 "check_func": self.check_colorspaces,
+                "fix_func": self.fix_colorspaces,
+                "fix_name": "Fix Colorspaces",
+                "fix_tooltip": "Get all conflicting colorspaces and change them",
                 "actions": [
                     {"name": "Select All", "callback": self.select_all_items},
                 ],
@@ -253,8 +260,16 @@ class NukeDataValidationHook(HookBaseClass):
             if b.knob('tk_profile_list').value() == 'Render 16bits' and os.environ['PROJECTCOLORSPACE'] not in b.knob(
                     'colorspace').value():
                 nodeErrors.append(b)
-        if 'AcesCg' not in nuke.root().knob('workingSpaceLUT').value():
-            nodeErrors.append(nuke.root())
+            elif b.knob('tk_profile_list').value() == 'PRECOMP' and os.environ['PROJECTCOLORSPACE'] not in b.knob(
+                    'colorspace').value():
+                nodeErrors.append(b)
+            elif b.knob('tk_profile_list').value() == 'TECH_PRECOMP' and 'ACEScg' not in b.knob(
+                    'colorspace').value():
+                nodeErrors.append(b)
+        if 'ACEScg' not in nuke.root().knob('workingSpaceLUT').value():
+            nodeErrors.append(nuke.root().knob('workingSpaceLUT'))
+        if os.environ['PROJECTCOLORSPACE'] not in nuke.root().knob('floatLut').value():
+            nodeErrors.append(nuke.root().knob('floatLut'))
         return nodeErrors
 
     def check_camera_trackers(self):
@@ -343,6 +358,39 @@ class NukeDataValidationHook(HookBaseClass):
             nuke.delete(a)
         undo.end()
 
+    def copy_to_pipeline(self, errors):
+        for n in nuke.allNodes():
+            n.setSelected(False)
+        for item in errors:
+            selNode = nuke.toNode(item['name'])
+            selNode.setSelected(True)
+        CopyToPipeline.CopyToPipeline()
+
+    def fix_colorspaces(self, errors):
+        for item in errors:
+            if item['name'] == 'workingSpaceLUT':
+                nuke.root().knob('workinSpaceLUT').setValue('ACEScg')
+            elif item['name'] == 'floatLut':
+                nuke.root().knob('floatLut').setValue(os.environ['PROJECTCOLORSPACE'])
+            else:
+                x = nuke.toNode(item['name'])
+                if x.Class() == 'Read':
+                    if '_LGT_' in x.knob('file').evaluate():
+                        x.knob('colorspace').setValue('ACEScg')
+                    elif '_PARAFX_' in x.knob('file').evaluate():
+                        x.knob('colorspace').setValue(os.environ['PROJECTCOLORSPACE'])
+                elif x.Class() == 'WriteTank':
+                    if x.knob('tk_profile_list').value() == 'Render 16bits':
+                        x.knob('colorspace').setValue(os.environ['PROJECTCOLORSPACE'])
+                    elif x.knob('tk_profile_list').value() == 'PRECOMP':
+                        x.knob('colorspace').setValue(os.environ['PROJECTCOLORSPACE'])
+                    elif x.knob('tk_profile_list').value() == 'TECH_PRECOMP':
+                        x.knob('colorspace').setValue('ACEScg')
+
+    # ---------------------------------------------------------------------------
+    # Utilities
+    # ---------------------------------------------------------------------------
+
     def select_all_items(self, errors):
         """Select a list of items."""
         # clear the previous selection before selecting the items
@@ -369,3 +417,5 @@ class NukeDataValidationHook(HookBaseClass):
         item = nuke.toNode(errors[0])
         nuke.delete(item)
         undo.end()
+
+
