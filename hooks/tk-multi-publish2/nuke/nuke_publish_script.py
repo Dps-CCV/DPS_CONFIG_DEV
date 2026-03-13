@@ -318,6 +318,9 @@ class NukeSessionPublishPlugin(HookBaseClass):
 
         # let the base class register the publish
         super(NukeSessionPublishPlugin, self).publish(settings, item)
+        publish_data = item.get_property("sg_publish_data")
+        item.properties["parched_type"] = publish_data['type']
+        item.properties["parched_id"] = publish_data['id']
 
     def finalize(self, settings, item):
         """
@@ -353,13 +356,14 @@ class NukeSessionPublishPlugin(HookBaseClass):
             threading.Thread(target=wrap, daemon=True).start()
 
             # Access the published entity created earlier
-            sg_publish = item.get_property("sg_publish_data")
+            type = item.get_property("parched_type")
+            id = item.get_property("parched_id")
 
-            if sg_publish:
+            if type != None and id != None:
                 # Update Shotgun/FPT fields as needed
                 self.sgtk.shotgun.update(
-                    sg_publish["type"],
-                    sg_publish["id"],
+                    type,
+                    id,
                     {"sg_archived": True}  # Any field you want to update
                 )
 
