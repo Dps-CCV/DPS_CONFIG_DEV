@@ -14,7 +14,7 @@ import sgtk
 from sgtk.util.filesystem import ensure_folder_exists
 import WrapItUp
 import shutil
-import threading
+# import threading
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -345,15 +345,20 @@ class NukeSessionPublishPlugin(HookBaseClass):
         elif 'ASSET_FOLDER' in os.environ.keys():
             AssetFolder = os.path.join(*os.environ['ASSET_FOLDER'].split(os.sep)[3:])
             archivePath = os.path.normpath(os.path.join(os.environ['PROJECT_PATH'], 'ARCHIVE', AssetFolder, base))[:-5]
-        if os.path.exists(archivePath):
-            shutil.rmtree(archivePath)
-        os.makedirs(archivePath)
 
-        def wrap():
+
+        # def wrap():
+        #     WrapItUp.WrapItUp(nk=scriptPath, out=archivePath, parentdircount=3, startnow=True, fonts=True,
+        #                       licinteractive=True, relativerelinked=True, gizmos=True)
+        try:
+            self.logger.info("Starting Archive of the script. Be patient my friend")
+            if os.path.exists(archivePath):
+                shutil.rmtree(archivePath)
+            os.makedirs(archivePath)
             WrapItUp.WrapItUp(nk=scriptPath, out=archivePath, parentdircount=3, startnow=True, fonts=True,
                               licinteractive=True, relativerelinked=True, gizmos=True)
-        try:
-            threading.Thread(target=wrap, daemon=True).start()
+            #
+            # threading.Thread(target=wrap, daemon=True).start()
 
             # Access the published entity created earlier
             type = item.get_property("parched_type")
