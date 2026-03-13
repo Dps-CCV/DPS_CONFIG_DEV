@@ -211,11 +211,6 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
         render_path = item.properties.get("path")
 
         sg_publish_data = item.properties.get("sg_publish_data")
-        try:
-            sg_parent_publish_data = item.parent.properties.get("sg_publish_data")
-            self.logger.info(sg_parent_publish_data)
-        except:
-            self.logger.info("No parent publish data found")
         if sg_publish_data is None:
             raise Exception(
                 "'sg_publish_data' was not found in the item's properties. "
@@ -254,12 +249,22 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
             first_frame = item.properties.get("render_first")
             last_frame = item.properties.get("render_last")
 
+        publishes = [sg_publish_data]
+        try:
+            sg_parent_publish_data = item.parent.properties.get("sg_publish_data")
+            if sg_parent_publish_data is not None:
+                publishes = [sg_publish_data, sg_parent_publish_data]
+        except:
+            self.logger.info("No parent publish data found")
+
+
+
         version = review_submission_app.render_and_submit_version(
             publish_template,
             render_path_fields,
             first_frame,
             last_frame,
-            [sg_publish_data],
+            publishes,
             sg_task,
             comment,
             thumbnail_path,
@@ -282,9 +287,6 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
             # self.parent.shotgun.upload_thumbnail(self.parent.context.entity['type'], self.parent.context.entity['id'], image)
             #self.parent.shotgun.upload_filmstrip_thumbnail(self.parent.context.entity['type'], self.parent.context.entity['id'], version['sg_path_to_movie'])
             #sg_path_to_movie
-            if sg_parent_publish_data is not None:
-                addparent = version["published_files"].append(sg_parent_publish_data)
-                self.sgtk.shotgun.update("Version", version["id"], {"published_files": addparent})
         else:
             raise Exception(
                 "Review submission failed. Could not render and "
