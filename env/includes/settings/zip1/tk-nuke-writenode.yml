@@ -45,7 +45,7 @@ settings.tk-nuke-writenode.asset:
         datatype: 16 bit half
         channels: all
         autocrop: true
-        compression: PIZ Wavelet (32 scanlines)
+        compression: Zip (1 scanline)
         interleave: channels
       tank_type: Rendered Image
       tile_color: [ 0, 209, 107 ]
@@ -154,7 +154,7 @@ settings.tk-nuke-writenode.shot:
       datatype: 16 bit half
       channels: all
       autocrop: true
-      compression: PIZ Wavelet (32 scanlines)
+      compression: Zip (1 scanline)
       interleave: channels
     tank_type: Rendered Image
     tile_color: [0, 209, 107]
