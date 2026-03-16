@@ -95,7 +95,7 @@ class ContextChange(get_hook_baseclass()):
                     self.logger.info("Environment variable SHOT changed to %s", str(current_context.entity["name"]))
                     self.logger.info("Environment variable SHOT_FOLDER changed to %s", str(shot_path))
 
-                    seq = current_context.sgtk.shotgun.find_one("Shot", [["id", "is", current_context.entity["id"]]], ["project.Project.sg_format", "sg_sequence", "sg_efecto_a_hacer", "sg_method", "sg_source_clip", "sg_source_clip.SourceClip.sg_lmt"])
+                    seq = current_context.sgtk.shotgun.find_one("Shot", [["id", "is", current_context.entity["id"]]], ["project.Project.sg_format", "sg_sequence", "sg_efecto_a_hacer", "sg_method", "sg_lmt", "sg_source_clip", "sg_source_clip.SourceClip.sg_lmt"])
                     os.environ["SEQ"] = str(seq["sg_sequence"]["name"])
                     os.environ["DESCRIPTION"] = str(seq["sg_efecto_a_hacer"])
                     methods = ''
@@ -115,6 +115,10 @@ class ContextChange(get_hook_baseclass()):
 
                         os.environ["LMT"] = str(clip["sg_source_clip.SourceClip.sg_lmt"])
                         self.logger.info("Environment variable LMT changed to %s", str(clip["sg_source_clip"]["name"]))
+
+                    elif clip["sg_source_clip"]["sg_lmt"] != "":
+                        os.environ["LMT"] = clip["sg_source_clip"]["sg_lmt"]
+                        self.logger.info("Environment variable LMT changed to %s", clip["sg_source_clip"]["sg_lmt"])
 
                     else:
                         os.environ["CLIP"] = " "

@@ -153,7 +153,7 @@ class RenderMedia(HookBaseClass):
             # and the slate
             slate_str = "Project: %s\n" % ctx.project["name"]
             slate_str += "%s: %s\n" % (ctx.entity["type"], ctx.entity["name"])
-            slate_str += "Name: %s\n" % name.capitalize()
+            slate_str += "Name: %s\n" % name.upper()
             slate_str += "Version: %s\n" % version_str
 
             if ctx.task:
