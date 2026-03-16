@@ -11,14 +11,14 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <split size="1254" stretch="1"/>
             <splitter orientation="2">
                 <split size="985"/>
-                <dock id="" activePageId="DAG.2">
+                <dock id="" activePageId="DAG.2" focus="true">
                     <page id="DAG.1"/>
                     <page id="DopeSheet.1"/>
                     <page id="DAG.2"/>
                 </dock>
             </splitter>
             <split size="615"/>
-            <dock id="" activePageId="Properties.1" focus="true">
+            <dock id="" activePageId="Properties.1">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
                 <page id="Scenegraph.1"/>
@@ -188,7 +188,7 @@ Group {
    xpos -61
    ypos -71
   }
-set N7f8acc00 [stack 0]
+set Na13dcc00 [stack 0]
   Dot {
    name Dot5
    xpos 803
@@ -199,7 +199,7 @@ set N7f8acc00 [stack 0]
    xpos 803
    ypos 560
   }
-push $N7f8acc00
+push $Na13dcc00
   NoOp {
    name calc
    tile_color 0xff1663ff
@@ -247,7 +247,7 @@ push $N7f8acc00
    addUserKnob {15 title_v}
    title_v {{"title_guide.x + ( title_area.x / 2 )" i} {title_guide.y i} {"title_guide.r - ( title_area.x / 2 )" i} {title_guide.t i}}
   }
-set N7f8ad800 [stack 0]
+set Na13dd800 [stack 0]
   Rectangle {
    replace true
    area {{"ceil( calc.title_guide.x - calc.line )" i} {"ceil( calc.title_guide.y - calc.line )" i} {"ceil( calc.title_guide.r + calc.line )" i} {"ceil( calc.title_guide.t + calc.line )" i}}
@@ -265,7 +265,7 @@ set N7f8ad800 [stack 0]
    xpos 604
    ypos 129
   }
-set N7f8e8000 [stack 0]
+set Na1418000 [stack 0]
   Rectangle {
    replace true
    area {{input.area.x i} {"( ( input.area.y + input.area.t ) / 2 ) - calc.line" i} {input.area.r i} {"( ( input.area.y + input.area.t ) / 2 ) + calc.line" i}}
@@ -292,7 +292,7 @@ set N7f8e8000 [stack 0]
    xpos 667
    ypos 232
   }
-push $N7f8e8000
+push $Na1418000
   Merge2 {
    inputs 2
    name Merge5
@@ -319,7 +319,7 @@ push $N7f8e8000
    xpos 638
    ypos 478
   }
-push $N7f8ad800
+push $Na13dd800
   Rectangle {
    replace true
    area {{"ceil( calc.action_guide.x - calc.line )" i} {"ceil( calc.action_guide.y - calc.line )" i} {"ceil( calc.action_guide.r + calc.line )" i} {"ceil( calc.action_guide.t + calc.line )" i}}
@@ -380,7 +380,7 @@ push $N7f8ad800
    xpos 462
    ypos 395
   }
-push $N7f8ad800
+push $Na13dd800
   Rectangle {
    replace true
    area {{"ceil( calc.ar_guide.x == 0 ? calc.ar_guide.x : calc.ar_guide.x - calc.line )" i} {"ceil( calc.ar_guide.y == 0 ? calc.ar_guide.y : calc.ar_guide.y - calc.line )" i} {"ceil( calc.ar_guide.r == width ? calc.ar_guide.r : calc.ar_guide.r + calc.line )" i} {"ceil( calc.ar_guide.t == height ? calc.ar_guide.t : calc.ar_guide.t + calc.line )" i}}
@@ -398,7 +398,7 @@ push $N7f8ad800
    xpos 207
    ypos 129
   }
-set N7c872400 [stack 0]
+set N9eb02400 [stack 0]
   Text {
    message "\[value parent.arguide_label]"
    font "\[value parent.font]"
@@ -429,7 +429,7 @@ set N7c872400 [stack 0]
    ypos 209
    disable {{!calc.ar_isbigger i}}
   }
-push $N7c872400
+push $N9eb02400
   Text {
    message "\[if \[string compare \[value parent.aspect_selection] Custom] \{return \[value parent.aspect_selection]:1\} else \{return \[value parent.aspect_custom]:1\}]"
    font "\[value parent.font]"
@@ -460,7 +460,7 @@ push $N7c872400
    ypos 206
    disable {{!calc.ar_isbigger i}}
   }
-push $N7c872400
+push $N9eb02400
   Switch {
    inputs 3
    which {{parent.arguide_label_mode i}}
@@ -474,7 +474,7 @@ push $N7c872400
    xpos 241
    ypos 321
   }
-push $N7f8ad800
+push $Na13dd800
   Rectangle {
    replace true
    invert true
@@ -489,7 +489,7 @@ push $N7f8ad800
    xpos 87
    ypos 169
   }
-push $N7f8ad800
+push $Na13dd800
   Merge2 {
    inputs 2
    mix {{parent.aspectmask_mix i}}
@@ -597,10 +597,12 @@ push $N7f8ad800
   ypos 236
  }
  Transform {
-  translate {100 100}
-  name Transform
+  translate {300 1800}
+  scale 2
+  name Transform1
+  selected true
   xpos 260
-  ypos 277
+  ypos 299
  }
  Constant {
   inputs 0
@@ -630,7 +632,6 @@ push $N7f8ad800
   which {{"\[python -execlocal curr_frame\\ =\\ nuke.root()\\\[\\\"frame\\\"\\].value()\\nnodefirst\\ =\\ nuke.thisNode().input(1).frameRange().first()\\n\\nif\\ curr_frame\\ <\\ nodefirst:\\n\\ \\ #\\ frames\\ before\\ the\\ start\\ of\\ the\\ sequence\\n\\ \\ #\\ switch\\ to\\ slate\\n\\ \\ ret\\ =\\ 0\\nelse:\\n\\ \\ #\\ play\\ back\\ sequence\\ with\\ burnins\\n\\ \\ ret\\ =\\ 1\\n]" x4 0 x1004 0 x1005 1}}
   name slate_or_burnin_chooser
   label "Switches to the slate if curr_frame < start_frame for the current scene."
-  selected true
   xpos 389
   ypos 347
  }

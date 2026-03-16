@@ -516,7 +516,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         engine = sgtk.platform.current_engine()
         order = [{'field_name': 'version_number', 'direction': 'asc'}]
         pubs = engine.shotgun.find("PublishedFile",[['task', 'is', engine.context.task], ['name', 'is', item.properties["publish_name"]]], ['path', 'version_number'], order)
-        if len pubs<5:
+        if len(pubs) < 5:
             return
         else:
             delete = pubs[5:]
