@@ -15,6 +15,7 @@ import sgtk
 
 from tank_vendor import six
 from sgtk.platform.qt import QtCore, QtGui
+import shutil
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -503,6 +504,36 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
         status = {"sg_status_list": "rev"}
         self.parent.sgtk.shotgun.update("Task", item.context.task['id'], status)
         # self.parent.sgtk.shotgun.update("Shot", item.context.entity['id'], status)
+
+    def finalize(self, settings, item):
+
+        ##EFECTOSCOPIO UNREGISTER AND DELETE ALL PUBLISHES
+        self.logger.info(
+            "Starting unregister and deletion of old publishes. For publish %s" % (publish_file)
+        )
+        publisher = self.parent
+        tk = publisher.sgtk
+        engine = sgtk.platform.current_engine()
+        order = [{'field_name': 'version_number', 'direction': 'asc'}]
+        pubs = engine.shotgun.find("PublishedFile",[['task', 'is', engine.context.task], ['name', 'is', item.properties["publish_name"]]], ['path', 'version_number'], order)
+        if len pubs<5:
+            return
+        else:
+            delete = pubs[5:]
+            for d in delete:
+                self.logger.info(
+                    "Unregistering %s " % (d['path'])
+                )
+                # Grab the unregister command
+                unreg_cmd = sgtk.get_command('unregister_folders', tk)
+                parameters = {"path": d['path']}
+                unreg_cmd.execute(parameters)
+                shutil.rmtree(d['path'])
+                self.logger.info(
+                    " Folder %s was deleted" % (d['path'])
+                )
+
+
 
 
 def _find_scene_animation_range():
