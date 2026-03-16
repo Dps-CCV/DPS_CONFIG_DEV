@@ -297,7 +297,7 @@ settings.tk-multi-publish2.nuke.asset_step:
       Work Template: nuke_asset_work
       Background Processing: True
   publish_plugins:
-  - name: Publish to Shotgun
+  - name: Publish Renders to Shotgun
     hook: "{config}/tk-multi-publish2/nuke/publish_file.py"
     settings: {}
   - name: Publish CAM to Shotgun
@@ -314,7 +314,7 @@ settings.tk-multi-publish2.nuke.asset_step:
   - name: Begin file versioning
     hook: "{engine}/tk-multi-publish2/basic/nuke_start_version_control.py"
     settings: {}
-  - name: Publish to Shotgun
+  - name: Publish Script to Shotgun
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/nuke/nuke_publish_script.py"
     settings:
         Publish Template: nuke_asset_publish
@@ -332,7 +332,7 @@ settings.tk-multi-publish2.nuke.shot_step:
       Work Template: nuke_shot_work
       Background Processing: True
   publish_plugins:
-  - name: Publish to Shotgun
+  - name: Publish Renders to Shotgun
     hook: "{config}/tk-multi-publish2/nuke/publish_file.py"
     settings: {}
   - name: Publish CAM to Shotgun
@@ -349,7 +349,7 @@ settings.tk-multi-publish2.nuke.shot_step:
   - name: Begin file versioning
     hook: "{engine}/tk-multi-publish2/basic/nuke_start_version_control.py"
     settings: {}
-  - name: Publish to Shotgun
+  - name: Publish Script to Shotgun
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/nuke/nuke_publish_script.py"
     settings:
         Publish Template: nuke_shot_publish

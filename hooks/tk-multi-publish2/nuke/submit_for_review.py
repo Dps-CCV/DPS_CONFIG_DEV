@@ -185,8 +185,18 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
         # in the tk-nuke-writenode app, then the write node app falls back on the
         # full-res template. Or if they rendered in full res and then switched to
         # proxy mode later. In this case, this is likely user error, so we catch it.
-        self.logger.info(item.parent)
-        self.logger.info(item.parent.properties)
+        checked = True
+        for i in item.tasks:
+            if i.plugin.name == 'Publish Renders to Shotgun':
+                if i.checked == False:
+                    checked = False
+        for i in item.parent.parent.tasks:
+            if i.plugin.name == 'Publish Script to Shotgun':
+                if i.checked == False:
+                    checked = False
+        if checked == False:
+            self.logger.error("In order to publish the quicktime version, you have to publish the render")
+            return False
         root_node = nuke.root()
         proxy_mode_on = root_node["proxy"].value()
         if proxy_mode_on:
@@ -253,12 +263,12 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
 
         publishes = [sg_publish_data]
         try:
-            sg_parent_publish_data = item.parent.properties.get("sg_publish_data")
+            sg_parent_publish_data = item.parent.parent.properties.get("sg_publish_data")
             if sg_parent_publish_data is not None:
                 publishes = [sg_publish_data, sg_parent_publish_data]
         except:
             self.logger.info("No parent publish data found")
-            self.logger.info(item.parent.propperties)
+
 
 
 

@@ -471,6 +471,14 @@ class UploadVersionPlugin(HookBaseClass):
             publish_data = item.properties["sg_publish_data"]
             version_data["published_files"] = [publish_data]
 
+            try:
+                sg_parent_publish_data = item.parent.parent.properties.get("sg_publish_data")
+                if sg_parent_publish_data is not None:
+                    version_data["published_files"] = [publish_data, sg_parent_publish_data]
+            except:
+                self.logger.info("No parent publish data found")
+
+
         if settings["Link Local File"].value:
             version_data["sg_path_to_movie"] = uploadPath
 
@@ -513,11 +521,7 @@ class UploadVersionPlugin(HookBaseClass):
         )
 
         self.logger.info("Upload complete!")
-        sg_parent_publish_data = item.parent.properties.get("sg_publish_data")
 
-        if sg_parent_publish_data is not None:
-            addparent = version["published_files"].append(sg_parent_publish_data)
-            self.sgtk.shotgun.update("Version", version["id"], {"published_files": addparent})
 
 
 
