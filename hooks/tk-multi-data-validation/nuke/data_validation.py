@@ -95,6 +95,25 @@ class NukeDataValidationHook(HookBaseClass):
                     },
                 ],
             },
+            "repeated_reads": {
+                "name": "Repeated Read nodes",
+                "description": """Check: if the same file is loaded in different reads<br/>
+                                    """,
+                "error_msg": "There are repetaed reads in the script",
+                "check_func": self.check_repeated_reads,
+                "fix_func": self.fix_repeated_reads,
+                "fix_name": "Substitute repeated reads with postage stamps with hidden input",
+                "fix_tooltip": "Replace repeated reads with postage stamps.",
+                "actions": [
+                    {"name": "Select All", "callback": self.select_all_items},
+                ],
+                "item_actions": [
+                    {
+                        "name": "Select",
+                        "callback": self.select_one,
+                    },
+                ],
+            },
             "unused_nodes": {
                 "name": "Delete Unused Nodes",
                 "description": """Check: Unused nodes<br/>
@@ -361,6 +380,16 @@ class NukeDataValidationHook(HookBaseClass):
 
         return matches
 
+    def check_repeated_reads(self):
+        readDict = {}
+        readNodes= []
+        for read in sorted(nuke.allNodes("Read")):
+            if read.knob('file').evaluate() not in readDict.keys():
+                readDict[read.knob('file').evaluate()] = read.name()
+                continue
+            else:
+                readNodes.append(read)
+        return readNodes
 
     # ---------------------------------------------------------------------------
     # Fix and actions methods
@@ -404,6 +433,44 @@ class NukeDataValidationHook(HookBaseClass):
                         x.knob('colorspace').setValue(os.environ['PROJECTCOLORSPACE'])
                     elif x.knob('tk_profile_list').value() == 'TECH_PRECOMP':
                         x.knob('colorspace').setValue('ACEScg')
+
+    def fix_repeated_reads(self, errors):
+        readDict = {}
+        for a in nuke.allNodes():
+            a.setSelected(False)
+        for read in sorted(nuke.allNodes("Read")):
+            if read.knob('file').evaluate() not in readDict.keys():
+                readDict[read.knob('file').evaluate()] = read.name()
+                continue
+            else:
+                # read.setSelected(True)
+
+                # Find downstream nodes connected to the original node
+                downstream = []
+                for n in nuke.allNodes():
+                    for i in range(n.inputs()):
+                        if n.input(i) is read:
+                            downstream.append((n, i))
+
+                postagestampX = read.xpos()
+                postagestampY = read.ypos()
+                postageStamp = nuke.createNode("PostageStamp", inpanel=False)
+                postageStamp['xpos'].setValue(postagestampX)
+                postageStamp['ypos'].setValue(postagestampY)
+
+                postageStamp.setInput(0, nuke.toNode(readDict[read.knob('file').evaluate()]))
+                # Reconnect downstream nodes to the PostageStamp
+                for n, i in downstream:
+                    print(n.name())
+                    print(postageStamp.name())
+                    n.setInput(i, postageStamp)
+                downstream = []
+                postageStamp['hide_input'].setValue(True)
+                postageStamp.setSelected(False)
+
+                # print (read.name())
+                nuke.delete(read)
+        return True
 
     # ---------------------------------------------------------------------------
     # Utilities

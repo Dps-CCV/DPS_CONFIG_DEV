@@ -165,6 +165,8 @@ settings.tk-multi-data-validation.nuke:
       data_type: Settings
     - id: check_materials
       data_type: Settings
+    - id: repeated_reads
+      data_type: Optimization
     - id: unused_nodes
       data_type: Optimization
     - id: bbox_nodes
