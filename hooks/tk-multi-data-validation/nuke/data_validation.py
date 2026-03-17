@@ -102,7 +102,7 @@ class NukeDataValidationHook(HookBaseClass):
                 "error_msg": "There are repetaed reads in the script",
                 "check_func": self.check_repeated_reads,
                 "fix_func": self.fix_repeated_reads,
-                "fix_name": "Substitute repeated reads with postage stamps with hidden input",
+                "fix_name": "Substitute repeated reads",
                 "fix_tooltip": "Replace repeated reads with postage stamps.",
                 "actions": [
                     {"name": "Select All", "callback": self.select_all_items},
@@ -463,11 +463,22 @@ class NukeDataValidationHook(HookBaseClass):
                 postageStamp.setInput(0, nuke.toNode(readDict[read.knob('file').evaluate()]))
                 # Reconnect downstream nodes to the PostageStamp
                 for n, i in downstream:
-                    print(n.name())
-                    print(postageStamp.name())
                     n.setInput(i, postageStamp)
                 downstream = []
                 postageStamp['hide_input'].setValue(True)
+                #baseRead = nuke.toNode(readDict[read.knob('file').evaluate()])
+                #baseReadFrameMode = baseRead.knob('frame_mode').value()
+                #baseReadFrame = baseRead.knob('frame').value()
+                #readFrameMode = baseRead.knob('frame_mode').value()
+                #readFrame = baseRead.knob('frame').value()
+                #if baseReadFrameMode == readFrameMode:
+                #    offset = float(readFrame) - float(baseReadFrame)
+                #if read.knob('frame_mode').value() == 'start at':
+                #    readOffset =
+                #    baseRead = nuke.toNode(readDict[read.knob('file').evaluate()])
+                #    if baseRead.knob('frame_mode').value() == 'start at':
+                #        baseReadOfffset =
+
                 postageStamp.setSelected(False)
 
                 # print (read.name())
