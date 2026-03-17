@@ -308,28 +308,6 @@ class NukeSessionCollector(HookBaseClass):
         first_frame = int(nuke.root()["first_frame"].value())
         last_frame = int(nuke.root()["last_frame"].value())
 
-        # mattepaintList = 0
-        # imageplaneList = 0
-        # precompList = 0
-        # techprecompList = 0
-        # alphaList = 0
-        # renderList = 0
-        # for node in sg_writenode_app.get_write_nodes():
-        #     if node.knob('tk_profile_list').value() == "MATTE_PAINT":
-        #         mattepaintList+=1
-        #     elif node.knob('tk_profile_list').value() in ["IMAGE_PLANE", "IMAGE_PLANE_MOV"]:
-        #         imageplaneList += 1
-        #     elif node.knob('tk_profile_list').value() == "PRECOMP":
-        #         precompList += 1
-        #     elif node.knob('tk_profile_list').value() == "TECH_PRECOMP":
-        #         techprecompList += 1
-        #     elif node.knob('tk_profile_list').value() == "ALPHA":
-        #         alphaList += 1
-        #     elif node.knob('tk_profile_list').value() == "Render 16bits":
-        #         renderList += 1
-
-
-
         for node in sg_writenode_app.get_write_nodes():
             publish_path_CHECK = sg_writenode_app.get_node_render_path(node)
 
@@ -445,10 +423,6 @@ class NukeSessionCollector(HookBaseClass):
                 item = item_types["RENDER"].create_item(item_type, type_display, display_name)
                 item.set_icon_from_path(item_info["icon_path"])
 
-            # # create and populate the item
-            # item = parent_item.create_item(item_type, type_display, display_name)
-            # item.set_icon_from_path(item_info["icon_path"])
-
             # if the supplied path is an image, use the path as # the thumbnail.
             item.set_thumbnail_from_path(path)
 
@@ -476,7 +450,6 @@ class NukeSessionCollector(HookBaseClass):
             item.properties["color_space"] = self._get_node_colorspace(node)
             item.properties["first_frame"] = first_frame
             item.properties["last_frame"] = last_frame
-
 
             # store the nuke writenode on the item as well. this can be used by
             # secondary publish plugins

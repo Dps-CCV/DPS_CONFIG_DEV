@@ -100,15 +100,15 @@ settings.tk-multi-loader2.houdini:
     filters:
       - [ project, is, '{context.project}' ]
       - [ entity, is, '{context.entity}' ]
-      - [ sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
+      - [ sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
     hierarchy: [ content ]
   - caption: Linked_Assets
     entity_type: Task
     filters:
       - [ project, is, '{context.project}' ]
       - { "filter_operator": "any", "filters": [ [ entity, is, '{context.entity}' ], [ entity.Asset.shots, is, '{context.entity}' ], [ entity.Asset.assets, is, '{context.entity}' ], [ entity.Shot.assets, is, '{context.entity}' ] ] }
-      - [ sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
-      - { "filter_operator": "any", "filters": [ [ entity.Shot.sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ], [ entity.Asset.sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ] ] }
+      - [ sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
+      - { "filter_operator": "any", "filters": [ [ entity.Shot.sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ], [ entity.Asset.sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ] ] }
     hierarchy: [ entity, content ]
   - caption: Library - Assets
     entity_type: Asset
@@ -120,27 +120,27 @@ settings.tk-multi-loader2.houdini:
     filters:
       - [ project, is, '{context.project}' ]
       - [ entity.Shot.sg_sequence.Sequence.shots, is, '{context.entity}' ]
-      - [ sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
-      - [ entity.Shot.sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
+      - [ sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
+      - [ entity.Shot.sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
     hierarchy: [ entity, content ]
   - caption: Assets
     entity_type: Asset
     filters:
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [sg_asset_type, code]
   - caption: Shots
     entity_type: Shot
     filters:
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [sg_sequence, code]
   - caption: My Tasks
     entity_type: Task
     filters:
     - [task_assignees, is, '{context.user}']
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [entity, content]
   publish_filters: [["sg_status_list", "is_not", null]]
   location: "@apps.tk-multi-loader2.location"
@@ -154,7 +154,7 @@ settings.tk-multi-loader2.mari:
     entity_type: Asset
     filters:
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [sg_asset_type, code]
     publish_filters: []
   - caption: My Tasks
@@ -162,7 +162,7 @@ settings.tk-multi-loader2.mari:
     filters:
     - [task_assignees, is, '{context.user}']
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [entity, content]
     publish_filters: []
   title_name: Import
@@ -202,13 +202,13 @@ settings.tk-multi-loader2.maya:
     filters:
       - [ project, is, '{context.project}' ]
       - [ entity, is, '{context.entity}' ]
-      - [ sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
+      - [ sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
     hierarchy: [ content ]
   - caption: Assets
     entity_type: Asset
     filters:
       - [ project, is, "{context.project}" ]
-      - [ sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
+      - [ sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
     hierarchy: [ sg_asset_type, code ]
   - caption: Library - Assets
     entity_type: Asset
@@ -220,29 +220,29 @@ settings.tk-multi-loader2.maya:
     filters:
       - [ project, is, '{context.project}' ]
       - { "filter_operator": "any", "filters": [ [ entity, is, '{context.entity}' ], [ entity.Asset.shots, is, '{context.entity}' ], [ entity.Asset.assets, is, '{context.entity}' ], [ entity.Shot.assets, is, '{context.entity}' ] ] }
-      - [ sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
-      - { "filter_operator": "any", "filters": [ [ entity.Shot.sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ], [ entity.Asset.sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ] ] }
+      - [ sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
+      - { "filter_operator": "any", "filters": [ [ entity.Shot.sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ], [ entity.Asset.sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ] ] }
     hierarchy: [ entity, content ]
   - caption: Shots_in_current_sequence
     entity_type: Task
     filters:
       - [ project, is, '{context.project}' ]
       - [ entity.Shot.sg_sequence.Sequence.shots, is, '{context.entity}' ]
-      - [ sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
-      - [ entity.Shot.sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
+      - [ sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
+      - [ entity.Shot.sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
     hierarchy: [ entity, content ]
   - caption: Shots
     entity_type: Shot
     filters:
     - [project, is, "{context.project}"]
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [sg_sequence, code]
   - caption: My Tasks
     entity_type: Task
     filters:
     - [task_assignees, is, "{context.user}"]
     - [project, is, "{context.project}"]
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [entity, content]
   publish_filters: [["sg_status_list", "is_not", null]]
   location: "@apps.tk-multi-loader2.location"
@@ -279,15 +279,15 @@ settings.tk-multi-loader2.nuke:
     filters:
       - [ project, is, '{context.project}' ]
       - [ entity, is, '{context.entity}' ]
-      - [ sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
+      - [ sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
     hierarchy: [ content ]
   - caption: Linked_Assets
     entity_type: Task
     filters:
       - [ project, is, '{context.project}' ]
       - {"filter_operator": "any", "filters": [[ entity.Asset.shots, is, '{context.entity}' ], [ entity.Asset.assets, is, '{context.entity}' ], [ entity.Shot.assets, is, '{context.entity}' ], [ entity.Shot.shots, is, '{context.entity}' ]]}
-      - [ sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
-      - {"filter_operator": "any", "filters": [[ entity.Shot.sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ], [ entity.Asset.sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]]}
+      - [ sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
+      - {"filter_operator": "any", "filters": [[ entity.Shot.sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ], [ entity.Asset.sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]]}
     hierarchy: [ entity, content ]
   - caption: Library - Assets
     entity_type: Asset
@@ -299,20 +299,20 @@ settings.tk-multi-loader2.nuke:
     filters:
       - [ project, is, '{context.project}' ]
       - [ entity.Shot.sg_sequence.Sequence.shots, is, '{context.entity}' ]
-      - [ sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
-      - [ entity.Shot.sg_status_list, not_in, [ 'bid', 'omt', 'hld' ] ]
+      - [ sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
+      - [ entity.Shot.sg_status_list, not_in, [ 'bid',  'omt', 'otr', 'hld' ] ]
     hierarchy: [ entity, content ]
   - caption: Assets
     entity_type: Asset
     filters:
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [sg_asset_type, code]
   - caption: Shots
     entity_type: Shot
     filters:
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [sg_sequence.Sequence.episode, sg_sequence, code]
   publish_filters: [["sg_status_list", "is_not", null]]
   location: "@apps.tk-multi-loader2.location"
@@ -429,7 +429,7 @@ settings.tk-multi-loader2.photoshop:
     entity_type: Asset
     filters:
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [sg_asset_type, code]
   - caption: Library - Assets
     entity_type: Asset
@@ -440,14 +440,14 @@ settings.tk-multi-loader2.photoshop:
     entity_type: Shot
     filters:
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [sg_sequence, code]
   - caption: My Tasks
     entity_type: Task
     filters:
     - [task_assignees, is, '{context.user}']
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [entity, content]
   publish_filters: [["sg_status_list", "is_not", null]]
   location: "@apps.tk-multi-loader2.location"
@@ -484,7 +484,7 @@ settings.tk-multi-loader2.aftereffects:
     entity_type: Asset
     filters:
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [sg_asset_type, code]
   - caption: Library - Assets
     entity_type: Asset
@@ -495,14 +495,14 @@ settings.tk-multi-loader2.aftereffects:
     entity_type: Shot
     filters:
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [sg_sequence, code]
   - caption: My Tasks
     entity_type: Task
     filters:
     - [task_assignees, is, '{context.user}']
     - [project, is, '{context.project}']
-    - [ sg_status_list, not_in, ['bid', 'omt', 'hld'] ]
+    - [ sg_status_list, not_in, ['bid',  'omt', 'otr', 'hld'] ]
     hierarchy: [entity, content]
   actions_hook: "{engine}/tk-multi-loader2/basic/scene_actions.py"
   publish_filters: [["sg_status_list", "is_not", null]]

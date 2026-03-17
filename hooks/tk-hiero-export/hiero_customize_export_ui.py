@@ -53,7 +53,7 @@ class HieroCustomizeExportUI(HookBaseClass):
                 tooltip="Update 'sg_tail_out' on the Shot entity.",
             ),
             dict(
-                label=" Export Source Clip:",
+                label="Export Source Clip:",
                 name="custom_sourceClip_bool_property",
                 value=True,
                 tooltip="Update 'sg_source_clip' on the Shot entity.",

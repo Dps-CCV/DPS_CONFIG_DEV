@@ -855,8 +855,7 @@ class NukeCameraPublishPlugin(HookBaseClass):
                 # copystring = copyCommand + workFileNorm + ' ' + publishFileNorm
                 # os.popen(copystring)
 
-                # os.rename(workFileNorm, publishFileNorm)
-                shutil.move(workFileNorm, publishFileNorm)
+                os.rename(workFileNorm, publishFileNorm)
 
 
             except Exception:
