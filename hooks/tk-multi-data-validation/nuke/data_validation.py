@@ -435,6 +435,8 @@ class NukeDataValidationHook(HookBaseClass):
                         x.knob('colorspace').setValue('ACEScg')
 
     def fix_repeated_reads(self, errors):
+        undo = nuke.Undo()
+        undo.begin()
         readDict = {}
         for a in nuke.allNodes():
             a.setSelected(False)
@@ -470,6 +472,7 @@ class NukeDataValidationHook(HookBaseClass):
 
                 # print (read.name())
                 nuke.delete(read)
+        undo.end()
         return True
 
     # ---------------------------------------------------------------------------
