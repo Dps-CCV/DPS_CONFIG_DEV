@@ -416,7 +416,7 @@ class NukeDataValidationHook(HookBaseClass):
             if item['name'] == 'colorManagement':
                 nuke.root().knob('colorManagement').setValue('OCIO')
             elif item['name'] == 'workingSpaceLUT':
-                nuke.root().knob('workinSpaceLUT').setValue('ACEScg')
+                nuke.root().knob('workingSpaceLUT').setValue('ACEScg')
             elif item['name'] == 'floatLut':
                 nuke.root().knob('floatLut').setValue(os.environ['PROJECTCOLORSPACE'])
             else:
