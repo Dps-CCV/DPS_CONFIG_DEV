@@ -264,6 +264,9 @@ class BasicFilePublishPlugin(HookBaseClass):
         """
 
         path = item.properties.path
+        checked = True
+        if item.properties.get("publish_type") not in ['BG_MATTEPAINT', 'RENDER_NUKE', 'IMAGE_PLANE', 'ALPHA_RENDER']:
+            checked = False
 
         # log the accepted file and display a button to reveal it in the fs
         self.logger.info(
@@ -272,7 +275,7 @@ class BasicFilePublishPlugin(HookBaseClass):
         )
 
         # return the accepted info
-        return {"accepted": True}
+        return {"accepted": True, "checked": checked}
 
     def validate(self, settings, item):
         """
