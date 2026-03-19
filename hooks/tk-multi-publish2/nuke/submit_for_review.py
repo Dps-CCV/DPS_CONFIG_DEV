@@ -236,7 +236,7 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
         thumbnail_path = item.get_thumbnail_as_path()
 
 
-        # progress_cb = lambda *args, **kwargs: None
+        progress_cb = lambda *args, **kwargs: None
         review_submission_app = self.parent.engine.apps.get("tk-multi-reviewsubmission")
 
         # Add a custom handler to forward review app logs to publisher logger
