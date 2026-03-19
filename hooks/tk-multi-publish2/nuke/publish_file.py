@@ -850,7 +850,25 @@ class BasicFilePublishPlugin(HookBaseClass):
         workFileDir = os.path.normpath(os.path.dirname(workFileNorm))
         ensure_folder_exists(os.path.dirname(publish_folder))
         try:
-            shutil.move(workFileDir, publish_folder)
+            self.logger.info(
+                "Trying to move folder to publish"
+            )
+            #os.rename(workFileDir, publish_folder)
+            movestring = f'move "{workFileDir}" "{publish_folder}"'
+            with subprocess.Popen(
+                    movestring,
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1  # line-buffered
+            ) as proc:
+                for line in proc.stdout:
+                    sys.stdout.write(line)  # stream to your console (or handle it as you like)
+                    self.logger.info(
+                        line
+                    )
+                return_code = proc.wait()
         except:
             self.logger.info(
                 "Unable to move folder to publish"

@@ -309,7 +309,7 @@ class NukeSessionCollector(HookBaseClass):
         last_frame = int(nuke.root()["last_frame"].value())
 
         for node in sg_writenode_app.get_write_nodes():
-            publish_path_CHECK = sg_writenode_app.get_node_render_path(node)
+            # publish_path_CHECK = sg_writenode_app.get_node_render_path(node)
 
 
             # see if any frames have been rendered for this write node
@@ -367,6 +367,7 @@ class NukeSessionCollector(HookBaseClass):
                 # create and populate the item
                 item = item_types["MATTE_PAINT"].create_item(item_type, type_display, display_name)
                 item.set_icon_from_path(item_info["icon_path"])
+                item.properties["publish_type"] = "BG_MATTEPAINT"
 
             elif node.knob('tk_profile_list').value() in ["IMAGE_PLANE", "IMAGE_PLANE_MOV"]:
                 if "IMAGE_PLANE" not in item_types:
@@ -378,6 +379,7 @@ class NukeSessionCollector(HookBaseClass):
                 # create and populate the item
                 item = item_types["IMAGE_PLANE"].create_item(item_type, type_display, display_name)
                 item.set_icon_from_path(item_info["icon_path"])
+                item.properties["publish_type"] = "IMAGE_PLANE"
 
             elif node.knob('tk_profile_list').value() == "PRECOMP":
                 if "PRECOMP" not in item_types:
@@ -389,6 +391,9 @@ class NukeSessionCollector(HookBaseClass):
                 # create and populate the item
                 item = item_types["PRECOMP"].create_item(item_type, type_display, display_name)
                 item.set_icon_from_path(item_info["icon_path"])
+                item.properties["publish_type"] = "PRECOMP"
+                item.properties["render_first"] = int(rendered_files[0][-8:-4])
+                item.properties["render_last"] = int(rendered_files[-1][-8:-4])
 
             elif node.knob('tk_profile_list').value() == "TECH_PRECOMP":
                 if "TECH_PRECOMP" not in item_types:
@@ -400,6 +405,9 @@ class NukeSessionCollector(HookBaseClass):
                 # create and populate the item
                 item = item_types["TECH_PRECOMP"].create_item(item_type, type_display, display_name)
                 item.set_icon_from_path(item_info["icon_path"])
+                item.properties["publish_type"] = "TECH_PRECOMP"
+                item.properties["render_first"] = int(rendered_files[0][-8:-4])
+                item.properties["render_last"] = int(rendered_files[-1][-8:-4])
 
             elif node.knob('tk_profile_list').value() == "ALPHA":
                 if "ALPHA" not in item_types:
@@ -411,6 +419,7 @@ class NukeSessionCollector(HookBaseClass):
                 # create and populate the item
                 item = item_types["ALPHA"].create_item(item_type, type_display, display_name)
                 item.set_icon_from_path(item_info["icon_path"])
+                item.properties["publish_type"] = "ALPHA_RENDER"
 
             else:
                 if "RENDER" not in item_types:
@@ -422,6 +431,7 @@ class NukeSessionCollector(HookBaseClass):
                 # create and populate the item
                 item = item_types["RENDER"].create_item(item_type, type_display, display_name)
                 item.set_icon_from_path(item_info["icon_path"])
+                item.properties["publish_type"] = "RENDER_NUKE"
 
             # if the supplied path is an image, use the path as # the thumbnail.
             item.set_thumbnail_from_path(path)
@@ -455,22 +465,6 @@ class NukeSessionCollector(HookBaseClass):
             # secondary publish plugins
             item.properties["sg_writenode"] = node
 
-            if node.knob('tk_profile_list').value() == "MATTE_PAINT":
-                item.properties["publish_type"] = "BG_MATTEPAINT"
-            elif node.knob('tk_profile_list').value() in ["IMAGE_PLANE", "IMAGE_PLANE_MOV"]:
-                item.properties["publish_type"] = "IMAGE_PLANE"
-            elif node.knob('tk_profile_list').value() == "PRECOMP":
-                item.properties["publish_type"] = "PRECOMP"
-                item.properties["render_first"] = int(rendered_files[0][-8:-4])
-                item.properties["render_last"] = int(rendered_files[-1][-8:-4])
-            elif node.knob('tk_profile_list').value() == "TECH_PRECOMP":
-                item.properties["publish_type"] = "TECH_PRECOMP"
-                item.properties["render_first"] = int(rendered_files[0][-8:-4])
-                item.properties["render_last"] = int(rendered_files[-1][-8:-4])
-            elif node.knob('tk_profile_list').value() == "ALPHA":
-                item.properties["publish_type"] = "ALPHA_RENDER"
-            else:
-                item.properties["publish_type"] = "RENDER_NUKE"
 
             # Collect dependencies from node
             item.properties["publish_dependencies"] = self.list_dependencies(node)

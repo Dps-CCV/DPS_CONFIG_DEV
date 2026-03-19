@@ -113,8 +113,6 @@ settings.tk-multi-data-validation.maya.asset_step:
     #EFECTOSCOPIO CUSTOM RULES
     - id: FPS
       data_type: Settings
-    - id: Masking Ratio
-      data_type: Settings
     - id: Shot Resolution
       data_type: Settings
   location: "@apps.tk-multi-data-validation.location"
@@ -141,8 +139,6 @@ settings.tk-multi-data-validation.maya.shot_step:
       data_type: Layers
     #EFECTOSCOPIO CUSTOM RULES
     - id: FPS
-      data_type: Settings
-    - id: Masking Ratio
       data_type: Settings
     - id: Shot Resolution
       data_type: Settings

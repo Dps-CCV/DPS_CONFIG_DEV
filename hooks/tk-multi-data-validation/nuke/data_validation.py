@@ -471,8 +471,10 @@ class NukeDataValidationHook(HookBaseClass):
                 #baseReadFrame = baseRead.knob('frame').value()
                 #readFrameMode = baseRead.knob('frame_mode').value()
                 #readFrame = baseRead.knob('frame').value()
-                #if baseReadFrameMode == readFrameMode:
+                #if baseReadFrameMode == 'start at' and  readFrameMode == 'start at':
                 #    offset = float(readFrame) - float(baseReadFrame)
+                #elif baseReadFrameMode == 'offset' and  readFrameMode == 'offset':
+                #    offset = abs(float(readFrame)) - abs(float(baseReadFrame))
                 #if read.knob('frame_mode').value() == 'start at':
                 #    readOffset =
                 #    baseRead = nuke.toNode(readDict[read.knob('file').evaluate()])

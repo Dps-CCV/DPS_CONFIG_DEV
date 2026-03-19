@@ -185,15 +185,6 @@ class MayaDataValidationHook(HookBaseClass):
                 "fix_name": "Synchronize",
                 "fix_tooltip": "Synchronize timeline with FPTR data",
             },
-            "Masking Ratio": {
-                "name": "Masking Ratio",
-                "description": """Check: Masking Ratio for the project""",
-                "error_msg": "Render settings Device Aspect is not the same as project masking ratio",
-                "check_func": self.check_device_aspect,
-                "fix_func": self.fix_device_aspect,
-                "fix_name": "Synchronize Device Aspect with Flow",
-                "fix_tooltip": "Synchronize render settings device aspect with project settings in Flow",
-            },
             "Shot Resolution": {
                 "name": "Shot Resolution",
                 "description": """Check: render resolution""",
@@ -590,21 +581,6 @@ class MayaDataValidationHook(HookBaseClass):
         else:
             return []
 
-    def check_device_aspect(self):
-        ### Routine for checking frame rate against project settings in the web
-        engine = sgtk.platform.current_engine()
-        sg = engine.shotgun
-        context = engine.context
-        project = sg.find_one('Project', [['id', 'is', context.project['id']]], ['sg_formato___ratio'])
-        maskRatio = round(cmds.getAttr("defaultResolution.deviceAspectRatio"), 3)
-        texto = ""
-        if float(project['sg_formato___ratio']) != maskRatio:
-            texto += "\n" + "El device aspect del proyecto es " + str(
-                project['sg_formato___ratio']) + " y los settings de esta escena son " + str(
-                maskRatio) + ". Deberías comprobar los settings de render"
-            return [texto]
-        else:
-            return []
 
 
     # ---------------------------------------------------------------------------
@@ -699,13 +675,6 @@ class MayaDataValidationHook(HookBaseClass):
         texto = "Render settings resolution changed to: " + str(shot['sg_width']) + "x" + str(shot['sg_height'])
         cmds.confirmDialog(title="Fixed Resolution", message=texto)
 
-    def fix_device_aspect(self, context):
-        ### Routine for checking frame rate against project settings in the web
-        engine = sgtk.platform.current_engine()
-        sg = engine.shotgun
-        context = engine.context
-        project = sg.find_one('Project', [['id', 'is', context.project['id']]], ['sg_formato___ratio'])
-        cmds.setAttr("defaultResolution.deviceAspectRatio", round(float(project['sg_formato___ratio'])), 3)
 
 
     # ---------------------------------------------------------------------------

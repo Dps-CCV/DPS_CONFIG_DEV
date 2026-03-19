@@ -11,6 +11,7 @@
 import nuke
 import os
 import sgtk
+import logging
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -186,6 +187,7 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
         # full-res template. Or if they rendered in full res and then switched to
         # proxy mode later. In this case, this is likely user error, so we catch it.
         checked = True
+        self.logger.info("test de actualizado")
         for i in item.tasks:
             if i.plugin.name == 'Publish Renders to Shotgun':
                 if i.checked == False:
@@ -232,8 +234,37 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
         sg_task = self.parent.context.task
         comment = item.description
         thumbnail_path = item.get_thumbnail_as_path()
-        progress_cb = lambda *args, **kwargs: None
+
+
+        # progress_cb = lambda *args, **kwargs: None
         review_submission_app = self.parent.engine.apps.get("tk-multi-reviewsubmission")
+
+        # Add a custom handler to forward review app logs to publisher logger
+        review_logger = review_submission_app.logger
+
+        # Create a handler that forwards to publisher logger
+        class PublisherLogHandler(logging.Handler):
+            def __init__(self, publisher_logger):
+                super(PublisherLogHandler, self).__init__()
+                self.publisher_logger = publisher_logger
+
+            def emit(self, record):
+                # Forward the log record to publisher logger
+                msg = self.format(record)
+
+                if record.levelno >= logging.ERROR:
+                    self.publisher_logger.error(msg)
+                elif record.levelno >= logging.WARNING:
+                    self.publisher_logger.warning(msg)
+                elif record.levelno >= logging.INFO:
+                    self.publisher_logger.info(msg)
+                else:
+                    self.publisher_logger.debug(msg)
+
+        # Add the custom handler
+        custom_handler = PublisherLogHandler(self.logger)
+        custom_handler.setLevel(logging.DEBUG)
+        review_logger.addHandler(custom_handler)
 
         render_template = item.properties.get("work_template")
         if render_template is None:
@@ -270,10 +301,8 @@ class NukeSubmitForReviewPlugin(HookBaseClass):
         except:
             self.logger.info("No parent publish data found")
 
-
-
-
-
+        self.logger.info("Starting ReviewSubmission")
+        self.logger.info("Copying files to local")
         version = review_submission_app.render_and_submit_version(
             publish_template,
             render_path_fields,

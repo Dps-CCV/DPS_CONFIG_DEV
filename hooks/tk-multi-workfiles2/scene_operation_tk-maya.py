@@ -165,24 +165,17 @@ class SceneOperation(HookClass):
     def CheckFrameRate(self, context):
         ### Routine for checking frame rate against project settings in the web
         sg = self.parent.shotgun
-        projectFps = sg.find_one('Project', [['id', 'is', context.project['id']]], ['sg_frame___rate', 'sg_formato___ratio'])
+        projectFps = sg.find_one('Project', [['id', 'is', context.project['id']]], ['sg_frame___rate'])
         mayaStupidUnit = cmds.currentUnit(query=True, time=True)
         timeDict = {"game": 15, "film": 24, "pal": 25, "ntsc": 30, "show": 48, "palf": 50, "ntscf": 60,
                     "23.976fps": 23.976, "29.97fps": 29.97, "29.97df": 29.97, "47.952fps": 47.952,
                     "59.94fps": 59.94, "44100fps": 44100, "48000fps": 48000}
         fps = timeDict[mayaStupidUnit]
-        maskRatio = round(cmds.getAttr("defaultResolution.deviceAspectRatio"), 3)
         texto = ""
-        if float(projectFps['sg_frame___rate'].replace(",", ".")) != fps or float(projectFps['sg_formato___ratio']) != maskRatio:
-            if float(projectFps['sg_frame___rate'].replace(",", ".")) != fps:
-                texto += "\n" + "El frame rate del proyecto es " + str(
-                projectFps['sg_frame___rate']) + " y los settings de esta escena son " + str(
-                fps) + ". Deberías comprobar los settings de la escena"
-
-            if round(float(projectFps['sg_formato___ratio']), 3) != maskRatio:
-                texto+= "\n" + "El device aspect del proyecto es " + str(
-                    projectFps['sg_formato___ratio']) + " y los settings de esta escena son " + str(
-                    maskRatio) + ". Deberías comprobar los settings de render"
+        if float(projectFps['sg_frame___rate'].replace(",", ".")) != fps:
+            texto += "\n" + "El frame rate del proyecto es " + str(
+            projectFps['sg_frame___rate']) + " y los settings de esta escena son " + str(
+            fps) + ". Deberías comprobar los settings de la escena"
             cmds.confirmDialog(title="Change status", message=texto)
 
     def vaccineFix(self):
