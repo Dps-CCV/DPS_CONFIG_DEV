@@ -424,7 +424,7 @@ class UploadVersionPlugin(HookBaseClass):
                     cmds.setAttr((main + '.displayGateMaskOpacity'), 1)
                     cmds.setAttr((main + '.overscan'), 1.0)
                     proj = sgtk.platform.current_engine().shotgun.find_one('Project', [['name', 'is', item.context.project['name']]], ['sg_formato___ratio'])
-                    cmds.setAttr("defaultResolution.deviceAspectRatio", round(float(proj['sg_formato___ratio'])), 3)
+                    cmds.setAttr("defaultResolution.deviceAspectRatio", round(float(proj['sg_formato___ratio']), 3))
 
                 ## Process avi
                 cmds.playblast(format='avi',
