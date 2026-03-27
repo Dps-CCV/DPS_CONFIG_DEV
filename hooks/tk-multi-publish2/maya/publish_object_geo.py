@@ -464,7 +464,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
             cmds.select(item.properties["object"])
             # if 'TEXTURE' or 'SHADING' in publisher.context.step['name']:
             #     bake_facesets_for_selection(remove_object_level_links=True, verbose=True)
-            # parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath = True )
+            parentNode = cmds.listRelatives(cmds.ls(selection=True)[0], parent=True, fullPath = True )
             alembic_args.append("-root")
             alembic_args.append(cmds.ls(selection=True)[0])
         else:

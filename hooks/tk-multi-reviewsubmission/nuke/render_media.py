@@ -96,13 +96,13 @@ class RenderMedia(HookBaseClass):
         # now operate inside this group
         group.begin()
         try:
-            try:
-                farmkey = os.environ['ON_FARM']
-                farm = True
-            except:
-                farm = False
-            if farm is not True:
-                local = nuke.toNode("preferences").knob("localCachePath").evaluate()[:-1]
+            # try:
+            #     farmkey = os.environ['ON_FARM']
+            #     farm = True
+            # except:
+            #     farm = False
+            # if farm is not True:
+            local = nuke.toNode("preferences").knob("localCachePath").evaluate()[:-1]
             renderFolder = os.path.dirname(input_path)
             localRenderFolder = renderFolder.replace(os.environ['MOUNT'], local)
 
@@ -212,9 +212,9 @@ class RenderMedia(HookBaseClass):
 
         if output_node:
             serverPath = output_node.knob('file').evaluate()
-            if farm is not True:
-                localPath = serverPath.replace(os.environ['MOUNT'], local)
-                output_node.knob('file').setValue(localPath)
+            # if farm is not True:
+            localPath = serverPath.replace(os.environ['MOUNT'], local)
+            output_node.knob('file').setValue(localPath)
 
 
             # Make sure the output folder exists
@@ -227,9 +227,9 @@ class RenderMedia(HookBaseClass):
             nuke.executeMultiple(
                     [output_node], ([first_frame - 1, last_frame, 1],), [nuke.views()[0]]
                 )
-            if farm is not True:
-                self.__app.log_info("Copying local qt file")
-                shutil.copy(localPath, serverPath)
+            # if farm is not True:
+            self.__app.log_info("Copying local qt file")
+            shutil.copy(localPath, serverPath)
 
 
 
