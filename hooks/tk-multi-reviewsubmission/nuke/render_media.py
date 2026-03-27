@@ -102,7 +102,8 @@ class RenderMedia(HookBaseClass):
             # except:
             #     farm = False
             # if farm is not True:
-            local = nuke.toNode("preferences").knob("localCachePath").evaluate()[:-1]
+            drive, rest = os.path.splitdrive(nuke.toNode("preferences").knob("localCachePath").evaluate())
+            local = drive
             renderFolder = os.path.dirname(input_path)
             localRenderFolder = renderFolder.replace(os.environ['MOUNT'], local)
 
