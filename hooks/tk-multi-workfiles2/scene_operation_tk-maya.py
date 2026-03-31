@@ -171,11 +171,10 @@ class SceneOperation(HookClass):
                     "23.976fps": 23.976, "29.97fps": 29.97, "29.97df": 29.97, "47.952fps": 47.952,
                     "59.94fps": 59.94, "44100fps": 44100, "48000fps": 48000}
         fps = timeDict[mayaStupidUnit]
-        texto = ""
         if float(projectFps['sg_frame___rate'].replace(",", ".")) != fps:
-            texto += "\n" + "El frame rate del proyecto es " + str(
-            projectFps['sg_frame___rate']) + " y los settings de esta escena son " + str(
-            fps) + ". Deberías comprobar los settings de la escena"
+            texto = "El frame rate del proyecto es " + str(
+                projectFps['sg_frame___rate']) + " y los settings de esta escena son " + str(
+                fps) + ". Deberías comprobar los settings de la escena"
             cmds.confirmDialog(title="Change status", message=texto)
 
     def vaccineFix(self):

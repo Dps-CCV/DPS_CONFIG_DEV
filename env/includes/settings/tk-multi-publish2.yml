@@ -310,7 +310,6 @@ settings.tk-multi-publish2.nuke.asset_step:
         Publish Template: nuke_asset_geo_publish
 #  - name: Upload for review
 #    hook: "{self}/upload_version.py"
-    settings: {}
   - name: Begin file versioning
     hook: "{engine}/tk-multi-publish2/basic/nuke_start_version_control.py"
     settings: {}
@@ -345,7 +344,6 @@ settings.tk-multi-publish2.nuke.shot_step:
         Publish Template: nuke_shot_geo_publish
 #  - name: Upload for review
 #    hook: "{self}/upload_version.py"
-    settings: {}
   - name: Begin file versioning
     hook: "{engine}/tk-multi-publish2/basic/nuke_start_version_control.py"
     settings: {}
