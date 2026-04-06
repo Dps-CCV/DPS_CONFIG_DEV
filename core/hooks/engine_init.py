@@ -29,9 +29,9 @@ class EngineInit(Hook):
         :type engine: :class:`~sgtk.platform.Engine`
         """
 
-        # ##synchronize path cache
-        # tk = engine.sgtk
-        # tk.synchronize_filesystem_structure(full_sync=True)
+        ##synchronize path cache
+        tk = engine.sgtk
+        tk.synchronize_filesystem_structure(full_sync=True)
 
 
         if engine.name == "tk-maya":
