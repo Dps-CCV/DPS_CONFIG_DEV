@@ -509,7 +509,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
 
         ##EFECTOSCOPIO UNREGISTER AND DELETE ALL PUBLISHES
         self.logger.info(
-            "Starting unregister and deletion of old publishes. For publish %s" % (publish_file)
+            "Starting unregister and deletion of old publishes"
         )
         publisher = self.parent
         tk = publisher.sgtk
@@ -526,7 +526,7 @@ class MayaObjectGeometryPublishPlugin(HookBaseClass):
                 )
                 # Grab the unregister command
                 unreg_cmd = sgtk.get_command('unregister_folders', tk)
-                parameters = {"path": d['path']}
+                parameters = {"entity": d}
                 unreg_cmd.execute(parameters)
                 shutil.rmtree(d['path'])
                 self.logger.info(
