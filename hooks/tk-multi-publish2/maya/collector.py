@@ -317,7 +317,7 @@ class MayaSessionCollector(HookBaseClass):
 
 
             self.logger.info("Processing render layer: %s" % (layer,))
-            renderable_cameras = cmds.ls(type="camera", long=True)
+            renderable_cameras = cmds.ls(type="camera")
             renderable_cameras = [cam for cam in renderable_cameras if cmds.getAttr(cam + ".renderable")]
             for cam in renderable_cameras:
                 if "camMain" in cam:
