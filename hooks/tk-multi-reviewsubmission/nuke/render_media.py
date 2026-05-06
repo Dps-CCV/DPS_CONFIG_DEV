@@ -237,6 +237,7 @@ class RenderMedia(HookBaseClass):
 
         # Cleanup after ourselves
         #nuke.delete(group)
+
         self.__app.log_info("Deleting local render")
         try:
             os.remove(localPath)
