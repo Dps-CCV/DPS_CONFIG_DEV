@@ -137,23 +137,26 @@ class ContextChange(get_hook_baseclass()):
 
                 if current_engine._Engine__engine_instance_name == 'tk-nuke':
                     import nuke
-                    reloadConfig = nuke.root().knob('reloadConfig')
-                    reloadConfig.execute()
-                    self.logger.info("Reload Config %s", str(current_engine._Engine__engine_instance_name))
                     try:
-                        ####DPS Write Shortcuts
-                        # # CUSTOM SHORTCUTS
-                        write_node_item = nuke.menu('Nodes').findItem("Image/Write")
-                        write_node_item.setShortcut("")
-
-                        nuke.menu('Nodes').findItem("Flow Production Tracking").findItem(
-                            "Render 16bits").setShortcut('w')
-                        nuke.menu('Nodes').findItem("Flow Production Tracking").findItem(
-                            "PRECOMP").setShortcut('Alt+w')
-                        nuke.menu('Nodes').findItem("Flow Production Tracking").findItem(
-                            "TECH_PRECOMP").setShortcut('Alt+j')
-                    except:
-                        self.engine.logger.info("No se ha podido registrar los atajos de nuke write")
+                        reloadConfig = nuke.root().knob('reloadConfig')
+                        reloadConfig.execute()
+                        self.logger.info("Reload Config %s", str(current_engine._Engine__engine_instance_name))
+                    except Exception as e:
+                        self.logger.info("Reload Config failed %s", str(e))
+                    # try:
+                    #     ####DPS Write Shortcuts
+                    #     # # CUSTOM SHORTCUTS
+                    #     write_node_item = nuke.menu('Nodes').findItem("Image/Write")
+                    #     write_node_item.setShortcut("")
+                    #
+                    #     nuke.menu('Nodes').findItem("Flow Production Tracking").findItem(
+                    #         "Render 16bits").setShortcut('w')
+                    #     nuke.menu('Nodes').findItem("Flow Production Tracking").findItem(
+                    #         "PRECOMP").setShortcut('Alt+w')
+                    #     nuke.menu('Nodes').findItem("Flow Production Tracking").findItem(
+                    #         "TECH_PRECOMP").setShortcut('Alt+j')
+                    # except:
+                    #     self.engine.logger.info("No se ha podido registrar los atajos de nuke write")
 
 
 
