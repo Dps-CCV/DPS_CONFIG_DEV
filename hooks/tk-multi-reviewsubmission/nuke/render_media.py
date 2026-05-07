@@ -236,31 +236,31 @@ class RenderMedia(HookBaseClass):
 
 
         # Cleanup after ourselves
-        #nuke.delete(group)
+        nuke.delete(group)
 
         self.__app.log_info("Deleting local render")
-        # try:
-        #     os.remove(localPath)
-        #     #deletestring = f'rmdir /s /q "{localRenderFolder}"'
-        #     deletestring = f'powershell -NoProfile -Command Remove-Item -LiteralPath "{localRenderFolder}" -Recurse -Force -Verbose'
-        #
-        #     with subprocess.Popen(
-        #             deletestring,
-        #             shell=True,
-        #             stdout=subprocess.PIPE,
-        #             stderr=subprocess.STDOUT,
-        #             text=True,
-        #             bufsize=1  # line-buffered
-        #     ) as proc:
-        #         for line in proc.stdout:
-        #             sys.stdout.write(line)  # stream to your console (or handle it as you like)
-        #             self.__app.log_info(
-        #                 line
-        #             )
-        #         return_code = proc.wait()
-        #     #shutil.rmtree(localRenderFolder)
-        # except:
-        #     self.__app.log_info("No local files were deleted")
+        try:
+            os.remove(localPath)
+            #deletestring = f'rmdir /s /q "{localRenderFolder}"'
+            deletestring = f'powershell -NoProfile -Command Remove-Item -LiteralPath "{localRenderFolder}" -Recurse -Force -Verbose'
+
+            with subprocess.Popen(
+                    deletestring,
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1  # line-buffered
+            ) as proc:
+                for line in proc.stdout:
+                    sys.stdout.write(line)  # stream to your console (or handle it as you like)
+                    self.__app.log_info(
+                        line
+                    )
+                return_code = proc.wait()
+            #shutil.rmtree(localRenderFolder)
+        except:
+            self.__app.log_info("No local files were deleted")
 
         return output_path
 
