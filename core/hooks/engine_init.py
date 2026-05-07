@@ -67,7 +67,7 @@ class EngineInit(Hook):
             # now register the command with the engine
             engine.register_command("Set Shot Resolution", menu_callback)
 
-        if engine.name == 'tk-nuke':
+        elif engine.name == 'tk-nuke':
             import nuke
             try:
                 ####DPS Write Shortcuts
