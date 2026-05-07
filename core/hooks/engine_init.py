@@ -66,6 +66,7 @@ class EngineInit(Hook):
 
             # now register the command with the engine
             engine.register_command("Set Shot Resolution", menu_callback)
+
         if engine.name == 'tk-nuke':
             import nuke
             try:
@@ -81,5 +82,5 @@ class EngineInit(Hook):
                 nuke.menu('Nodes').findItem("Flow Production Tracking").findItem(
                     "TECH_PRECOMP").setShortcut('Alt+j')
             except:
-                self.engine.logger.info("No se ha podido registrar los atajos de nuke write")
+                self.logger.info("No se ha podido registrar los atajos de nuke write")
         pass
