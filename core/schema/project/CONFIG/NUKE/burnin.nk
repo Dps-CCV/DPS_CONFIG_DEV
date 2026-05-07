@@ -11,7 +11,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <split size="1254" stretch="1"/>
             <splitter orientation="2">
                 <split size="985"/>
-                <dock id="" activePageId="DAG.2" focus="true">
+                <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="DopeSheet.1"/>
                     <page id="DAG.2"/>
@@ -33,7 +33,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             </dock>
         </splitter>
     </window>
-    <window x="-2160" y="-279" w="1078" h="1866" maximized="1" screen="2">
+    <window x="-2160" y="-279" w="1078" h="1866" screen="2">
         <splitter orientation="1">
             <split size="1078"/>
             <dock id="" activePageId="Curve Editor.1">
@@ -67,7 +67,6 @@ Group {
  inputs 0
  name Group1
  note_font Verdana
- selected true
  xpos -249
  ypos -39
  mapsize {0.15 0.15}
@@ -78,14 +77,21 @@ Group {
   xpos 385
   ypos -2
  }
- AddTimeCode {
-  startcode 00:00:00:00
-  frame 0
-  useFrame true
-  name AddTimeCode2
-  xpos 385
-  ypos 22
+set N59bcc000 [stack 0]
+ Dot {
+  name Dot1
+  note_font_size 50
+  xpos 540
+  ypos 1
  }
+ Dot {
+  name Dot2
+  note_font_size 50
+  selected true
+  xpos 540
+  ypos 413
+ }
+push $N59bcc000
  OCIOLookTransform {
   in_colorspace scene_linear
   look Shot_GRADE
@@ -188,7 +194,7 @@ Group {
    xpos -61
    ypos -71
   }
-set Na13dcc00 [stack 0]
+set N59bccc00 [stack 0]
   Dot {
    name Dot5
    xpos 803
@@ -199,7 +205,7 @@ set Na13dcc00 [stack 0]
    xpos 803
    ypos 560
   }
-push $Na13dcc00
+push $N59bccc00
   NoOp {
    name calc
    tile_color 0xff1663ff
@@ -247,7 +253,7 @@ push $Na13dcc00
    addUserKnob {15 title_v}
    title_v {{"title_guide.x + ( title_area.x / 2 )" i} {title_guide.y i} {"title_guide.r - ( title_area.x / 2 )" i} {title_guide.t i}}
   }
-set Na13dd800 [stack 0]
+set N59bcd800 [stack 0]
   Rectangle {
    replace true
    area {{"ceil( calc.title_guide.x - calc.line )" i} {"ceil( calc.title_guide.y - calc.line )" i} {"ceil( calc.title_guide.r + calc.line )" i} {"ceil( calc.title_guide.t + calc.line )" i}}
@@ -265,7 +271,7 @@ set Na13dd800 [stack 0]
    xpos 604
    ypos 129
   }
-set Na1418000 [stack 0]
+set N59c08000 [stack 0]
   Rectangle {
    replace true
    area {{input.area.x i} {"( ( input.area.y + input.area.t ) / 2 ) - calc.line" i} {input.area.r i} {"( ( input.area.y + input.area.t ) / 2 ) + calc.line" i}}
@@ -292,7 +298,7 @@ set Na1418000 [stack 0]
    xpos 667
    ypos 232
   }
-push $Na1418000
+push $N59c08000
   Merge2 {
    inputs 2
    name Merge5
@@ -319,7 +325,7 @@ push $Na1418000
    xpos 638
    ypos 478
   }
-push $Na13dd800
+push $N59bcd800
   Rectangle {
    replace true
    area {{"ceil( calc.action_guide.x - calc.line )" i} {"ceil( calc.action_guide.y - calc.line )" i} {"ceil( calc.action_guide.r + calc.line )" i} {"ceil( calc.action_guide.t + calc.line )" i}}
@@ -380,7 +386,7 @@ push $Na13dd800
    xpos 462
    ypos 395
   }
-push $Na13dd800
+push $N59bcd800
   Rectangle {
    replace true
    area {{"ceil( calc.ar_guide.x == 0 ? calc.ar_guide.x : calc.ar_guide.x - calc.line )" i} {"ceil( calc.ar_guide.y == 0 ? calc.ar_guide.y : calc.ar_guide.y - calc.line )" i} {"ceil( calc.ar_guide.r == width ? calc.ar_guide.r : calc.ar_guide.r + calc.line )" i} {"ceil( calc.ar_guide.t == height ? calc.ar_guide.t : calc.ar_guide.t + calc.line )" i}}
@@ -398,7 +404,7 @@ push $Na13dd800
    xpos 207
    ypos 129
   }
-set N9eb02400 [stack 0]
+set N50a62400 [stack 0]
   Text {
    message "\[value parent.arguide_label]"
    font "\[value parent.font]"
@@ -429,7 +435,7 @@ set N9eb02400 [stack 0]
    ypos 209
    disable {{!calc.ar_isbigger i}}
   }
-push $N9eb02400
+push $N50a62400
   Text {
    message "\[if \[string compare \[value parent.aspect_selection] Custom] \{return \[value parent.aspect_selection]:1\} else \{return \[value parent.aspect_custom]:1\}]"
    font "\[value parent.font]"
@@ -460,7 +466,7 @@ push $N9eb02400
    ypos 206
    disable {{!calc.ar_isbigger i}}
   }
-push $N9eb02400
+push $N50a62400
   Switch {
    inputs 3
    which {{parent.arguide_label_mode i}}
@@ -474,7 +480,7 @@ push $N9eb02400
    xpos 241
    ypos 321
   }
-push $Na13dd800
+push $N59bcd800
   Rectangle {
    replace true
    invert true
@@ -489,7 +495,7 @@ push $Na13dd800
    xpos 87
    ypos 169
   }
-push $Na13dd800
+push $N59bcd800
   Merge2 {
    inputs 2
    mix {{parent.aspectmask_mix i}}
@@ -600,7 +606,6 @@ push $Na13dd800
   translate {300 1800}
   scale 2
   name Transform1
-  selected true
   xpos 260
   ypos 299
  }
@@ -634,6 +639,12 @@ push $Na13dd800
   label "Switches to the slate if curr_frame < start_frame for the current scene."
   xpos 389
   ypos 347
+ }
+ CopyMetaData {
+  inputs 2
+  name CopyMetaData1
+  xpos 389
+  ypos 410
  }
  Output {
   name Output1

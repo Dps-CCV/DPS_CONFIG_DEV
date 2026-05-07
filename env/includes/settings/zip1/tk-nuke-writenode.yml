@@ -32,6 +32,7 @@ settings.tk-nuke-writenode.asset:
         autocrop: true
         compression: Zip (1 scanline)
         interleave: channels
+        colorspace: $PROJECTCOLOR
       tank_type: Rendered Image
       tile_color: [ 173, 137, 2 ]
       promote_write_knobs: ["compression"]
@@ -47,6 +48,7 @@ settings.tk-nuke-writenode.asset:
         autocrop: true
         compression: Zip (1 scanline)
         interleave: channels
+        colorspace: $PROJECTCOLOR
       tank_type: Rendered Image
       tile_color: [ 0, 209, 107 ]
       promote_write_knobs: ["compression"]
@@ -125,6 +127,7 @@ settings.tk-nuke-writenode.shot:
       autocrop: true
       compression: Zip (1 scanline)
       interleave: channels
+      colorspace: $PROJECTCOLOR
     tank_type: Rendered Image
     tile_color: [173, 137, 2]
     promote_write_knobs: ["compression"]
@@ -138,7 +141,7 @@ settings.tk-nuke-writenode.shot:
       datatype: 16 bit half
       channels: rgba
       autocrop: true
-      colorspace: "Utility - Raw"
+      colorspace: "Raw"
       compression: Zip (1 scanline)
       interleave: channels
     tank_type: Rendered Image
@@ -156,6 +159,7 @@ settings.tk-nuke-writenode.shot:
       autocrop: true
       compression: Zip (1 scanline)
       interleave: channels
+      colorspace: $PROJECTCOLOR
     tank_type: Rendered Image
     tile_color: [0, 209, 107]
     promote_write_knobs: ["compression"]
