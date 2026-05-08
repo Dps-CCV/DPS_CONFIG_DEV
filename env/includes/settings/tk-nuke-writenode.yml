@@ -20,7 +20,7 @@ settings.tk-nuke-writenode:
   template_script_work: nuke_asset_work
   show_convert_actions: True
   write_nodes:
-    - file_type: $FormExt
+    - file_type: exr
       name: Render 16bits
       proxy_publish_template: nuke_asset_render_pub_proxy
       proxy_render_template: nuke_asset_render_proxy
