@@ -254,6 +254,7 @@ settings.tk-nuke.asset:
       location: "@apps.tk-nuke-quickreview.location"
     tk-multi-bugreporter: "@settings.tk-multi-bugreporter.main"
     tk-multi-data-validation: "@settings.tk-multi-data-validation.nuke"
+    tk-nuke-writenode: "@settings.tk-nuke-writenode.asset"
   menu_favourites:
   - {app_instance: tk-multi-workfiles2, name: File Open..., hotkey: Shift+Ctrl+o}
   favourite_directories:
