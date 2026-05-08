@@ -165,7 +165,7 @@ settings.tk-nuke.hiero.shot:
     tk-multi-workfiles2: "@settings.tk-multi-workfiles2.hiero"
     tk-nuke-quickreview:
       location: "@apps.tk-nuke-quickreview.location"
-    tk-nuke-writenode: "@settings.tk-nuke-writenode"
+    tk-nuke-writenode: "@settings.tk-nuke-writenode.shot"
     tk-multi-bugreporter: "@settings.tk-multi-bugreporter.main"
   bin_context_menu:
   - app_instance: tk-multi-workfiles2
@@ -211,7 +211,7 @@ settings.tk-nuke.hiero.shot_step:
     tk-multi-workfiles2: "@settings.tk-multi-workfiles2.hiero"
     tk-nuke-quickreview:
       location: "@apps.tk-nuke-quickreview.location"
-    tk-nuke-writenode: "@settings.tk-nuke-writenode"
+    tk-nuke-writenode: "@settings.tk-nuke-writenode.shot"
     tk-multi-bugreporter: "@settings.tk-multi-bugreporter.main"
   bin_context_menu:
   - app_instance: tk-multi-workfiles2
@@ -292,7 +292,7 @@ settings.tk-nuke.asset_step:
     tk-multi-workfiles2: "@settings.tk-multi-workfiles2.nuke.asset_step"
     tk-nuke-quickreview:
       location: "@apps.tk-nuke-quickreview.location"
-    tk-nuke-writenode: "@settings.tk-nuke-writenode"
+    tk-nuke-writenode: "@settings.tk-nuke-writenode.asset"
     tk-multi-bugreporter: "@settings.tk-multi-bugreporter.main"
   menu_favourites:
   - {app_instance: tk-multi-workfiles2, name: File Open..., hotkey: Shift+Ctrl+o}
@@ -406,7 +406,7 @@ settings.tk-nuke.shot_step:
     tk-multi-snapshot: "@settings.tk-multi-snapshot.nuke.shot_step"
     tk-multi-workfiles2: "@settings.tk-multi-workfiles2.nuke.shot_step"
     tk-nuke-quickreview: "@settings.tk-nuke-quickreview"
-    tk-nuke-writenode: "@settings.tk-nuke-writenode"
+    tk-nuke-writenode: "@settings.tk-nuke-writenode.shot"
     tk-multi-bugreporter: "@settings.tk-multi-bugreporter.main"
     tk-multi-data-validation: "@settings.tk-multi-data-validation.nuke"
 
@@ -454,7 +454,7 @@ settings.tk-nuke.nukestudio.asset_step:
     tk-multi-workfiles2: "@settings.tk-multi-workfiles2.hiero"
     tk-nuke-quickreview:
       location: "@apps.tk-nuke-quickreview.location"
-    tk-nuke-writenode: "@settings.tk-nuke-writenode"
+    tk-nuke-writenode: "@settings.tk-nuke-writenode.asset"
     tk-multi-bugreporter: "@settings.tk-multi-bugreporter.main"
   bin_context_menu:
   - app_instance: tk-multi-workfiles2
@@ -499,7 +499,7 @@ settings.tk-nuke.nukestudio.project:
     tk-multi-breakdown2: "@settings.tk-multi-breakdown2.nukestudio"
     tk-multi-loader2: "@settings.tk-multi-loader2.nukestudio.project"
     tk-multi-bugreporter: "@settings.tk-multi-bugreporter.main"
-    tk-nuke-writenode: "@settings.tk-nuke-writenode"
+    tk-nuke-writenode: "@settings.tk-nuke-writenode.shot"
   menu_favourites:
     - { app_instance: tk-multi-workfiles2, name: File Open..., hotkey: Shift+Ctrl+o }
     - { app_instance: tk-multi-snapshot, name: Snapshot... }
@@ -558,7 +558,7 @@ settings.tk-nuke.nukestudio.sequence:
     tk-multi-breakdown2: "@settings.tk-multi-breakdown2.nukestudio"
     tk-multi-loader2: "@settings.tk-multi-loader2.nukestudio.project"
     tk-multi-bugreporter: "@settings.tk-multi-bugreporter.main"
-    tk-nuke-writenode: "@settings.tk-nuke-writenode"
+    tk-nuke-writenode: "@settings.tk-nuke-writenode.shot"
   menu_favourites:
     - { app_instance: tk-multi-workfiles2, name: File Open..., hotkey: Shift+Ctrl+o }
     - { app_instance: tk-multi-snapshot, name: Snapshot... }
@@ -617,7 +617,7 @@ settings.tk-nuke.nukestudio.shot:
     tk-multi-workfiles2: "@settings.tk-multi-workfiles2.hiero"
     tk-nuke-quickreview:
       location: "@apps.tk-nuke-quickreview.location"
-    tk-nuke-writenode: "@settings.tk-nuke-writenode"
+    tk-nuke-writenode: "@settings.tk-nuke-writenode.shot"
     tk-multi-bugreporter: "@settings.tk-multi-bugreporter.main"
   bin_context_menu:
   - app_instance: tk-multi-workfiles2
@@ -663,7 +663,7 @@ settings.tk-nuke.nukestudio.shot_step:
     tk-multi-workfiles2: "@settings.tk-multi-workfiles2.hiero"
     tk-nuke-quickreview:
       location: "@apps.tk-nuke-quickreview.location"
-    tk-nuke-writenode: "@settings.tk-nuke-writenode"
+    tk-nuke-writenode: "@settings.tk-nuke-writenode.shot"
     tk-multi-bugreporter: "@settings.tk-multi-bugreporter.main"
   bin_context_menu:
   - app_instance: tk-multi-workfiles2
