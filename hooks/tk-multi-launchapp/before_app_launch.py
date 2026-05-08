@@ -78,10 +78,13 @@ class BeforeAppLaunch(tank.Hook):
         os.environ["PROJECTCOLORSPACE"] = str(getColor["sg_espacio___color"])
 
         os.environ["FormExt"] = getColor['sg_format']
-        if getColor['sg_format'] == 'exr':
-            os.environ["CompressionExt"] = getColor['sg_compression']
-        else:
-            os.environ["CompressionExt"] = getColor['sg_format']
+        # if getColor['sg_format'] == 'exr':
+        #     os.environ["CompressionExt"] = getColor['sg_compression']
+        # else:
+        #     os.environ["CompressionExt"] = getColor['sg_format']
+
+        os.environ["COMPRESSION"] = str(getColor["sg_compression"])
+        os.environ["CHANNELS"] = str(getColor["sg_channels"])
 
 
 
