@@ -106,8 +106,8 @@ class BeforeAppLaunch(tank.Hook):
 
         os.environ['SHOTGUN_SITE'] = tank.platform.current_engine().sgtk.shotgun_url
 
-        os.environ['SHOTGUN_CONFIG_URI'] = "sgtk:descriptor:path?path=" + tank.platform.current_engine().sgtk.configuration_descriptor.get_path() + "\config"
-        os.environ['SHOTGUN_SGTK_MODULE_PATH'] = tank.platform.current_engine().sgtk.configuration_descriptor.get_path() + "\install\core\python"
+        os.environ['SHOTGUN_CONFIG_URI'] = tank.platform.current_engine().sgtk.configuration_descriptor.get_uri()
+        os.environ['SHOTGUN_SGTK_MODULE_PATH'] = tank.get_sgtk_module_path()
 
         ###Empty variables fro clip and lmt. Later they are set at context change
         os.environ["CLIP"] = " "
