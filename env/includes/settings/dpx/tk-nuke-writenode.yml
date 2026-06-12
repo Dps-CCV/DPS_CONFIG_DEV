@@ -128,7 +128,7 @@ settings.tk-nuke-writenode.shot:
     settings:
       datatype: 16 bit
       channels: rgba
-      colorspace: "Utility - Raw"
+      colorspace: "Raw"
     tank_type: Rendered Image
     tile_color: [ 106, 181, 0 ]
     promote_write_knobs: [ ]

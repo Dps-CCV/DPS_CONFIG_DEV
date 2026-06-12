@@ -662,3 +662,4 @@ settings.tk-multi-publish2.vred.asset_step:
   post_phase: "{self}/post_phase.py"
   help_url: *help_url
   location: "@apps.tk-multi-publish2.location"
+
