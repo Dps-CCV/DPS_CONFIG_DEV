@@ -12,7 +12,7 @@ import os
 import nuke
 import sgtk
 from sgtk.util.filesystem import ensure_folder_exists
-import WrapItUpLogger
+import WrapItUpLogger_v2
 import shutil
 
 
@@ -346,28 +346,32 @@ class NukeSessionPublishPlugin(HookBaseClass):
             AssetFolder = os.path.join(*os.environ['ASSET_FOLDER'].split(os.sep)[3:])
             archivePath = os.path.normpath(os.path.join(os.environ['PROJECT_PATH'], 'ARCHIVE', AssetFolder, base))[:-5]
 
-
-
         try:
             self.logger.info("Starting Archive of the script. Be patient my friend")
+
             if os.path.exists(archivePath):
-                shutil.rmtree(archivePath)
-            os.makedirs(archivePath)
-            WrapItUpLogger.WrapItUp(nk=scriptPath, out=archivePath, parentdircount=3, startnow=True, fonts=True,
-                              licinteractive=True, relativerelinked=True, gizmos=True, logger=self.logger)
+                # --- selective cleanup: only remove .nk scripts and log ---
+                # media symlinks are kept and reused if unchanged
+                _cleanup_archive_scripts(archivePath, self.logger)
+            else:
+                os.makedirs(archivePath)
 
+            WrapItUpLogger_v2.WrapItUp(
+                nk=scriptPath,
+                out=archivePath,
+                parentdircount=3,
+                startnow=True,
+                fonts=True,
+                licinteractive=True,
+                relativerelinked=True,
+                gizmos=True,
+                logger=self.logger
+            )
 
-            # Access the published entity created earlier
             type = item.get_property("parched_type")
             id = item.get_property("parched_id")
-
-            if type != None and id != None:
-                # Update Shotgun/FPT fields as needed
-                self.sgtk.shotgun.update(
-                    type,
-                    id,
-                    {"sg_archived": True}  # Any field you want to update
-                )
+            if type is not None and id is not None:
+                self.sgtk.shotgun.update(type, id, {"sg_archived": True})
 
             self.logger.info("Scene archived successfully")
         except:
@@ -466,3 +470,33 @@ def _get_save_as_action():
             "callback": callback,
         }
     }
+def _cleanup_archive_scripts(archive_path, logger):
+    """
+    Selectively clean the archive folder before a re-publish.
+    Removes only .nk scripts, log files and gizmo init files
+    so they get regenerated fresh.
+    Media symlinks are left in place to be reused if unchanged.
+    """
+    import glob
+
+    patterns_to_delete = [
+        # nuke scripts at root level
+        os.path.join(archive_path, '*.nk'),
+        # log
+        os.path.join(archive_path, 'log.csv'),
+        # temporary relink files
+        os.path.join(archive_path, 'WrapItUp_Temp-RELINK_*.py'),
+        # gizmo init/menu files (always regenerated)
+        os.path.join(archive_path, 'GIZMOS', 'init.py'),
+        os.path.join(archive_path, 'GIZMOS', 'menu.py'),
+        os.path.join(archive_path, 'GIZMOS', 'Collected', '*', 'init.py'),
+        os.path.join(archive_path, 'GIZMOS', 'Collected', '*', 'menu.py'),
+    ]
+
+    for pattern in patterns_to_delete:
+        for f in glob.glob(pattern):
+            try:
+                os.remove(f)
+                logger.info("Removed for regeneration: %s" % f)
+            except Exception as e:
+                logger.warning("Could not remove %s: %s" % (f, str(e)))
