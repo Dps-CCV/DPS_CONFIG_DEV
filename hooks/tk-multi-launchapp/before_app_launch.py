@@ -202,7 +202,7 @@ class BeforeAppLaunch(tank.Hook):
         os.environ['SHOTGUN_CONFIG_URI'] = tank.platform.current_engine().sgtk.configuration_descriptor.get_uri()
         os.environ['SHOTGUN_SGTK_MODULE_PATH'] = self.rebuild_path(tank.get_sgtk_module_path().replace('C:', 'L:'))
 
-        ###Empty variables fro clip and lmt. Later they are set at context change
+        ###Empty variables from clip and lmt. Later they are set at context change
         os.environ["CLIP"] = " "
         os.environ["LMT"] = " "
         os.environ["SHOT"] = " "

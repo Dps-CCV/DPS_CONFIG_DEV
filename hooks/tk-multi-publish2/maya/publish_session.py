@@ -580,6 +580,7 @@ def _get_save_as_action():
 
 
 
+
 # Extension -> archive subfolder mapping (mirrors Maya's Archive Scene logic)
 EXT_TO_FOLDER = {
     # Scenes / references
@@ -710,6 +711,9 @@ class MayaSceneArchiver:
 
             logger.info("\n[4/6] Linking files to archive...")
             self._link_files_to_archive(logger)
+
+            logger.info("\n[4b] Redirecting node attributes to archive paths...")
+            self._redirect_node_attributes(logger)
 
             logger.info("\n[5/6] Saving archived scene...")
             archived_scene_path = self._save_archived_scene(logger, archive_name)
@@ -962,7 +966,7 @@ class MayaSceneArchiver:
                     file_info['relative_path'] = os.path.relpath(target_path, self.output_dir)
 
                     linked_count += 1
-                    logger.info("    OK: %s" % filename)
+                    logger.info("    ARCHIVED OK: %s" % filename)
 
                     if 'node' in file_info and 'attr' in file_info:
                         try:
@@ -979,6 +983,53 @@ class MayaSceneArchiver:
                     skipped_count += 1
 
         logger.info("\n  Processed: %d   Skipped: %d" % (linked_count, skipped_count))
+
+    def _redirect_node_attributes(self, logger):
+        """Redirect all file node attributes to their symlink paths in the archive."""
+
+        # Build map: original source path -> archive link path
+        path_map = {}
+        for files in self.collected_files.values():
+            for file_info in files:
+                if 'archive_path' in file_info:
+                    norm = os.path.normpath(file_info['source'])
+                    path_map[norm] = file_info['archive_path']
+
+        if not path_map:
+            logger.info("  No path remapping needed")
+            return
+
+        logger.info("  Remapping %d path(s) in scene nodes..." % len(path_map))
+
+        file_attrs = [
+            'fileTextureName', 'imageName', 'filename',
+            'abc_File', 'cacheFileName', 'cachePath',
+            'dso', 'aiFilename', 'sceneFileName',
+            'cfnFilePath', 'vdbFilePath',
+        ]
+
+        remapped = 0
+        for attr in file_attrs:
+            for node in cmds.ls('*'):
+                if not cmds.attributeQuery(attr, node=node, exists=True):
+                    continue
+                try:
+                    current = cmds.getAttr('%s.%s' % (node, attr))
+                    if not current:
+                        continue
+                    norm = os.path.normpath(current)
+                    if norm in path_map:
+                        cmds.setAttr(
+                            '%s.%s' % (node, attr),
+                            path_map[norm],
+                            type='string'
+                        )
+                        logger.info("    Remapped %s.%s -> %s" % (node, attr, os.path.basename(path_map[norm])))
+                        remapped += 1
+                except Exception:
+                    pass
+
+        logger.info("  Total remapped: %d" % remapped)
 
     def _save_archived_scene(self, logger, archive_name):
         archived_scene_path = os.path.join(
