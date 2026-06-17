@@ -12,7 +12,7 @@ import os
 import nuke
 import sgtk
 from sgtk.util.filesystem import ensure_folder_exists
-import WrapItUpLogger_v2
+import WrapItUpLogger
 import shutil
 
 
@@ -346,54 +346,33 @@ class NukeSessionPublishPlugin(HookBaseClass):
             AssetFolder = os.path.join(*os.environ['ASSET_FOLDER'].split(os.sep)[3:])
             archivePath = os.path.normpath(os.path.join(os.environ['PROJECT_PATH'], 'ARCHIVE', AssetFolder, base))[:-5]
 
+
+
         try:
             self.logger.info("Starting Archive of the script. Be patient my friend")
-
             if os.path.exists(archivePath):
-                # step 1: clean up .nk scripts so they get regenerated
-                _cleanup_archive_scripts(archivePath, self.logger)
-            else:
-                os.makedirs(archivePath)
+                shutil.rmtree(archivePath)
+            os.makedirs(archivePath)
+            WrapItUpLogger.WrapItUp(nk=scriptPath, out=archivePath, parentdircount=3, startnow=True, fonts=True,
+                              licinteractive=True, relativerelinked=True, gizmos=True, logger=self.logger)
 
-            # step 2: dry run to find out what WrapItUp intends to archive
-            import WrapItUpLogger as WIU
-            WIU.WrapItUp_v2(
-                nk=scriptPath,
-                out=archivePath,
-                parentdircount=3,
-                startnow=False,  # <-- preview only, no copying
-                fonts=True,
-                licinteractive=True,
-                relativerelinked=True,
-                gizmos=True,
-                logger=self.logger
-            )
 
-            # step 3: reconcile — remove stale files no longer in the script
-            intended_paths = _get_intended_archive_paths(WIU.WIU_SilentList, archivePath)
-            _reconcile_archive_media(archivePath, intended_paths, self.logger)
-
-            # step 4: actual archive run (smart symlink skipping handles the rest)
-            WIU.WrapItUp_v2(
-                nk=scriptPath,
-                out=archivePath,
-                parentdircount=3,
-                startnow=True,  # <-- now actually copy/link
-                fonts=True,
-                licinteractive=True,
-                relativerelinked=True,
-                gizmos=True,
-                logger=self.logger
-            )
-
+            # Access the published entity created earlier
             type = item.get_property("parched_type")
             id = item.get_property("parched_id")
-            if type is not None and id is not None:
-                self.sgtk.shotgun.update(type, id, {"sg_archived": True})
+
+            if type != None and id != None:
+                # Update Shotgun/FPT fields as needed
+                self.sgtk.shotgun.update(
+                    type,
+                    id,
+                    {"sg_archived": True}  # Any field you want to update
+                )
 
             self.logger.info("Scene archived successfully")
         except:
             self.logger.warning("Archive was not possible")
+
 
 
         # bump the session file to the next version
@@ -487,180 +466,3 @@ def _get_save_as_action():
             "callback": callback,
         }
     }
-def _cleanup_archive_scripts(archive_path, logger):
-    """
-    Selectively clean the archive folder before a re-publish.
-    Removes only .nk scripts, log files and gizmo init files
-    so they get regenerated fresh.
-    Media symlinks are left in place to be reused if unchanged.
-    """
-    import glob
-
-    patterns_to_delete = [
-        # nuke scripts at root level
-        os.path.join(archive_path, '*.nk'),
-        # log
-        os.path.join(archive_path, 'log.csv'),
-        # temporary relink files
-        os.path.join(archive_path, 'WrapItUp_Temp-RELINK_*.py'),
-        # gizmo init/menu files (always regenerated)
-        os.path.join(archive_path, 'GIZMOS', 'init.py'),
-        os.path.join(archive_path, 'GIZMOS', 'menu.py'),
-        os.path.join(archive_path, 'GIZMOS', 'Collected', '*', 'init.py'),
-        os.path.join(archive_path, 'GIZMOS', 'Collected', '*', 'menu.py'),
-    ]
-
-    for pattern in patterns_to_delete:
-        for f in glob.glob(pattern):
-            try:
-                os.remove(f)
-                logger.info("Removed for regeneration: %s" % f)
-            except Exception as e:
-                logger.warning("Could not remove %s: %s" % (f, str(e)))
-
-def _reconcile_archive_media(archive_path, intended_files, logger):
-    """
-    Remove symlinks from the archive that are no longer part of the current
-    publish. Compares existing symlinks in MEDIA/PROJECT_DIRECTORY folders
-    against the list of files WrapItUp intends to place there.
-
-    :param archive_path:    Root of the archive folder
-    :param intended_files:  Set of normalised absolute paths that SHOULD be
-                            in the archive after this publish
-    :param logger:          sgtk logger
-    """
-    import stat
-
-    media_roots = [
-        os.path.join(archive_path, 'MEDIA'),
-        os.path.join(archive_path, 'PROJECT_DIRECTORY'),
-        os.path.join(archive_path, 'FONTS'),
-        os.path.join(archive_path, 'GIZMOS', 'Collected'),
-    ]
-
-    removed = 0
-    for media_root in media_roots:
-        if not os.path.isdir(media_root):
-            continue
-
-        for dirpath, dirnames, filenames in os.walk(media_root, topdown=False):
-            for filename in filenames:
-                filepath = os.path.normpath(os.path.join(dirpath, filename))
-
-                if filepath not in intended_files:
-                    try:
-                        os.remove(filepath)
-                        logger.info("Removed stale file from archive: %s" % filepath)
-                        removed += 1
-                    except Exception as e:
-                        logger.warning("Could not remove stale file %s: %s" % (filepath, str(e)))
-
-            # remove empty directories left behind
-            try:
-                if not os.listdir(dirpath):
-                    os.rmdir(dirpath)
-            except Exception:
-                pass
-
-    logger.info("Reconciliation complete: %d stale file(s) removed." % removed)
-
-def _get_intended_archive_paths(wrap_preview_result, archive_path):
-    """
-    WrapItUp silent preview returns a list of strings like:
-      'nodeName   /original/source/path'
-    We need the *destination* paths in the archive, not the sources.
-    Since WrapItUp places files under MEDIA/<nodename>/<parentdirs>/filename
-    we reconstruct the destination from what's already been built into
-    WrapItUp's WIU_PackedPath logic.
-
-    Simpler approach: after a dry run we just collect all files currently
-    in the archive that WOULD be written — i.e. we run WrapItUp once with
-    startnow=False, then inspect WIU_SilentList which contains [label, index]
-    pairs, and use WIU_MediaData to reconstruct destination paths.
-
-    Even simpler: just collect all destination paths by running the copy
-    with a custom flag. Since we can't easily hook into WrapItUp internals
-    from outside, we instead scan what WOULD exist by checking
-    WrapItUp's internal state after the preview call via the returned list.
-
-    Practical approach: parse the label strings from the preview.
-    Labels look like: 'nodeName  \t\t/path/to/source/file'
-    We extract source paths and resolve their expected archive destinations.
-    """
-    import WrapItUpLogger as WIU
-
-    intended = set()
-
-    # after _Start(silent, startnow=False) runs, WIU_SilentList is populated
-    # with [label_string, data_index] pairs and WIU_MediaData has full info
-    # We access these via the module globals
-    try:
-        for item in WIU.WIU_SilentList:
-            data_index = item[1]
-
-            # skip .nk scripts and other non-media items (negative indices)
-            if data_index < 0:
-                continue
-
-            media_item = WIU.WIU_MediaData[data_index]
-            node_name  = _get_node_names_str(media_item[0])
-            project_dir = media_item[6]
-
-            # each file in the sequence
-            for file_info in media_item[4]:
-                source_path = file_info[0]
-                # reconstruct destination the same way WrapItUp does
-                dest = _reconstruct_wiu_dest(
-                    source_path,
-                    archive_path,
-                    node_name,
-                    project_dir,
-                    WIU.WIU_NodeNameFolder,
-                    WIU.WIU_ParentDirCount
-                )
-                if dest:
-                    intended.add(os.path.normpath(dest))
-    except Exception as e:
-        pass
-
-    return intended
-
-
-def _get_node_names_str(node_list):
-    names = []
-    for n in node_list[:5]:
-        try:
-            names.append(n.fullName())
-        except Exception:
-            pass
-    return '_'.join(names)
-
-
-def _reconstruct_wiu_dest(source_path, archive_path, node_name, project_dir, node_name_folder, parent_dir_count):
-    """
-    Mirrors WrapItUp's PackedPath() logic to reconstruct where a file
-    would be placed in the archive.
-    """
-    try:
-        source_path = source_path.replace('\\', '/')
-        split = [s for s in source_path.split('/') if s]
-
-        parent_count = min(parent_dir_count, len(split))
-        if project_dir:
-            parent_count = len(split)
-
-        new_path = (node_name + '/') if (node_name_folder and not project_dir) else ''
-        for c in range(parent_count):
-            new_path += split[len(split) - (parent_count - c)]
-            if c < parent_count - 1:
-                new_path += '/'
-
-        # sanitise
-        for ch in ':<>$?!;\'\"`*|':
-            new_path = new_path.replace(ch, '_')
-
-        subdir = 'PROJECT_DIRECTORY' if project_dir else 'MEDIA'
-        return archive_path.replace('\\', '/') + '/' + subdir + '/' + new_path
-
-    except Exception:
-        return None
